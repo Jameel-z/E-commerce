@@ -1,0 +1,1 @@
+// src/app/(admin)/dashboard/categories/new/page.tsx

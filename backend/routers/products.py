@@ -1,22 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status, Path
+# backend/routers/product.py
+from fastapi import (
+    APIRouter, Depends, HTTPException, Query, status, Path,
+    UploadFile, File, Form
+)
 from typing import List, Optional
 from decimal import Decimal
 from sqlalchemy.orm import Session
-from datetime import datetime
 
 from database import get_db
-from models.product import Product
 from schemas.product import (
     ProductCreate,
     ProductUpdate,
-    ProductWithCategory,
-    Product
+    ProductList,
+    ProductDetail,
+    ProductImage,
+    ProductImageCreate
 )
-from schemas.category import Category
 from crud.product_crud import product_crud
 from crud.category_crud import category_crud
 from core.security import get_current_active_user, require_admin
+from core.storage import store_image, delete_image_file
 from schemas.user import User
+# import annotated and file
+from typing import Annotated
 
 router = APIRouter(
     prefix="/products",
@@ -30,50 +36,24 @@ router = APIRouter(
 # PUBLIC ENDPOINTS
 # --------------------------
 
-@router.get("/", response_model=List[ProductWithCategory])
+@router.get("/", response_model=List[ProductList])
 def list_products(
     db: Session = Depends(get_db),
-    skip: int = Query(0, ge=0, description="Pagination offset"),
-    limit: int = Query(100, ge=1, le=1000, description="Items per page"),
-    name: Optional[str] = Query(None, min_length=2, description="Filter by product name"),
-    category_id: Optional[int] = Query(None, ge=1, description="Filter by category ID"),
-    min_price: Optional[Decimal] = Query(None, ge=0, description="Minimum price filter"),
-    max_price: Optional[Decimal] = Query(None, ge=0, description="Maximum price filter"),
-    in_stock: Optional[bool] = Query(None, description="Only products with stock available")
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
+    category_id: Optional[int] = None
 ):
-    """
-    List all products with optional filtering and pagination.
-    Returns:
-    - List of products with full details including category information
-    """
-    filters = {}
-    if name:
-        filters["name"] = name
-    if category_id:
-        if not category_crud.get(db, category_id):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Category with ID {category_id} doesn't exist"
-            )
-        filters["category_id"] = category_id
-    if min_price is not None:
-        filters["price_ge"] = min_price
-    if max_price is not None:
-        filters["price_le"] = max_price
-
-    # Use the dedicated method for in_stock filtering
-    if in_stock:
-        products = product_crud.get_in_stock(db, skip=skip, limit=limit)
-    elif in_stock is False:
-        products = product_crud.get_out_of_stock(db, skip=skip, limit=limit)
-    else:
-        products = product_crud.get_multi(db, skip=skip, limit=limit, **filters)
-
-    return products
+    """Get products for main page listing"""
+    return product_crud.get_list(
+        db, 
+        skip=skip, 
+        limit=limit, 
+        category_id=category_id
+    )
 
 @router.get(
     "/{product_id}",
-    response_model=ProductWithCategory,
+    response_model=ProductDetail,
     responses={
         404: {"description": "Product not found"}
     }
@@ -82,16 +62,8 @@ def get_product(
     product_id: int = Path(..., gt=0, description="The ID of the product to retrieve"),
     db: Session = Depends(get_db)
 ):
-    """
-    Get detailed information about a specific product.
-    
-    Parameters:
-    - product_id: The ID of the product to retrieve
-    
-    Returns:
-    - Complete product details including category information
-    """
-    product = product_crud.get(db, product_id)
+    """Get detailed product unformation"""
+    product = product_crud.get_detail(db, product_id)
     if not product:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -101,7 +73,7 @@ def get_product(
 
 @router.get(
     "/category/{category_id}",
-    response_model=List[ProductWithCategory],
+    response_model=List[ProductList],
     responses={
         404: {"description": "Category not found"}
     }
@@ -128,7 +100,7 @@ def get_products_by_category(
 
 @router.post(
     "/",
-    response_model=ProductWithCategory,
+    response_model=ProductDetail,
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(require_admin)],
     responses={
@@ -136,20 +108,26 @@ def get_products_by_category(
         409: {"description": "Product name already exists"}
     }
 )
-def create_product(
-    product_data: ProductCreate,
+async def create_product(
+    name: Annotated[str, Form(example="Wireless Mouse")],
+    price: Annotated[Decimal, Form(example=23.99)],
+    category_id: Annotated[int, Form(example=1)],
+    stock_quantity: Annotated[Optional[int], Form()] = 0,
+    description: Annotated[Optional[str], Form()] = None,
+    primary_image: Annotated[Optional[UploadFile], File()] = None,
+    secondary_images: Annotated[List[UploadFile], File()] = [],
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """
-    Create a new product (Admin only).
+    """Create a new product (Admin only)."""
+    product_data = ProductCreate(
+        name=name,
+        description=description,
+        price=price,
+        stock_quantity=stock_quantity,
+        category_id=category_id
+    )
     
-    Parameters:
-    - product_data: Product creation data
-    
-    Returns:
-    - The newly created product with full details
-    """
     # Check for existing product with same name
     if product_crud.get_by_name(db, name=product_data.name):
         raise HTTPException(
@@ -164,11 +142,44 @@ def create_product(
             detail=f"Category with ID {product_data.category_id} doesn't exist"
         )
     
-    return product_crud.create(db, obj_in=product_data)
+    # Create the product first
+    product = product_crud.create(db, obj_in=product_data)
+    
+    try:
+        # Handle primary image upload
+        if primary_image:
+            primary_url = await store_image(primary_image, product.id)
+            product = product_crud.update_primary_image(
+                db, 
+                product_id=product.id,
+                image_url=primary_url
+            )
+        
+        # Handle secondary images
+        for image in secondary_images:
+            url = await store_image(image, product.id)
+            product_crud.add_product_image(
+                db,
+                product_id=product.id,
+                image_in=ProductImageCreate(url=url)
+            )
+        
+        db.commit()
+        return product_crud.get_detail(db, product.id)
+    
+    except Exception as e:
+        db.rollback()
+        # Clean up any uploaded files if something went wrong
+        if primary_image and hasattr(product, 'primary_image_url'):
+            await delete_image_file(product.primary_image_url)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating product: {str(e)}"
+        )
 
 @router.put(
     "/{product_id}",
-    response_model=ProductWithCategory,
+    response_model=ProductDetail,
     dependencies=[Depends(require_admin)],
     responses={
         400: {"description": "Invalid data"},
@@ -183,13 +194,6 @@ def update_product(
 ):
     """
     Update an existing product (Admin only).
-    
-    Parameters:
-    - product_id: The ID of the product to update
-    - product_data: Product update data (partial updates supported)
-    
-    Returns:
-    - The updated product with full details
     """
     product = product_crud.get(db, product_id)
     if not product:
@@ -213,11 +217,41 @@ def update_product(
             detail=f"Category with ID {product_data.category_id} doesn't exist"
         )
     
-    return product_crud.update(db, db_obj=product, obj_in=product_data)
+    updated_product = product_crud.update(db, db_obj=product, obj_in=product_data)
+    
+    return product_crud.get_detail(db, product_id=updated_product.id)
+
+@router.post(
+        "/{product_id}/images",
+        response_model=List[ProductImage],
+        dependencies=[Depends(require_admin)]
+)
+async def add_product_images(
+    product_id: int,
+    images: List[UploadFile] = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Add secondary images to a product (Admin only)."""
+    product = product_crud.get(db, product_id)
+    if not product:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    uploaded_images = []
+    for image in images:
+        url = await store_image(image, product_id)
+        uploaded_image = product_crud.add_product_image(
+            db,
+            product_id=product_id,
+            image_in=ProductImageCreate(url=url)
+        )
+        uploaded_images.append(uploaded_image)
+    return uploaded_images
+
+
 
 @router.patch(
     "/{product_id}/stock",
-    response_model=ProductWithCategory,
+    response_model=ProductDetail,
     dependencies=[Depends(require_admin)],
     responses={
         400: {"description": "Invalid stock adjustment"},
@@ -230,16 +264,7 @@ def adjust_stock(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """
-    Adjust product stock quantity (Admin only).
-    
-    Parameters:
-    - product_id: The ID of the product
-    - adjustment: The amount to adjust stock by (positive to add, negative to subtract)
-    
-    Returns:
-    - The updated product with full details
-    """
+    """Adjust product stock quantity (Admin only)."""
     product = product_crud.get(db, product_id)
     if not product:
         raise HTTPException(
@@ -260,6 +285,7 @@ def adjust_stock(
             detail=str(e)
         )
 
+# delete product
 @router.delete(
     "/{product_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -273,15 +299,7 @@ def delete_product(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """
-    Delete a product (Admin only).
-    
-    Parameters:
-    - product_id: The ID of the product to delete
-    
-    Returns:
-    - 204 No Content on successful deletion
-    """
+    """Delete a product (Admin only)."""
     product = product_crud.get(db, product_id)
     if not product:
         raise HTTPException(
@@ -289,5 +307,38 @@ def delete_product(
             detail=f"Product with ID {product_id} not found"
         )
     
+    # Delete primary image file if exists
+    if product.primary_image_url:
+        try:
+            delete_image_file(product.primary_image_url)
+        except Exception:
+            pass
+    # Delete secondary images files
+    for image in product.images:
+        try:
+            delete_image_file(image.url)
+        except Exception:
+            pass
+    
     product_crud.remove(db, id=product_id)
+    return None
+
+# delete product image
+@router.delete(
+    "/{product_id}/images/{image_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)]
+)
+async def delete_product_image(
+    product_id: int,
+    image_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Delete a secondary image from a product (Admin only)."""
+    image = db.query(ProductImage).get(image_id)
+    if not image or image.product_id != product_id:
+        raise HTTPException(status_code=404, detail="Image not found")
+    await delete_image_file(image.url)
+    product_crud.delete_product_image(db, image_id=image_id)
     return None

@@ -1,3 +1,4 @@
+// src/components/admin/ProductTable.tsx
 import Link from "next/link";
 import { Product } from "@/lib/types/apiTypes";
 import { DeleteButton } from "./DeleteButton";
@@ -27,7 +28,7 @@ export default function ProductTable({ products, token }: ProductTableProps) {
               <td className="py-2 px-4 border-b">${product.price}</td>
               <td className="py-2 px-4 border-b">
                 <Link
-                  href={`/products/${product.id}`}
+                  href={`/dashboard/${product.id}`}
                   className="text-blue-600 hover:underline mr-3"
                 >
                   Edit

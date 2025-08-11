@@ -3,14 +3,14 @@ from .base import BaseSchema, TimestampSchema
 # Import order matters - base schemas first, then independent ones, then relationships
 from .user import UserBase, UserCreate, UserUpdate, User, UserInDB
 from .category import CategoryBase, CategoryCreate, Category, CategoryUpdate  # Import Category first
-from .product import ProductBase, ProductCreate, Product, ProductUpdate  # Then Product
+from .product import ProductBase, ProductCreate, ProductUpdate  # Then Product
 from .cart import CartBase, CartItemCreate, CartItem, Cart, CartCreate, CartUpdate, OfflineCheckout, ShippingOption
 from .order_item import OrderItemBase, OrderItemCreate, OrderItem
 from .order import OrderBase, OrderCreate, Order, OrderUpdate
 
 # Now import the relationship schemas after their components are defined
 from .category import CategoryWithProducts
-from .product import ProductWithCategory
+from .product import ProductList, ProductDetail, ProductImageBase, ProductImageCreate, ProductImage
 from .order_item import OrderItemWithProduct
 from .order import OrderWithItems
 
@@ -36,9 +36,12 @@ __all__ = [
     # Product schemas
     'ProductBase',
     'ProductCreate',
-    'Product',
     'ProductUpdate',
-    'ProductWithCategory',  # Keep this after basic product schemas
+    "ProductList",  
+    "ProductDetail",   
+    "ProductImageBase", 
+    'ProductImageCreate',
+    'ProductImage',
 
     # Cart schemas
     'CartBase',

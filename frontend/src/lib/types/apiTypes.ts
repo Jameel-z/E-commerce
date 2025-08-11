@@ -1,3 +1,5 @@
+// src/lib/types/apiTypes.ts
+
 /* eslint-disable */
 /* tslint:disable */
 // @ts-nocheck
@@ -337,6 +339,11 @@ export interface User {
   updated_at?: string | null;
   /** Id */
   id: number;
+  /**
+   * Is Admin
+   * @default false
+   */
+  is_admin?: boolean;
 }
 
 /** UserCreate */

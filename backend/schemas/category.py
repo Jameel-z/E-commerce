@@ -4,7 +4,7 @@ from .base import BaseSchema, TimestampSchema
 from datetime import datetime
 
 if TYPE_CHECKING:
-    from .product import Product
+    from .product import ProductDetail
 
 class CategoryBase(BaseSchema):
     """Base fields for category operations"""
@@ -47,7 +47,7 @@ class Category(CategoryBase):
 
 class CategoryWithProducts(Category):
     """Extended category schema including product listings"""
-    products: List["Product"] = Field(
+    products: List["ProductDetail"] = Field(
         default_factory=list,
         description="Products belonging to this category"
     )
@@ -70,5 +70,5 @@ class CategoryUpdate(BaseSchema):
         return None
 
 # Fix for forward references
-from .product import Product  # <-- Add this import at runtime
+from .product import ProductDetail  # <-- Add this import at runtime
 CategoryWithProducts.model_rebuild()

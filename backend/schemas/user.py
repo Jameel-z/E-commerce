@@ -5,6 +5,12 @@ from pydantic_core import PydanticCustomError
 from .base import BaseSchema, TimestampSchema
 
 class UserBase(BaseSchema):
+    name: Optional[str] = Field(
+        None,
+        max_length=100,
+        description="User's full name",
+        examples=["John Doe"]
+    )
     email: EmailStr = Field(..., examples=["user@example.com"])
     is_active: bool = Field(default=True)
 
@@ -37,6 +43,12 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseSchema):
     """Schema for updating user password"""
+    name: Optional[str] = Field(
+        None,
+        max_length=100,
+        description="User's full name",
+        examples=["changed name"]
+    )
     password: Optional[str] = Field(
         None,
         min_length=8,
@@ -63,7 +75,7 @@ class User(TimestampSchema, UserBase):
     id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
-    is_admin: bool = Field(default=False, exclude=True)  # Internal use only
+    is_admin: bool = Field(default=False)  # Internal use only
 
     model_config = {
         "json_schema_extra": {
@@ -72,7 +84,8 @@ class User(TimestampSchema, UserBase):
                 "email": "user@example.com",
                 "is_active": True,
                 "created_at": "2025-01-01T00:00:00",
-                "updated_at": "2025-01-02T00:00:00"
+                "updated_at": "2025-01-02T00:00:00",
+                "is_admin": False,
             }
         }
     }

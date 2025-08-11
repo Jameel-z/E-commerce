@@ -1,3 +1,4 @@
+// src/app/(admin)/dashboard/products/[id]/page.tsx
 import { apiClient } from "@/lib/types/apiClient";
 import { notFound } from "next/navigation";
 import { getAuthToken } from "@/lib/auth";
@@ -12,7 +13,7 @@ export default async function EditProductPage({
   // await params before using its property `id`
   const { id } = await params;
 
-  const token = await getAuthToken();
+  const token = (await getAuthToken()) || "";
   const product = await apiClient.getProductById(Number(id));
 
   if (!product) return notFound();
@@ -34,7 +35,7 @@ export default async function EditProductPage({
 
       return {
         success: true,
-        redirectTo: "/products",
+        redirectTo: "/dashboard",
       };
     } catch (error: unknown) {
       console.error("Update failed:", error);

@@ -3,7 +3,7 @@ from pydantic import Field, field_validator
 from datetime import datetime
 
 from .base import BaseSchema, TimestampSchema
-from .product import Product  # Import your Product schema
+from .product import ProductDetail  # Import your Product schema
 
 class CartBase(BaseSchema):
     """
@@ -45,7 +45,7 @@ class CartItem(CartItemBase):
     Complete cart item schema with product details
     """
     id: int
-    product: Product
+    product: ProductDetail
     added_at: datetime = Field(
         default_factory=datetime.utcnow,
         description="When the item was added to cart"

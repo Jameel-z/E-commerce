@@ -1,10 +1,11 @@
+// src/app/(admin)/dashboard/products/new/page.tsx
 import { getAuthToken } from "@/lib/auth";
 import ProductForm from "@/components/admin/ProductForm";
 import { apiClient } from "@/lib/types/apiClient";
 import { ProductCreate } from "@/lib/types/apiTypes";
 
 export default async function CreateProductPage() {
-  const token = await getAuthToken();
+  const token = (await getAuthToken()) || "";
 
   const handleSubmit = async (data: ProductCreate) => {
     "use server";
@@ -21,7 +22,7 @@ export default async function CreateProductPage() {
         token
       );
 
-      return { success: true, redirectTo: "/products" };
+      return { success: true, redirectTo: "/dashboard" };
     } catch (error) {
       console.error("Product creation failed:", error);
       return {

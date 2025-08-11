@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Optional, Annotated
 from pydantic import Field, ConfigDict, field_validator
 from .base import BaseSchema
-from .product import Product  
+from .product import ProductDetail
 
 class OrderItemBase(BaseSchema):
     """Base fields for order line items"""
@@ -33,7 +33,7 @@ class OrderItem(OrderItemBase):
     """Complete order item schema for API responses"""
     id: int = Field(..., examples=[1])
     order_id: int = Field(..., examples=[456])
-    product: Optional[Product] = Field(
+    product: Optional[ProductDetail] = Field(
         None,
         description="Full product details",
         exclude=True  # Don't include by default in responses
@@ -64,4 +64,4 @@ class OrderItem(OrderItemBase):
 
 class OrderItemWithProduct(OrderItem):
     """Order item with product details included"""
-    product: Product = Field(..., exclude=False)  # Override to include
+    product: ProductDetail = Field(..., exclude=False)  # Override to include

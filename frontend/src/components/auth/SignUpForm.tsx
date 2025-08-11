@@ -1,21 +1,21 @@
-// src/components/auth/LoginForm.tsx
+// src/components/auth/SignUpForm.tsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "@/lib/redux/features/auth/authThunks";
+import { registerUser } from "@/lib/redux/features/auth/authThunks";
 import { AppDispatch, RootState } from "@/lib/redux/store";
 
-interface LoginFormProps {
+interface SignUpFormProps {
   onSuccessRedirect?: string;
   className?: string;
 }
 
-export function LoginForm({
+export function SignUpForm({
   onSuccessRedirect = "/",
   className = "w-full max-w-md mx-auto p-6 bg-white shadow-md rounded-lg space-y-6",
-}: LoginFormProps) {
+}: SignUpFormProps) {
   const [email, setemail] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch<AppDispatch>();
@@ -24,8 +24,8 @@ export function LoginForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const resultAction = await dispatch(loginUser({ email, password }));
-    if (loginUser.fulfilled.match(resultAction)) {
+    const resultAction = await dispatch(registerUser({ email, password }));
+    if (registerUser.fulfilled.match(resultAction)) {
       router.push(onSuccessRedirect);
     }
   };

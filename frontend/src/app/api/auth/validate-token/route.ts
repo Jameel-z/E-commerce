@@ -1,23 +1,36 @@
-// // pages/api/auth/validate-token.ts
-// import { NextApiRequest, NextApiResponse } from "next";
+// src/app/api/auth/validate-token/route.ts
+import { NextResponse } from "next/server";
+import { apiClient } from "@/lib/types/apiClient";
+import type { NextRequest } from "next/server";
 
-// export default async function handler(
-//   req: NextApiRequest,
-//   res: NextApiResponse
-// ) {
-//   if (req.method !== "GET") {
-//     return res.status(405).end();
-//   }
+export async function POST(request: NextRequest) {
+  try {
+    const { token } = await request.json();
 
-//   try {
-//     const token = req.cookies.auth_token;
-//     if (!token) {
-//       return res.status(401).json({ error: "No token found" });
-//     }
+    // Validate token exists and is a string
+    if (!token || typeof token !== "string") {
+      return NextResponse.json(
+        { valid: false, error: "Valid token string is required" },
+        { status: 400 }
+      );
+    }
 
-//     // Add any additional token validation logic here
-//     return res.status(200).json({ token });
-//   } catch (error) {
-//     res.status(500).json({ error: "Token validation failed" });
-//   }
-// }
+    // Verify token by fetching current user
+    await apiClient.getCurrentUser(token);
+
+    return NextResponse.json({
+      valid: true,
+      expiresIn: 3600, // Optional: Add token expiration info if available
+    });
+  } catch (error) {
+    console.error("Token validation failed:", error);
+    return NextResponse.json(
+      {
+        valid: false,
+        error: "Invalid or expired token",
+        shouldRefresh: true, // Optional: Signal client to attempt refresh
+      },
+      { status: 401 }
+    );
+  }
+}

@@ -91,6 +91,13 @@ def update_current_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
+    
+    # Validate name length if provided
+    if user_update.name and len(user_update.name) > 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Name cannot exceed 100 characters"
+        )
     return user_crud.update(
         db=db,
         db_obj=db_user,

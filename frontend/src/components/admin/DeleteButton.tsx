@@ -1,3 +1,4 @@
+// src/components/admin/DeleteButton.tsx
 "use client";
 
 import { useRouter } from "next/navigation";

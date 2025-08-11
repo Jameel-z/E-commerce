@@ -1,3 +1,4 @@
+// src/lib/types/apiClient.ts
 import {
   Api,
   ProductCreate,

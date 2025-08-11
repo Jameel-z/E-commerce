@@ -23,6 +23,7 @@ app.include_router(products.router, tags=["Products"])
 app.include_router(categories.router, tags=["Categories"])
 app.include_router(carts.router, tags=["Carts"])
 
+
 @app.get("/")
 def read_root():
     return {"message": "E-commerce Backend API"}

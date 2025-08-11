@@ -1,21 +1,27 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+// src/middleware.ts
+import { NextResponse, type NextRequest } from "next/server";
 
-const ADMIN_PATHS = [
-  "/products", // Matches /products and /products/*
-  "/dashboard", // Other admin paths
-];
+const ADMIN_PATHS = ["/admin", "/dashboard"];
 
-export function middleware(request: NextRequest) {
-  const isAdminPath = ADMIN_PATHS.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  );
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (!ADMIN_PATHS.some((path) => pathname.startsWith(path))) {
+    return NextResponse.next();
+  }
 
   const token = request.cookies.get("auth_token")?.value;
 
-  if (isAdminPath && !token) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  // Only check for token presence - detailed validation happens in layout
+  if (!token) {
+    const response = NextResponse.redirect(new URL("/login", request.url));
+    response.cookies.delete("auth_token");
+    return response;
   }
 
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: ["/admin/:path*", "/dashboard/:path*"],
+};
