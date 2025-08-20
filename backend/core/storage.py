@@ -1,57 +1,4 @@
-# import shutil
-# from fastapi import UploadFile, HTTPException
-# from pathlib import Path
-# from datetime import datetime
-# # import uuid
-# import uuid
-
-# # Define constants
-# ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
-
-# async def store_image(file: UploadFile, product_id: int) -> str:
-#     """Store product image in a dedicated folder and return its URL"""
-#     # Validate file extension
-#     ext = Path(file.filename).suffix.lower()
-#     if ext not in ALLOWED_EXTENSIONS:
-#         raise HTTPException(
-#             status_code=400,
-#             detail=f"Invalid file type. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
-#         )
-    
-#     # Create product-specific directory
-#     product_dir = Path(f"static/products/{product_id}")
-#     product_dir.mkdir(parents=True, exist_ok=True)
-    
-#     # Generate unique filename
-#     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-#     filename = f"{timestamp}_{Path(file.filename).stem}{ext}"
-
-#     file_path = product_dir / filename
-    
-#     # Save file
-#     try:
-#         with file_path.open("wb") as buffer:
-#             shutil.copyfileobj(file.file, buffer)
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=500,
-#             detail=f"Failed to save image: {str(e)}"
-#         )
-    
-#     # Return relative URL path
-#     return f"/static/products/{product_id}/{filename}"
-
-# # Delete image file
-# def delete_image_file(image_url: str):
-#     """Delete an image file from the server"""
-#     file_path = Path(image_url.lstrip("/"))
-#     if file_path.exists():
-#         file_path.unlink()
-#     else:
-#         raise FileNotFoundError(f"Image file {image_url} not found")
-
 import shutil
-import aiofiles
 from fastapi import UploadFile, HTTPException
 from pathlib import Path
 from typing import Optional, Tuple
@@ -59,8 +6,6 @@ import uuid
 from PIL import Image
 import io
 import logging
-import asyncio
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -229,6 +174,6 @@ async def store_image(file: UploadFile, product_id: int) -> str:
     result = await ImageStorage.store_image(file, product_id)
     return result["url"]
 
-def delete_image_file(image_url: str) -> None:
-    """Legacy function that wraps the new storage system"""
-    asyncio.run(ImageStorage.delete_image(image_url))
+async def delete_image_file(image_url: str) -> None:
+    """Delete an image file (async-compatible version)"""
+    await ImageStorage.delete_image(image_url)

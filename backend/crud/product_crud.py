@@ -5,26 +5,27 @@ from .category_crud import category_crud
 from models.product import Product, ProductImage
 from models.category import Category
 from schemas.product import (
-    ProductList,
     ProductCreate,
     ProductUpdate,
-    ProductImageCreate,
-    ProductImage as ProductImageSchema,
+    ProductImageUpdate,
     ProductDetail
 )
-# import UploadFile
-from fastapi import UploadFile, File
+from fastapi import UploadFile
+import logging
+from services.image_services import ImageService
+from core.utils import generate_static_url
 
+logger = logging.getLogger(__name__)
 
 class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
     def get_list(
-        self,
-        db: Session,
-        *,
-        skip: int = 0,
-        limit: int = 100,
-        category_id: Optional[int] = None,
-    ) -> List[ProductList]:
+            self,
+            db: Session,
+            skip: int = 0,
+            limit: int = 100,
+            category_id: Optional[int] = None,
+            search_term: Optional[str] = None
+    ):
         """Get products for main page listing with optional category filter"""
         query = (
             db.query(
@@ -32,7 +33,8 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
                 Product.name,
                 Product.price,
                 Product.primary_image_url,
-                Category.name.label('category_name')
+                Category.name.label('category_name'),
+                Product.stock_quantity
             )
             .join(Product.category)
         )
@@ -40,74 +42,17 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
         if category_id:
             query = query.filter(Product.category_id == category_id)
 
+        if search_term:
+            query = query.filter(
+                Product.name.ilike(f"%{search_term}%") |
+                Product.description.ilike(f"%{search_term}")
+                )
+
         return query.offset(skip).limit(limit).all()
 
     def get_by_name(self, db: Session, *, name: str) -> Optional[Product]:
         """Get product by exact name match"""
         return db.query(self.model).filter(self.model.name == name).first()
-    
-    def update_stock(
-        self,
-        db: Session,
-        *,
-        db_obj: Product,
-        stock_adjustment: int
-    ) -> Product:
-        """Update product stock quantity with validation"""
-        if db_obj.stock_quantity + stock_adjustment < 0:
-            raise ValueError("Insufficient stock available")
-        
-        db_obj.stock_quantity += stock_adjustment
-        db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
-        return db_obj
-    
-    def get_in_stock(
-        self,
-        db: Session,
-        skip: int = 0,
-        limit: int = 100
-    ) -> List[Product]:
-        """Return products with stock_quantity > 0"""
-        return (
-            db.query(self.model)
-            .filter(self.model.stock_quantity > 0)
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
-    
-    def get_out_of_stock(
-        self,
-        db: Session,
-        skip: int = 0,
-        limit: int = 100
-    ) -> List[Product]:
-        """Return products with stock_quantity == 0"""
-        return (
-            db.query(self.model)
-            .filter(self.model.stock_quantity == 0)
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
-    
-    def get_by_category(
-        self,
-        db: Session,
-        category_id: int,
-        skip: int = 0,
-        limit: int = 100
-    ) -> List[Product]:
-        """Return products filtered by category_id"""
-        return (
-            db.query(self.model)
-            .filter(self.model.category_id == category_id)
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
     
     def get_detail(
         self,
@@ -126,98 +71,119 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
         )
     
     async def create_product_with_images(
-            self,
-            db: Session,
-            product_data: ProductCreate,
-            primary_image: Optional[UploadFile] = None,
-            secondary_images: List[UploadFile] = []
+        self,
+        db: Session,
+        *,
+        product_data: ProductCreate,
+        primary_image: Optional[UploadFile] = None,
+        secondary_images: List[UploadFile] = []
     ) -> ProductDetail:
         """Create a new product with primary and secondary images"""
-        # check for existing product name
+        # Validate inputs
         if self.get_by_name(db, name=product_data.name):
-            raise ValueError(f"Product with name '{product_data.name}")
-        # validate category
+            raise ValueError(f"Product with name '{product_data.name}' already exists")
+        
         if not category_crud.get(db, product_data.category_id):
-            raise ValueError(f"Category with ID {product_data.category_id} doesnt exist")
-        # Create the product
-        product = self.create(db, obj_in=product_data)
-        
-        # Handle primary image
-        if primary_image:
-            product = self.update_primary_image(
-                db, product_id=product.id, image_url=primary_image
-            )
-        
-        # Handle secondary images
-        if secondary_images:
-            for image in secondary_images:
-                self.add_product_image(db, product_id=product.id, image_in=image)
-        
-        db.commit()
-        db.refresh(product)
-        
-        return self.get_detail(db, product.id)
-    
-    def add_product_image(
-        self,
-        db: Session,
-        *,
-        product_id: int,
-        image_in: ProductImageCreate
-    ) -> ProductImageSchema:
-        """Add a secondary image to a product"""
-        db_image = ProductImage(
-            url=image_in.url,
-            product_id=product_id
-        )
-        db.add(db_image)
-        db.commit()
-        db.refresh(db_image)
-        return db_image
-    
-    def get_product_images(
-        self,
-        db: Session,
-        *,
-        product_id: int
-    ) -> List[ProductImageSchema]:
-        """Get all secondary images for a product"""
-        return (
-            db.query(ProductImage)
-            .filter(ProductImage.product_id == product_id)
-            .all()
-        )
-    
-    def update_primary_image(
-        self,
-        db: Session,
-        *,
-        product_id: int,
-        image_url: str
-    ) -> Product:
-        """Update product's primary image URL"""
-        db_obj = self.get(db, product_id)
-        if not db_obj:
-            raise ValueError("Product not found")
-            
-        db_obj.primary_image_url = image_url
-        db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
-        return db_obj
-    
-    def delete_product_image(
-        self,
-        db: Session,
-        *,
-        image_id: int
-    ) -> None:
-        """Delete a secondary image"""
-        db_image = db.query(ProductImage).filter(ProductImage.id == image_id).first()
-        if db_image:
-            db.delete(db_image)
-            db.commit()
-        else:
-            raise ValueError("Image not found")
+            raise ValueError(f"Category with ID {product_data.category_id} doesn't exist")
 
+        relative_path = None
+        uploaded_paths = []
+        try:
+            # Create product first
+            product = self.create(db, obj_in=product_data)
+            
+            # Handle primary image
+            if primary_image:
+                relative_path = await ImageService.save_product_image(primary_image, product.id)
+                uploaded_paths.append(relative_path)
+                product.primary_image_url = generate_static_url(relative_path)
+            
+            # Handle secondary images
+            for image in secondary_images:
+                relative_path = await ImageService.save_product_image(image, product.id)
+                uploaded_paths.append(relative_path)
+                db_image = ProductImage(
+                    url=generate_static_url(relative_path),
+                    product_id=product.id
+                )
+                db.add(db_image)
+            
+            db.commit()
+            return self.get_detail(db, product.id)
+            
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Failed to create product: {str(e)}")
+            # Cleanup uploaded files if creation failed
+            # attempt to cleanup any uploaded files
+            for p in uploaded_paths:
+                try:
+                    ImageService.delete_image(p)
+                except Exception:
+                    logger.warning(f"Failed to cleanup image {p}")
+            raise
+    
+    async def update_product_with_images(
+        self,
+        db: Session,
+        *,
+        product_id: int,
+        product_data: ProductUpdate,
+        image_data: Optional[ProductImageUpdate] = None,
+        new_primary_image: Optional[UploadFile] = None
+    ) -> ProductDetail:
+        db_product = self.get(db, product_id)
+        if not db_product:
+            raise ValueError("Product not found")
+
+        try:
+            # Update basic product info
+            update_data = product_data.model_dump(exclude_unset=True)
+            if update_data:
+                for field, value in update_data.items():
+                    setattr(db_product, field, value)
+                db.add(db_product)
+
+            # Handle primary image
+            old_primary_url = None
+            if new_primary_image:
+                old_primary_url = db_product.primary_image_url
+                rel = await ImageService.save_product_image(new_primary_image, product_id)
+                db_product.primary_image_url = generate_static_url(rel)
+                db.add(db_product)
+
+            # Handle secondary images
+            if image_data:
+                current_images = {img.id: img for img in db_product.images}
+                
+                # Delete images not in keep_ids
+                for img_id, img in current_images.items():
+                    if img_id not in image_data.keep_ids:
+                        try:
+                            ImageService.delete_image(img.url)
+                        except Exception:
+                            logger.warning(f"Failed to delete image {img.url}")
+                        db.delete(img)
+                
+                # Add new images
+                for image_file in image_data.new_images:
+                    rel = await ImageService.save_product_image(image_file, product_id)
+                    db.add(ProductImage(url=generate_static_url(rel), product_id=product_id))
+
+            db.commit()
+            
+            # Cleanup old files after successful commit (fire-and-forget)
+            if old_primary_url:
+                try:
+                    ImageService.delete_image(old_primary_url)
+                except Exception:
+                    logger.warning(f"Failed to delete old primary image {old_primary_url}")
+
+            return self.get_detail(db, product_id)
+        
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Failed to update product {product_id}: {str(e)}", exc_info=True)
+            raise
+  
 product_crud = ProductCRUD(Product)

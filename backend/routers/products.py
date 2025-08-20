@@ -3,32 +3,31 @@ from fastapi import (
     APIRouter, Depends, HTTPException, Query, status, Path,
     UploadFile, File, Form
 )
-from typing import List, Optional
+from typing import List, Optional, Annotated, Union
 from decimal import Decimal
 from sqlalchemy.orm import Session
-
 from database import get_db
 from schemas.product import (
     ProductCreate,
     ProductUpdate,
     ProductList,
     ProductDetail,
-    ProductImage,
-    ProductImageCreate
+    ProductImageUpdate
 )
 from crud.product_crud import product_crud
-from crud.category_crud import category_crud
 from core.security import get_current_active_user, require_admin
-from core.storage import store_image, delete_image_file
 from schemas.user import User
-# import annotated and file
-from typing import Annotated
+from services.image_services import ImageService, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/products",
     responses={
         404: {"description": "Product not found"},
-        400: {"description": "Invalid request data"}
+        400: {"description": "Invalid request data"},
+        415: {"description": "Unsupported media type"}
     }
 )
 
@@ -36,33 +35,41 @@ router = APIRouter(
 # PUBLIC ENDPOINTS
 # --------------------------
 
-@router.get("/", response_model=List[ProductList])
+@router.get("/",
+             response_model=List[ProductList],
+             summary="List Products",
+             description="Retrieve paginated list of products with optional filtering",
+             response_description="List of product summaries"
+)
 def list_products(
     db: Session = Depends(get_db),
-    skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
-    category_id: Optional[int] = None
+    page: int = Query(1, ge=1, description="Page number"),
+    per_page: int = Query(DEFAULT_PAGE_SIZE, ge=1, le=MAX_PAGE_SIZE, description="Items per page"),
+    category_id: Optional[int] = Query(None, description="Filter by category ID"),
+    search: Optional[str] = Query(None, description="Search term")
 ):
-    """Get products for main page listing"""
+    """Get paginated products with optional filters."""
     return product_crud.get_list(
         db, 
-        skip=skip, 
-        limit=limit, 
-        category_id=category_id
+        skip=(page - 1) * per_page, 
+        limit=per_page, 
+        category_id=category_id,
+        search_term=search
     )
 
 @router.get(
     "/{product_id}",
     response_model=ProductDetail,
+    summary="Get Product Details",
     responses={
-        404: {"description": "Product not found"}
+        404: {"model": None, "description": "Product not found"}
     }
 )
 def get_product(
-    product_id: int = Path(..., gt=0, description="The ID of the product to retrieve"),
+    product_id: int = Path(..., gt=0, description="Product ID"),
     db: Session = Depends(get_db)
 ):
-    """Get detailed product unformation"""
+    """Get detailed product information including images."""
     product = product_crud.get_detail(db, product_id)
     if not product:
         raise HTTPException(
@@ -70,29 +77,6 @@ def get_product(
             detail=f"Product with ID {product_id} not found"
         )
     return product
-
-@router.get(
-    "/category/{category_id}",
-    response_model=List[ProductList],
-    responses={
-        404: {"description": "Category not found"}
-    }
-)
-def get_products_by_category(
-    category_id: int = Path(..., gt=0, description="The ID of the category"),
-    skip: int = Query(0, ge=0, description="Pagination offset"),
-    limit: int = Query(100, ge=1, le=1000, description="Items per page"),
-    db: Session = Depends(get_db)
-):
-    """
-    List all products belonging to a specific category.
-    """
-    if not category_crud.get(db, category_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Category with ID {category_id} not found"
-        )
-    return product_crud.get_by_category(db, category_id=category_id, skip=skip, limit=limit)
 
 # --------------------------
 # ADMIN-ONLY ENDPOINTS
@@ -103,75 +87,65 @@ def get_products_by_category(
     response_model=ProductDetail,
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(require_admin)],
+    summary="Create new product",
     responses={
         400: {"description": "Invalid category or data"},
         409: {"description": "Product name already exists"}
     }
 )
 async def create_product(
-    name: Annotated[str, Form(example="Wireless Mouse")],
-    price: Annotated[Decimal, Form(example=23.99)],
-    category_id: Annotated[int, Form(example=1)],
+    name: Annotated[str, Form(..., min_length=2, max_length=100, example="Wireless Mouse")],
+    price: Annotated[Decimal, Form(..., gt=0, example=23.99)],
+    category_id: Annotated[int, Form(..., example=1)],
     stock_quantity: Annotated[Optional[int], Form()] = 0,
-    description: Annotated[Optional[str], Form()] = None,
-    primary_image: Annotated[Optional[UploadFile], File()] = None,
-    secondary_images: Annotated[List[UploadFile], File()] = [],
+    description: Annotated[Optional[str], Form(max_length=500)] = None,
+    primary_image: Union[UploadFile, str, None] = File(None),
+    secondary_images: List[Union[UploadFile, Optional[str]]] = File([]),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Create a new product (Admin only)."""
+    """
+    Create a new product with optional images.
+    
+    - **name**: Product name (2-100 chars)
+    - **price**: Must be positive
+    - **category_id**: Must exist
+    - **images**: JPEG/PNG/WEBP under 10MB
+    """
+    # Convert string inputs to None/valid files
+    if isinstance(primary_image, str):
+        primary_image = None
+    secondary_images = [f for f in secondary_images if not isinstance(f, str)]
+    
+    # Validate images
+    primary_image = await ImageService.validate_image(primary_image)
+    secondary_images = [
+        img for img in 
+        [await ImageService.validate_image(img) for img in secondary_images]
+        if img is not None
+    ]
+
     product_data = ProductCreate(
-        name=name,
-        description=description,
+        name=name.strip(),
+        description=description.strip() if description else None,
         price=price,
         stock_quantity=stock_quantity,
         category_id=category_id
     )
     
-    # Check for existing product with same name
-    if product_crud.get_by_name(db, name=product_data.name):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Product with this name already exists"
+    try:
+        return await product_crud.create_product_with_images(
+            db,
+            product_data=product_data,
+            primary_image=primary_image,
+            secondary_images=secondary_images
         )
-    
-    # Validate category exists
-    if not category_crud.get(db, product_data.category_id):
+    except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Category with ID {product_data.category_id} doesn't exist"
+            detail=str(e)
         )
-    
-    # Create the product first
-    product = product_crud.create(db, obj_in=product_data)
-    
-    try:
-        # Handle primary image upload
-        if primary_image:
-            primary_url = await store_image(primary_image, product.id)
-            product = product_crud.update_primary_image(
-                db, 
-                product_id=product.id,
-                image_url=primary_url
-            )
-        
-        # Handle secondary images
-        for image in secondary_images:
-            url = await store_image(image, product.id)
-            product_crud.add_product_image(
-                db,
-                product_id=product.id,
-                image_in=ProductImageCreate(url=url)
-            )
-        
-        db.commit()
-        return product_crud.get_detail(db, product.id)
-    
     except Exception as e:
-        db.rollback()
-        # Clean up any uploaded files if something went wrong
-        if primary_image and hasattr(product, 'primary_image_url'):
-            await delete_image_file(product.primary_image_url)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error creating product: {str(e)}"
@@ -181,125 +155,91 @@ async def create_product(
     "/{product_id}",
     response_model=ProductDetail,
     dependencies=[Depends(require_admin)],
+    summary="Update product",
     responses={
-        400: {"description": "Invalid data"},
+        400: {"description": "Invalid input"},
         404: {"description": "Product not found"}
     }
 )
-def update_product(
-    product_id: int = Path(..., gt=0, description="The ID of the product to update"),
-    product_data: ProductUpdate = ...,
+async def update_product(
+    product_id: int = Path(..., gt=0, description="Product ID to update"),
+    name: Annotated[Optional[str], Form(min_length=2, max_length=100)] = None,
+    description: Annotated[Optional[str], Form(max_length=500)] = None,
+    price: Annotated[Optional[Decimal], Form(gt=0)] = None,
+    stock_quantity: Annotated[Optional[int], Form(ge=0)] = None,
+    category_id: Annotated[Optional[int], Form()] = None,
+    primary_image: Union[UploadFile, str, None] = File(None),
+    keep_image_ids: Annotated[Optional[str], Form()] = None,
+    new_images: List[Union[UploadFile, Optional[str]]] = File([]),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """
-    Update an existing product (Admin only).
-    """
-    product = product_crud.get(db, product_id)
-    if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Product with ID {product_id} not found"
-        )
+    """Update product details and images."""
     
-    # If name is being updated, check for conflicts
-    if product_data.name and product_data.name != product.name:
-        if product_crud.get_by_name(db, name=product_data.name):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Product with this name already exists"
-            )
+    # Convert string inputs to None/valid files
+    if isinstance(primary_image, str):
+        primary_image = None
+    new_images = [f for f in new_images if not isinstance(f, str)]
     
-    # Validate category if being updated
-    if product_data.category_id and not category_crud.get(db, product_data.category_id):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Category with ID {product_data.category_id} doesn't exist"
-        )
-    
-    updated_product = product_crud.update(db, db_obj=product, obj_in=product_data)
-    
-    return product_crud.get_detail(db, product_id=updated_product.id)
+    # Validate images
+    primary_image = await ImageService.validate_image(primary_image)
+    new_images = [
+        img for img in 
+        [await ImageService.validate_image(img) for img in new_images]
+        if img is not None
+    ]
 
-@router.post(
-        "/{product_id}/images",
-        response_model=List[ProductImage],
-        dependencies=[Depends(require_admin)]
-)
-async def add_product_images(
-    product_id: int,
-    images: List[UploadFile] = File(...),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    """Add secondary images to a product (Admin only)."""
-    product = product_crud.get(db, product_id)
-    if not product:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-    uploaded_images = []
-    for image in images:
-        url = await store_image(image, product_id)
-        uploaded_image = product_crud.add_product_image(
+    try:
+        # Prepare product data
+        product_data = ProductUpdate(
+            name=name.strip() if name else None,
+            description=description.strip() if description else None,
+            price=price,
+            stock_quantity=stock_quantity,
+            category_id=category_id,
+        )
+
+        # Prepare image data
+        image_update = None
+        if keep_image_ids is not None or new_images:
+            keep_ids = []
+            if keep_image_ids:
+                keep_ids = [int(id.strip()) for id in keep_image_ids.split(",") if id.strip().isdigit()]
+            
+            image_update = ProductImageUpdate(
+                keep_ids=keep_ids,
+                new_images=new_images
+            )
+
+        return await product_crud.update_product_with_images(
             db,
             product_id=product_id,
-            image_in=ProductImageCreate(url=url)
-        )
-        uploaded_images.append(uploaded_image)
-    return uploaded_images
-
-
-
-@router.patch(
-    "/{product_id}/stock",
-    response_model=ProductDetail,
-    dependencies=[Depends(require_admin)],
-    responses={
-        400: {"description": "Invalid stock adjustment"},
-        404: {"description": "Product not found"}
-    }
-)
-def adjust_stock(
-    product_id: int = Path(..., gt=0, description="The ID of the product"),
-    adjustment: int = Query(..., description="Amount to adjust stock by (positive or negative)"),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    """Adjust product stock quantity (Admin only)."""
-    product = product_crud.get(db, product_id)
-    if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Product with ID {product_id} not found"
+            product_data=product_data,
+            image_data=image_update,
+            new_primary_image=primary_image
         )
     
-    try:
-        updated_product = product_crud.update_stock(
-            db,
-            db_obj=product,
-            stock_adjustment=adjustment
-        )
-        return updated_product
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Product update failed: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
 
-# delete product
 @router.delete(
     "/{product_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(require_admin)],
     responses={
-        404: {"description": "Product not found"}
+        404: {"description": "Product not found"},
+        500: {"description": "Product deletion failed"}
     }
 )
-def delete_product(
-    product_id: int = Path(..., gt=0, description="The ID of the product to delete"),
+async def delete_product(
+    product_id: int = Path(..., gt=0),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Delete a product (Admin only)."""
+    """Delete product and associated images folder."""
     product = product_crud.get(db, product_id)
     if not product:
         raise HTTPException(
@@ -307,38 +247,15 @@ def delete_product(
             detail=f"Product with ID {product_id} not found"
         )
     
-    # Delete primary image file if exists
-    if product.primary_image_url:
-        try:
-            delete_image_file(product.primary_image_url)
-        except Exception:
-            pass
-    # Delete secondary images files
-    for image in product.images:
-        try:
-            delete_image_file(image.url)
-        except Exception:
-            pass
-    
     product_crud.remove(db, id=product_id)
-    return None
-
-# delete product image
-@router.delete(
-    "/{product_id}/images/{image_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Depends(require_admin)]
-)
-async def delete_product_image(
-    product_id: int,
-    image_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    """Delete a secondary image from a product (Admin only)."""
-    image = db.query(ProductImage).get(image_id)
-    if not image or image.product_id != product_id:
-        raise HTTPException(status_code=404, detail="Image not found")
-    await delete_image_file(image.url)
-    product_crud.delete_product_image(db, image_id=image_id)
+    
+    try:
+        await ImageService.delete_product_folder(product_id)
+    except Exception as e:
+        logger.error(f"Error deleting product folder for product {product_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete product folder: {str(e)}"
+        )
+    
     return None

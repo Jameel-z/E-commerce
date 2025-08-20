@@ -3,7 +3,7 @@ from typing import Optional, Any
 from .base_crud import CRUDBase
 from models import User
 from schemas import UserCreate, UserUpdate
-from core.security import get_password_hash, verify_password
+from core.security import get_password_hash
 
 class UserCRUD(CRUDBase[User, UserCreate, UserUpdate]):
     """User-specific CRUD with authentication support"""
@@ -40,19 +40,5 @@ class UserCRUD(CRUDBase[User, UserCreate, UserUpdate]):
             db_obj.name = update_data.get("name")
             
         return super().update(db, db_obj=db_obj, obj_in=update_data)
-    
-    def authenticate(
-        self, 
-        db: Session, 
-        *, 
-        email: str, 
-        password: str
-    ) -> Optional[User]:
-        user = self.get_by_email(db, email=email)
-        if not user:
-            return None
-        if not verify_password(password, user.hashed_password):
-            return None
-        return user
     
 user_crud = UserCRUD(User)

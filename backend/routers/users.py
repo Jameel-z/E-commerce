@@ -65,7 +65,7 @@ def read_user(
     user_id: int,
     db: Session = Depends(get_db)
 ):
-    if user_id != current_user.id and not current_user.is_superuser:
+    if user_id != current_user.id and not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"

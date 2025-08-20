@@ -1,6 +1,6 @@
 from typing import Optional, List, TYPE_CHECKING
 from pydantic import Field, field_validator, ConfigDict
-from .base import BaseSchema, TimestampSchema
+from .base import BaseSchema
 from datetime import datetime
 
 if TYPE_CHECKING:

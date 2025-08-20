@@ -3,8 +3,9 @@ from datetime import datetime
 from typing import Optional, Annotated, TYPE_CHECKING, List
 from decimal import Decimal
 from pydantic import Field, field_validator, ConfigDict
-from fastapi import UploadFile, File
+from fastapi import UploadFile
 from .base import BaseSchema, TimestampSchema
+from core.utils import generate_static_url
 
 if TYPE_CHECKING:
     from .category import Category
@@ -34,6 +35,10 @@ class ProductImage(ProductImageBase):
         }
     )
 
+    @field_validator('url', mode='before')
+    def make_full_url(cls, v):
+        return generate_static_url(v)
+
 class ProductList(BaseSchema):
     """Schema for product list view (main page)"""
     id: int
@@ -41,6 +46,7 @@ class ProductList(BaseSchema):
     price: Decimal
     primary_image_url: Optional[str] = None
     category_name: str
+    stock_quantity: int = Field(..., ge=0)
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -70,6 +76,12 @@ class ProductBase(BaseSchema):
     )
     price: Decimal = Field(..., gt=0, decimal_places=2)
 
+    @field_validator("price")
+    def validate_price(cls, v):
+        if v <= 0:
+            raise ValueError("Price must be greater than zero")
+        return v
+
 class ProductCreate(ProductBase):
     """Schema for creating a new product"""
     stock_quantity: int = Field(..., ge=0, examples=[100])
@@ -91,8 +103,6 @@ class ProductUpdate(BaseSchema):
     price: Optional[Annotated[Decimal, Field(gt=0, decimal_places=2)]] = None
     stock_quantity: Optional[int] = Field(None, ge=0)
     category_id: Optional[int] = None
-    primary_image: Optional[UploadFile] = File(None)
-    secondary_images: Optional[List[UploadFile]] =File([])
 
     @field_validator('name')
     @classmethod
@@ -100,12 +110,6 @@ class ProductUpdate(BaseSchema):
         if v is not None and len(v.strip()) < 2:
             raise ValueError("Name must be at least 2 characters long")
         return v.title() if v else None
-    @field_validator('primary_image', 'secondary_images')
-    def validate_file_type(cls, v):
-        allowed_types = ['image/jpeg', 'image/png']
-        if isinstance(v, UploadFile) and v.content_type not in allowed_types:
-            raise ValueError("Invalid file type")
-        return v
 
 class ProductDetail(TimestampSchema, ProductBase):
     """Schema for single product detail view"""
@@ -113,6 +117,7 @@ class ProductDetail(TimestampSchema, ProductBase):
     stock_quantity: int
     category_id: int
     primary_image_url: Optional[str] = None
+    price: Optional[Decimal] = Field(gt=0, decimal_places=2)
     category: "Category"
     secondary_images: List[ProductImage] = Field(default_factory=list, alias="images")
     created_at: datetime
@@ -147,6 +152,24 @@ class ProductDetail(TimestampSchema, ProductBase):
             }
         }
     )
+
+
+class ProductImageUpdate(BaseSchema):
+    """Schema for updating product images"""
+    keep_ids: Optional[List[int]] = Field(
+        default_factory=list,
+        description="IDs of existing images to retain",
+        example=[1, 3]
+    )
+    new_images: Optional[List[UploadFile]] = Field(
+        default_factory=list,
+        description="New images to upload"
+    )
+
+class ProductUpdateRequest(ProductUpdate):
+    """Complete product update request schema"""
+    images: Optional[ProductImageUpdate] = None
+    primary_image: Optional[UploadFile] = None
 
 # Fix for forward references
 from .category import Category  

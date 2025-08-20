@@ -12,7 +12,12 @@ class CRUDBase(Generic[ModelType, CreateSchema, UpdateSchema]):
         self.model = model
     
     def get(self, db: Session, id: Any) -> Optional[ModelType]:
-        return db.query(self.model).filter(self.model.id == id).first()
+        # Use Session.get for direct primary-key lookup when possible
+        try:
+            return db.get(self.model, id)
+        except Exception:
+            # Fallback to query if Session.get is unavailable in older SQLAlchemy
+            return db.query(self.model).filter(self.model.id == id).first()
     
     def get_multi(
             self,
@@ -54,7 +59,11 @@ class CRUDBase(Generic[ModelType, CreateSchema, UpdateSchema]):
         return db_obj
     
     def remove(self, db: Session, *, id: int) -> ModelType:
-        obj = db.query(self.model).get(id)
+        # Use Session.get for primary-key retrieval
+        try:
+            obj = db.get(self.model, id)
+        except Exception:
+            obj = db.query(self.model).filter(self.model.id == id).first()
         db.delete(obj)
         db.commit()
         return obj

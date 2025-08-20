@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import users, products, categories, carts
 from database import create_database, create_tables
+from fastapi.staticfiles import StaticFiles
+from core.config import settings
+from core.middleware import cleanup_temp_files
 
 create_database()
 create_tables() 
@@ -15,6 +18,14 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+app.middleware("http")(cleanup_temp_files)
+
+# Configure static files
+app.mount(
+    "/static",
+    StaticFiles(directory=settings.STATIC_DIR),
+    name="static"
 )
 
 # Include routers

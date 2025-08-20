@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+from pathlib import Path
 
 class Settings(BaseSettings):
     """Application settings"""
@@ -14,6 +15,11 @@ class Settings(BaseSettings):
     DB_HOST: str
     DB_PORT: str
     DB_NAME: str
+
+    # Static files settings
+    STATIC_DIR: str = str(Path(__file__).parent.parent / "static")
+    DOMAIN: str = "hamdancomputers.com"
+    ASSET_VERSION: str = "1.0"  # Change this when you update assets
 
     @property
     def DATABASE_URL(self) -> str:

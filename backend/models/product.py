@@ -1,5 +1,5 @@
 # backend/models/product.py
-from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, DateTime, func, Boolean
+from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
 from .base import Base
 
