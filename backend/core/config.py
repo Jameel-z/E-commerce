@@ -18,7 +18,7 @@ class Settings(BaseSettings):
 
     # Static files settings
     STATIC_DIR: str = str(Path(__file__).parent.parent / "static")
-    DOMAIN: str = "hamdancomputers.com"
+    DOMAIN: str = "localhost:8000"  # Changed for development
     ASSET_VERSION: str = "1.0"  # Change this when you update assets
 
     @property

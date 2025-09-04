@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# E-Commerce Frontend
+
+A modern Next.js e-commerce frontend that integrates with a FastAPI backend.
+
+## Features
+
+- **Authentication**: JWT-based login/register with role-based access control
+- **Product Management**: Browse products with filtering and search
+- **Cart Management**: Guest cart with localStorage, user cart with API integration
+- **Order Management**: Complete checkout process and order tracking
+- **Admin Dashboard**: Product, category, and order management for administrators
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
+- Node.js 18+ 
+- Your FastAPI backend running on `http://localhost:8000`
+
+### Installation
+
+1. Install dependencies:
+\`\`\`bash
+npm install
+\`\`\`
+
+2. Create environment file:
+\`\`\`bash
+cp .env.local.example .env.local
+\`\`\`
+
+3. Update `.env.local` with your FastAPI backend URL:
+\`\`\`
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+\`\`\`
+
+4. Start the development server:
+\`\`\`bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+\`\`\`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## API Integration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This frontend is designed to work with a FastAPI backend that provides:
 
-## Learn More
+- Authentication endpoints (`/users/token`, `/users/`, `/users/me`)
+- Product management (`/products/`, `/categories/`)
+- Cart management (`/carts/`)
+- Order management (`/orders/`)
+- Admin endpoints for managing products, categories, and orders
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `app/` - Next.js app router pages
+- `components/` - Reusable React components
+- `hooks/` - Custom React hooks for auth and cart management
+- `lib/` - Utility functions and API client
+- `public/` - Static assets
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Technologies Used
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Next.js 15 with App Router
+- TypeScript
+- Tailwind CSS
+- Radix UI components
+- Lucide React icons

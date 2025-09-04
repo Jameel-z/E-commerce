@@ -100,7 +100,7 @@ async def create_product(
     stock_quantity: Annotated[Optional[int], Form()] = 0,
     description: Annotated[Optional[str], Form(max_length=500)] = None,
     primary_image: Union[UploadFile, str, None] = File(None),
-    secondary_images: List[Union[UploadFile, Optional[str]]] = File([]),
+    secondary_images: Union[List[UploadFile], str, None] = File([]),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
@@ -170,7 +170,7 @@ async def update_product(
     category_id: Annotated[Optional[int], Form()] = None,
     primary_image: Union[UploadFile, str, None] = File(None),
     keep_image_ids: Annotated[Optional[str], Form()] = None,
-    new_images: List[Union[UploadFile, Optional[str]]] = File([]),
+    new_images: Union[List[UploadFile], str, None] = File([]),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
