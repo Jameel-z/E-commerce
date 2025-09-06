@@ -1,3 +1,29 @@
+// Auth types from feature folder
+import type {
+  User,
+  AuthResponse,
+  UserRegistrationRequest,
+} from "@/features/auth/types";
+
+// Cart types from feature folder
+import type { CartItem, Cart } from "@/features/cart/types";
+
+// Order types from feature folder
+import type {
+  OrderItem,
+  Order,
+  CreateOrderRequest,
+} from "@/features/orders/types";
+
+// Shared types (products, categories)
+import type {
+  Category,
+  Product,
+  ProductDetail,
+  ProductImage,
+  ProductCreateRequest,
+} from "@/shared/types";
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
@@ -30,173 +56,6 @@ export const getProductImageUrl = (product: {
   // Return optimized SVG placeholder
   return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%236b7280' font-family='Arial, sans-serif' font-size='14'%3ENo Image%3C/text%3E%3C/svg%3E";
 };
-
-// ========================================
-// TYPE DEFINITIONS - Aligned with Backend Schemas
-// ========================================
-
-/**
- * User interface - matches backend schemas/user.py User schema
- */
-export interface User {
-  id: number;
-  name: string | null;
-  email: string;
-  is_active: boolean;
-  is_admin: boolean;
-  created_at: string;
-  updated_at: string | null;
-}
-
-/**
- * Category interface - matches backend schemas/category.py
- */
-export interface Category {
-  id: number;
-  name: string;
-  description?: string | null;
-  created_at: string;
-  updated_at: string | null;
-}
-
-/**
- * Product Image interface - matches backend schemas/product.py ProductImage
- */
-export interface ProductImage {
-  id: number;
-  url: string;
-  product_id: number;
-  created_at: string;
-}
-
-/**
- * Product List interface - matches backend schemas/product.py ProductList
- * Used for product listings (main page, search results)
- */
-export interface Product {
-  id: number;
-  name: string;
-  price: number;
-  primary_image_url: string | null;
-  category_name: string;
-  stock_quantity: number;
-}
-
-/**
- * Product Detail interface - matches backend schemas/product.py ProductDetail
- * Used for individual product pages
- */
-export interface ProductDetail {
-  id: number;
-  name: string;
-  description: string | null;
-  price: number;
-  stock_quantity: number;
-  category_id: number;
-  primary_image_url: string | null;
-  category: Category;
-  secondary_images: ProductImage[];
-  created_at: string;
-  updated_at: string | null;
-}
-
-/**
- * Cart Item interface - matches backend schemas/cart.py CartItem
- */
-export interface CartItem {
-  price: number;
-  id: number;
-  product_id: number;
-  quantity: number;
-  product: ProductDetail;
-  added_at: string;
-  updated_at: string | null;
-  total_price: number; // Add this property
-}
-
-/**
- * Cart interface - matches backend schemas/cart.py Cart
- */
-export interface Cart {
-  id: number;
-  user_id: number | null;
-  items: CartItem[];
-  total_price: number;
-  created_at: string;
-  updated_at: string | null;
-}
-
-/**
- * Order Item interface - matches backend schemas/order_item.py OrderItem
- */
-export interface OrderItem {
-  id: number;
-  order_id: number;
-  product_id: number;
-  product_name: string;
-  quantity: number;
-  price_at_order: number;
-  total_price: number;
-}
-
-/**
- * Order interface - matches backend schemas/order.py Order
- */
-export interface Order {
-  id: number;
-  user_id: number;
-  status: string;
-  total_amount: number;
-  notes: string | null;
-  created_at: string;
-  updated_at: string | null;
-  order_items: OrderItem[];
-}
-
-// ========================================
-// REQUEST/RESPONSE TYPES
-// ========================================
-
-/**
- * Create Order Request - matches backend expected format
- */
-export interface CreateOrderRequest {
-  cart_items: {
-    product_id: number;
-    quantity: number;
-  }[];
-  shipping_address: string;
-  payment_method: string;
-  notes?: string;
-}
-
-/**
- * User Registration Request
- */
-export interface UserRegistrationRequest {
-  name: string;
-  email: string;
-  password: string;
-}
-
-/**
- * Product Creation Request - for admin
- */
-export interface ProductCreateRequest {
-  name: string;
-  description?: string;
-  price: number;
-  stock_quantity: number;
-  category_id: number;
-}
-
-/**
- * Authentication Response
- */
-export interface AuthResponse {
-  access_token: string;
-  token_type: string;
-}
 
 // ========================================
 // API CLIENT CLASS
