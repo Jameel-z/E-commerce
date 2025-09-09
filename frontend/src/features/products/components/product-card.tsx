@@ -9,7 +9,8 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ShoppingCart, Eye } from "lucide-react";
-import { type Product, getProductImageUrl } from "@/lib/api";
+import { type Product } from "@/shared/types";
+import { getProductImageUrl } from "@/shared/utils/image";
 
 interface ProductCardProps {
   product: Product;

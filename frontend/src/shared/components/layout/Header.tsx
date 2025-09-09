@@ -4,7 +4,7 @@ import { Button } from "@/shared/components/ui/button";
 import { CartIcon } from "@/features/cart/components/cart-icon";
 import Link from "next/link";
 import { ShoppingBag, User, Shield } from "lucide-react";
-import { User as ApiUser } from "@/lib/api";
+import { type User as ApiUser } from "@/features/auth/types";
 import { getDisplayName } from "@/shared/utils/utils"; // Import from utils
 
 interface HeaderProps {

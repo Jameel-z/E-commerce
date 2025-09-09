@@ -19,7 +19,8 @@ import {
 } from "@/shared/components/ui/card";
 import { Slider } from "@/shared/components/ui/slider";
 import { Checkbox } from "@/shared/components/ui/checkbox";
-import { apiClient, type Category } from "@/lib/api";
+import { apiClient } from "@/lib/api";
+import { type Category } from "@/shared/types";
 import { Search, Filter, X } from "lucide-react";
 
 interface ProductFiltersProps {

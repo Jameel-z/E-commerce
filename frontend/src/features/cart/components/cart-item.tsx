@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { CartItem } from "@/lib/api";
-import { getProductImageUrl } from "@/lib/api";
+import type { CartItem } from "@/features/cart/types";
+import { getProductImageUrl } from "@/shared/utils/image";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import Input from "@/shared/components/ui/input";

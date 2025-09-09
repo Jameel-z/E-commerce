@@ -12,7 +12,8 @@ import {
 } from "@/shared/components/ui/card";
 import Link from "next/link";
 import { ShoppingBag, User, Package, History } from "lucide-react";
-import { User as ApiUser } from "@/lib/api";
+// import user type from features/auth/types;
+import { type User as ApiUser } from "@/features/auth/types";
 
 interface QuickAccessSectionProps {
   user: ApiUser | null;

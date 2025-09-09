@@ -4,7 +4,8 @@ import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import Link from "next/link";
 import { Package } from "lucide-react";
-import { type Product, getProductImageUrl } from "@/lib/api";
+import { type Product } from "@/shared/types";
+import { getProductImageUrl } from "@/shared/utils/image";
 
 interface FeaturedProductsSectionProps {
   products: Product[];
