@@ -84,7 +84,7 @@ class ApiClient {
     });
 
     if (!response.ok) {
-      throw new Error("Invalid credentials"); 
+      throw new Error("Invalid credentials");
     }
 
     const data: AuthResponse = await response.json();
@@ -312,3 +312,33 @@ class ApiClient {
  * Singleton API client instance for use throughout the application
  */
 export const apiClient = new ApiClient();
+
+// ========================================
+// RE-EXPORT TYPES FOR CONVENIENCE
+// ========================================
+
+// Auth types
+export type {
+  User,
+  AuthResponse,
+  UserRegistrationRequest,
+} from "@/features/auth/types";
+
+// Cart types
+export type { CartItem, Cart } from "@/features/cart/types";
+
+// Order types
+export type {
+  OrderItem,
+  Order,
+  CreateOrderRequest,
+} from "@/features/orders/types";
+
+// Shared types (products, categories)
+export type {
+  Category,
+  Product,
+  ProductDetail,
+  ProductImage,
+  ProductCreateRequest,
+} from "@/shared/types";

@@ -3,12 +3,14 @@
 import { useAuth } from "@/shared/hooks/use-auth";
 import { useEffect, useState } from "react";
 import { apiClient, type Product } from "@/lib/api";
-import { Header } from "@/shared/components/layout/Header";
-import { HeroSection } from "@/shared/components/sections/HeroSection";
-import { ErrorBanner } from "@/shared/components/ui/ErrorBanner";
-import { FeaturesSection } from "@/shared/components/sections/FeaturesSection";
-import { QuickAccessSection } from "@/shared/components/sections/QuickAccessSection";
-import { FeaturedProductsSection } from "@/shared/components/sections/FeaturedProductsSection";
+import {
+  Header,
+  HeroSection,
+  ErrorBanner,
+  FeaturesSection,
+  QuickAccessSection,
+  FeaturedProductsSection,
+} from "@/shared/components";
 
 export default function HomePage() {
   const { user, loading } = useAuth();

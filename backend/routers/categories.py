@@ -15,6 +15,15 @@ router = APIRouter(
     }
 )
 
+@router.get(
+    "/",
+    response_model=list[Category],
+    status_code=status.HTTP_200_OK
+)
+def get_categories(db: Session = Depends(get_db)):
+    """Get all categories - public endpoint"""
+    return category_crud.get_multi(db)
+
 @router.post(
     "/",
     response_model=Category,

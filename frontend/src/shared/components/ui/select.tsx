@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import clsx from "clsx";
 
@@ -28,6 +30,7 @@ export const Select: React.FC<SelectProps> = ({
           return React.cloneElement(child, {
             isOpen,
             setIsOpen,
+            value, // Pass the current value to SelectTrigger
           } as SelectTriggerProps);
         }
 
@@ -49,12 +52,14 @@ interface SelectTriggerProps {
   children: React.ReactNode;
   isOpen?: boolean;
   setIsOpen?: (isOpen: boolean) => void;
+  value?: string;
 }
 
 export const SelectTrigger: React.FC<SelectTriggerProps> = ({
   children,
   isOpen,
   setIsOpen,
+  value,
 }) => (
   <div
     className={clsx(
@@ -65,7 +70,17 @@ export const SelectTrigger: React.FC<SelectTriggerProps> = ({
     )}
     onClick={() => setIsOpen?.(!isOpen)}
   >
-    {children}
+    {React.Children.map(children, (child) => {
+      if (React.isValidElement(child) && child.type === SelectValue) {
+        return React.cloneElement(
+          child as React.ReactElement<SelectValueProps>,
+          {
+            value,
+          }
+        );
+      }
+      return child;
+    })}
   </div>
 );
 
@@ -78,13 +93,25 @@ interface SelectContentProps {
 
 export const SelectContent: React.FC<SelectContentProps> = ({
   children,
+  value,
+  onValueChange,
   isOpen,
 }) => {
   if (!isOpen) return null;
 
   return (
     <div className="absolute top-full left-0 right-0 z-50 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 mt-1">
-      {children}
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement(child) && child.type === SelectItem) {
+          return React.cloneElement(
+            child as React.ReactElement<SelectItemProps>,
+            {
+              onValueChange,
+            }
+          );
+        }
+        return child;
+      })}
     </div>
   );
 };
@@ -99,7 +126,11 @@ export const SelectValue: React.FC<SelectValueProps> = ({
   value,
 }) => (
   <span className="text-foreground">
-    {value || <span className="text-muted-foreground">{placeholder}</span>}
+    {value && value !== "all" ? (
+      value
+    ) : (
+      <span className="text-muted-foreground">{placeholder}</span>
+    )}
   </span>
 );
 

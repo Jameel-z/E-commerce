@@ -1,8 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardFooter } from "@/shared/components/ui/card";
-import { Button } from "@/shared/components/ui/button";
-import { Badge } from "@/shared/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  Button,
+  Badge,
+} from "@/shared/components";
+import { getProductImageUrl } from "@/shared/utils";
 import { useCart } from "@/shared/hooks/use-cart";
 import { useAuth } from "@/shared/hooks/use-auth";
 import { useState } from "react";
@@ -10,7 +15,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { ShoppingCart, Eye } from "lucide-react";
 import { type Product } from "@/shared/types";
-import { getProductImageUrl } from "@/shared/utils/image";
 
 interface ProductCardProps {
   product: Product;
@@ -63,7 +67,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </p>
           <div className="flex items-center justify-between">
             <span className="text-2xl font-bold text-primary">
-              ${product.price.toFixed(2)}
+              ${Number(product.price).toFixed(2)}
             </span>
             <span className="text-sm text-muted-foreground">
               Stock: {product.stock_quantity}

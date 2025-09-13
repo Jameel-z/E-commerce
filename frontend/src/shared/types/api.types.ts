@@ -45,12 +45,12 @@ export interface ProductDetail {
   id: number;
   name: string;
   description: string | null;
-  price: number;
+  price: string; // Backend returns price as string "100.00"
   stock_quantity: number;
   category_id: number;
   primary_image_url: string | null;
   category: Category;
-  secondary_images: ProductImage[];
+  images: ProductImage[]; // Updated to match backend response
   created_at: string;
   updated_at: string | null;
 }
