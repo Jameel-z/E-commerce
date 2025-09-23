@@ -78,7 +78,7 @@ export function CartItemComponent({ item }: CartItemProps) {
           <div className="flex-1 min-w-0">
             <h3 className="font-medium truncate">{item.product.name}</h3>
             <p className="text-sm text-muted-foreground">
-              ${item.product.price.toFixed(2)} each
+              ${Number(item.product.price).toFixed(2)} each
             </p>
           </div>
 
@@ -123,7 +123,7 @@ export function CartItemComponent({ item }: CartItemProps) {
 
           <div className="text-right">
             <p className="font-semibold">
-              ${(item.product.price * item.quantity).toFixed(2)}
+              ${(Number(item.product.price) * Number(quantity)).toFixed(2)}
             </p>
           </div>
 

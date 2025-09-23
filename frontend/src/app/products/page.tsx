@@ -4,14 +4,13 @@ import { useState, useEffect, useCallback } from "react";
 import {
   ProductFilters,
   ProductsLoading,
-  ProductsHeader,
   ProductsEmptyState,
   ProductsErrorState,
   ProductsGridLoading,
   ProductsGrid,
 } from "@/features/products/components";
 import { type ProductFiltersState } from "@/features/products/types";
-import { ErrorBanner } from "@/shared/components";
+import { ErrorBanner, UnifiedLayout } from "@/shared/components";
 import { apiClient, type Product } from "@/lib/api";
 
 export default function ProductsPage() {
@@ -97,9 +96,15 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <ProductsHeader />
-
+    <UnifiedLayout
+      pageHeaderProps={{
+        backButton: {
+          label: "Back to Home",
+          href: "/",
+        },
+        title: "Products",
+      }}
+    >
       {error && (
         <ErrorBanner error={error} onRetry={() => window.location.reload()} />
       )}
@@ -135,6 +140,6 @@ export default function ProductsPage() {
           </div>
         </div>
       </div>
-    </div>
+    </UnifiedLayout>
   );
 }

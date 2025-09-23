@@ -6,12 +6,12 @@ import {
   ProductDetailLoading,
   ProductNotFound,
   ProductDetailError,
-  ProductDetailHeader,
   ProductDetailContent,
 } from "@/features/products/components";
 import { useCart } from "@/shared/hooks/use-cart";
 import { useToast } from "@/shared/hooks/use-toast";
 import { apiClient, type ProductDetail } from "@/lib/api";
+import { UnifiedLayout } from "@/shared/components";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -76,9 +76,15 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <ProductDetailHeader />
-
+    <UnifiedLayout
+      pageHeaderProps={{
+        backButton: {
+          label: "Back to Products",
+          href: "/products",
+        },
+        title: product?.name,
+      }}
+    >
       {error ? (
         <ProductDetailError
           error={error}
@@ -93,6 +99,6 @@ export default function ProductDetailPage() {
           isAddingToCart={isAddingToCart}
         />
       )}
-    </div>
+    </UnifiedLayout>
   );
 }

@@ -4,7 +4,7 @@ import { useAuth } from "@/shared/hooks/use-auth";
 import { useEffect, useState } from "react";
 import { apiClient, type Product } from "@/lib/api";
 import {
-  Header,
+  UnifiedLayout,
   HeroSection,
   ErrorBanner,
   FeaturesSection,
@@ -48,8 +48,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header user={user} />
+    <UnifiedLayout>
       <HeroSection />
       {error && <ErrorBanner error={error} />}
       <FeaturedProductsSection
@@ -59,6 +58,6 @@ export default function HomePage() {
       />
       <FeaturesSection />
       <QuickAccessSection user={user} />
-    </div>
+    </UnifiedLayout>
   );
 }

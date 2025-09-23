@@ -44,7 +44,8 @@ class GuestCart {
     productId: number,
     name: string,
     price: number,
-    quantity: number
+    quantity: number,
+    product?: ProductDetail
   ): void {
     const items = this.getCart();
     const existingItem = items.find((item) => item.product_id === productId);
@@ -59,11 +60,21 @@ class GuestCart {
         price,
         quantity,
         total_price: price * quantity,
-        product: {
-          id: productId,
-          name: name,
-          // Add other required ProductDetail properties or use minimal structure
-        } as ProductDetail,
+        product:
+          product ||
+          ({
+            id: productId,
+            name: name,
+            price: price.toString(), // Ensure price is stored as string to match ProductDetail
+            description: null,
+            stock_quantity: 0,
+            category_id: 0,
+            primary_image_url: null,
+            category: { id: 0, name: "", created_at: "", updated_at: null },
+            images: [],
+            created_at: new Date().toISOString(),
+            updated_at: null,
+          } as ProductDetail),
         added_at: new Date().toISOString(),
         updated_at: null,
       });
@@ -154,7 +165,13 @@ export function useCartProvider() {
       // We need to get product details for guest cart
       try {
         const product = await apiClient.getProduct(productId);
-        GuestCart.addItem(productId, product.name, product.price, quantity);
+        GuestCart.addItem(
+          productId,
+          product.name,
+          Number(product.price),
+          quantity,
+          product
+        );
         await refreshCart();
       } catch (error) {
         throw new Error("Failed to add item to cart");

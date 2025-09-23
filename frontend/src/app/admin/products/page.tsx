@@ -310,7 +310,7 @@ export default function AdminProducts() {
 
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-primary">
-                      ${product.price.toFixed(2)}
+                      ${Number(product.price).toFixed(2)}
                     </span>
                     <Badge
                       variant={
