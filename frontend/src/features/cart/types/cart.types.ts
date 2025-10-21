@@ -44,12 +44,3 @@ export interface CartItemOperations {
   isUpdating?: boolean;
   isRemoving?: boolean;
 }
-
-// Cart summary calculations
-export interface CartSummaryData {
-  subtotal: number;
-  tax: number;
-  shipping: number;
-  total: number;
-  itemCount: number;
-}

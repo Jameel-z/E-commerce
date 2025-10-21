@@ -2,7 +2,7 @@
 
 import { Button } from "@/shared/components/ui/button";
 import Link from "next/link";
-import { Package, ShoppingBag } from "lucide-react";
+import { Package } from "lucide-react";
 
 export function HeroSection() {
   return (
@@ -23,17 +23,6 @@ export function HeroSection() {
               <Link href="/products">
                 <Package className="h-5 w-5 mr-2" />
                 Start Shopping
-              </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="text-lg px-8 bg-transparent"
-              asChild
-            >
-              <Link href="/cart">
-                <ShoppingBag className="h-5 w-5 mr-2" />
-                View Cart
               </Link>
             </Button>
           </div>
