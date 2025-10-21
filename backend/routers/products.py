@@ -82,6 +82,29 @@ def get_product(
 # ADMIN-ONLY ENDPOINTS
 # --------------------------
 
+# Custom validator function
+def validate_file_input(v):
+    """Handle different file input types"""
+    logger.info(f"validate_file_input received: {type(v)} - {v}")
+    
+    if v is None:
+        logger.info("validate_file_input: returning None (v is None)")
+        return None
+    if isinstance(v, str) and v == "":
+        logger.info("validate_file_input: returning None (v is empty string)")
+        return None
+    if isinstance(v, list):
+        # Filter out empty strings and non-UploadFile objects
+        result = [item for item in v if hasattr(item, 'filename') and item.filename]
+        logger.info(f"validate_file_input: returning list with {len(result)} items: {result}")
+        return result
+    if hasattr(v, 'filename') and v.filename:
+        logger.info(f"validate_file_input: returning UploadFile: {v.filename}")
+        return v
+    
+    logger.info("validate_file_input: returning None (no conditions matched)")
+    return None
+
 @router.post(
     "/",
     response_model=ProductDetail,
@@ -94,9 +117,9 @@ def get_product(
     }
 )
 async def create_product(
-    name: Annotated[str, Form(..., min_length=2, max_length=100, example="Wireless Mouse")],
-    price: Annotated[Decimal, Form(..., gt=0, example=23.99)],
-    category_id: Annotated[int, Form(..., example=1)],
+    name: Annotated[str, Form(min_length=2, max_length=100, example="Wireless Mouse")],
+    price: Annotated[Decimal, Form(gt=0, example=23.99)],
+    category_id: Annotated[str, Form()] = "",  # Accept as string to handle empty values
     stock_quantity: Annotated[Optional[int], Form()] = 0,
     description: Annotated[Optional[str], Form(max_length=500)] = None,
     primary_image: Union[UploadFile, str, None] = File(None),
@@ -104,52 +127,52 @@ async def create_product(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """
-    Create a new product with optional images.
-    
-    - **name**: Product name (2-100 chars)
-    - **price**: Must be positive
-    - **category_id**: Must exist
-    - **images**: JPEG/PNG/WEBP under 10MB
-    """
-    # Convert string inputs to None/valid files
-    if isinstance(primary_image, str):
-        primary_image = None
-    secondary_images = [f for f in secondary_images if not isinstance(f, str)]
-    
-    # Validate images
-    primary_image = await ImageService.validate_image(primary_image)
-    secondary_images = [
-        img for img in 
-        [await ImageService.validate_image(img) for img in secondary_images]
-        if img is not None
-    ]
-
-    product_data = ProductCreate(
-        name=name.strip(),
-        description=description.strip() if description else None,
-        price=price,
-        stock_quantity=stock_quantity,
-        category_id=category_id
-    )
-    
     try:
-        return await product_crud.create_product_with_images(
-            db,
+        # Parse category_id from string to int or None
+        parsed_category_id = None
+        if category_id and category_id.strip() and category_id.strip() != "":
+            try:
+                parsed_category_id = int(category_id.strip())
+            except ValueError:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid category_id format"
+                )
+            
+        # Apply custom validation
+        processed_primary_image = validate_file_input(primary_image)
+        processed_secondary_images = validate_file_input(secondary_images)
+        
+        # Debug logging
+        logger.info(f"Raw primary_image: {type(primary_image)} - {primary_image}")
+        logger.info(f"Raw secondary_images: {type(secondary_images)} - {secondary_images}")
+        logger.info(f"Processed primary_image: {type(processed_primary_image)} - {processed_primary_image}")
+        logger.info(f"Processed secondary_images: {type(processed_secondary_images)} - {processed_secondary_images}")
+        
+        # Create product data
+        product_data = ProductCreate(
+            name=name,
+            price=price,
+            category_id=parsed_category_id,
+            stock_quantity=stock_quantity,
+            description=description
+        )
+        
+        # Use your existing CRUD logic
+        product = await product_crud.create_product_with_images(
+            db=db,
             product_data=product_data,
-            primary_image=primary_image,
-            secondary_images=secondary_images
+            primary_image=processed_primary_image,
+            secondary_images=processed_secondary_images
         )
+        
+        return product
+        
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error creating product: {str(e)}"
-        )
+        logger.error(f"Error creating product: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.put(
     "/{product_id}",

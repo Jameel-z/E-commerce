@@ -4,6 +4,7 @@ from datetime import datetime
 
 from .base import BaseSchema, TimestampSchema
 from .product import ProductDetail  # Import your Product schema
+from pydantic import BaseModel
 
 class CartBase(BaseSchema):
     """
@@ -220,3 +221,20 @@ class PaymentMethodsResponse(BaseSchema):
         default_factory=lambda: ["Cash on Delivery", "Bank Transfer", "Pickup in Store"],
         description="Available offline payment methods"
     )
+
+class GuestCartItemRequest(BaseModel):
+    product_id: int
+    quantity: int
+
+class GuestCartMergeRequest(BaseModel):
+    items: List[GuestCartItemRequest]
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "items": [
+                    {"product_id": 1, "quantity": 2},
+                    {"product_id": 3, "quantity": 1}
+                ]
+            }
+        }

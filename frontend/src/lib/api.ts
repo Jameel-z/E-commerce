@@ -110,6 +110,19 @@ class ApiClient {
   }
 
   /**
+   * Update current user profile - matches backend /users/me PATCH endpoint
+   */
+  async updateCurrentUser(data: {
+    name?: string;
+    password?: string;
+  }): Promise<User> {
+    return this.request<User>("/users/me", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
    * Logout user (client-side token removal)
    */
   logout(): void {
@@ -139,13 +152,67 @@ class ApiClient {
   /**
    * Create new product - matches backend /products/ POST endpoint (Admin only)
    */
+  // async createProduct(
+  //   productData: ProductCreateRequest
+  // ): Promise<ProductDetail> {
+  //   return this.request<ProductDetail>("/products/", {
+  //     method: "POST",
+  //     body: JSON.stringify(productData),
+  //   });
+  // }
   async createProduct(
     productData: ProductCreateRequest
   ): Promise<ProductDetail> {
-    return this.request<ProductDetail>("/products/", {
+    const formData = new FormData();
+
+    // Required fields
+    formData.append("name", productData.name);
+    formData.append("price", productData.price.toString());
+    formData.append(
+      "stock_quantity",
+      (productData.stock_quantity || 0).toString()
+    );
+
+    // Optional fields
+    if (productData.description) {
+      formData.append("description", productData.description);
+    }
+
+    // Only append category_id if it exists (following your login pattern)
+    if (productData.category_id) {
+      formData.append("category_id", productData.category_id.toString());
+    }
+
+    // Handle file uploads
+    if (productData.primary_image) {
+      formData.append("primary_image", productData.primary_image);
+    }
+
+    if (
+      productData.secondary_images &&
+      productData.secondary_images.length > 0
+    ) {
+      productData.secondary_images.forEach((file) => {
+        formData.append("secondary_images", file);
+      });
+    }
+
+    const token = localStorage.getItem("access_token");
+    const response = await fetch(`${API_BASE_URL}/products/`, {
       method: "POST",
-      body: JSON.stringify(productData),
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+        // No Content-Type - let browser handle FormData boundary
+      },
+      body: formData,
     });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error || `HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
   }
 
   /**
@@ -153,21 +220,79 @@ class ApiClient {
    */
   async updateProduct(
     id: number,
-    productData: Partial<ProductCreateRequest>
+    productData: any // Change type to accept keep_image_ids and new_images
   ): Promise<ProductDetail> {
-    return this.request<ProductDetail>(`/products/${id}`, {
+    const formData = new FormData();
+
+    // Add basic fields
+    if (productData.name) {
+      formData.append("name", productData.name);
+    }
+    if (productData.price !== undefined) {
+      formData.append("price", productData.price.toString());
+    }
+    if (productData.stock_quantity !== undefined) {
+      formData.append("stock_quantity", productData.stock_quantity.toString());
+    }
+    if (productData.description) {
+      formData.append("description", productData.description);
+    }
+    if (productData.category_id !== undefined) {
+      formData.append("category_id", productData.category_id.toString());
+    }
+
+    // Handle primary image
+    if (productData.primary_image) {
+      formData.append("primary_image", productData.primary_image);
+    }
+
+    // 🔥 NEW: Handle keep_image_ids for existing images
+    if (productData.keep_image_ids !== undefined) {
+      formData.append("keep_image_ids", productData.keep_image_ids);
+    }
+
+    // 🔥 FIXED: Use "new_images" instead of "secondary_images"
+    if (productData.new_images && productData.new_images.length > 0) {
+      productData.new_images.forEach((file: File) => {
+        formData.append("new_images", file); // ✅ Correct field name
+      });
+    }
+
+    const token = localStorage.getItem("access_token");
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
       method: "PUT",
-      body: JSON.stringify(productData),
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
     });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error || `HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
   }
 
   /**
    * Delete product - matches backend /products/{id} DELETE endpoint (Admin only)
    */
   async deleteProduct(id: number): Promise<void> {
-    return this.request(`/products/${id}`, {
+    const url = `${API_BASE_URL}/products/${id}`;
+
+    const response = await fetch(url, {
       method: "DELETE",
+      headers: this.getAuthHeaders(),
     });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error || `Failed to delete product: ${response.status}`);
+    }
+
+    // Don't try to parse JSON - DELETE returns empty response
+    return;
   }
 
   // ========================================
@@ -224,10 +349,30 @@ class ApiClient {
   /**
    * Update cart item quantity - matches backend /carts/update-item PATCH endpoint
    */
-  async updateCartItem(product_id: number, quantity: number): Promise<Cart> {
+  // async updateCartItem(product_id: number, quantity: number): Promise<Cart> {
+  //   return this.request<Cart>("/carts/update-item", {
+  //     method: "PATCH",
+  //     body: JSON.stringify({ product_id, quantity, action: "set" }),
+  //   });
+  // }
+  async updateCartItem(
+    product_id: number,
+    newQuantity: number,
+    currentQuantity: number
+  ): Promise<Cart> {
+    const difference = newQuantity - currentQuantity;
+
+    if (difference === 0) {
+      // No change needed, just return current cart
+      return this.getCart();
+    }
+
+    const action = difference > 0 ? "increment" : "decrement";
+    const quantity = Math.abs(difference);
+
     return this.request<Cart>("/carts/update-item", {
       method: "PATCH",
-      body: JSON.stringify({ product_id, quantity }),
+      body: JSON.stringify({ product_id, quantity, action }),
     });
   }
 
@@ -253,9 +398,50 @@ class ApiClient {
    * Merge guest cart with user cart - matches backend /carts/merge POST endpoint
    */
   async mergeCart(): Promise<Cart> {
-    return this.request<Cart>("/carts/merge", {
-      method: "POST",
-    });
+    // Get guest cart from localStorage
+    const guestCartData = localStorage.getItem("cart");
+
+    if (!guestCartData) {
+      // No guest cart to merge, just return empty response
+      console.log("No guest cart found to merge");
+      return this.getCart(); // Get user's existing cart instead
+    }
+
+    try {
+      const guestCart = JSON.parse(guestCartData);
+
+      // Transform localStorage cart format to backend format
+      const mergeRequest = {
+        items:
+          guestCart.items?.map((item: any) => ({
+            product_id: item.product_id || item.id,
+            quantity: item.quantity,
+          })) || [],
+      };
+
+      // Only merge if there are items
+      if (mergeRequest.items.length === 0) {
+        console.log("Guest cart is empty, skipping merge");
+        return this.getCart();
+      }
+
+      console.log("Merging guest cart:", mergeRequest);
+
+      const result = await this.request<Cart>("/carts/merge", {
+        method: "POST",
+        body: JSON.stringify(mergeRequest),
+      });
+
+      // Clear guest cart after successful merge
+      localStorage.removeItem("cart");
+      console.log("Guest cart merged and cleared");
+
+      return result;
+    } catch (error) {
+      console.error("Failed to parse or merge guest cart:", error);
+      // If merge fails, just get the user's existing cart
+      return this.getCart();
+    }
   }
 
   // ========================================

@@ -67,5 +67,7 @@ export interface ProductCreateRequest {
   description?: string;
   price: number;
   stock_quantity: number;
-  category_id: number;
+  category_id?: number; // Make optional
+  primary_image?: File;
+  secondary_images?: File[];
 }

@@ -23,20 +23,26 @@ class ImageService:
     @staticmethod
     async def save_product_image(file: UploadFile, product_id: int) -> str:
         """Save product image and return relative path"""
+        logger.info(f"save_product_image called for product {product_id} with file: {file.filename}")
+        
         # Create product directory if not exists
         product_dir = Path(settings.STATIC_DIR) / "products" / str(product_id)
+        logger.info(f"Creating directory: {product_dir}")
         product_dir.mkdir(parents=True, exist_ok=True)
 
         # Generate safe filename
         ext = Path(file.filename).suffix.lower()
         filename = f"img_{os.urandom(4).hex()}{ext}"
         save_path = product_dir / filename
+        logger.info(f"Saving file to: {save_path}")
 
         # Save file
         try:
             with open(save_path, "wb") as buffer:
                 content = await file.read()
+                logger.info(f"Read {len(content)} bytes from uploaded file")
                 buffer.write(content)
+                logger.info(f"Successfully saved file: {save_path}")
 
             return f"/products/{product_id}/{filename}"
         except Exception as e:

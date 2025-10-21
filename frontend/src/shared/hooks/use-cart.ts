@@ -116,13 +116,19 @@ export function useCartProvider() {
   const { user } = useAuth();
 
   const refreshCart = async () => {
+    console.log("Refreshing cart for user:", user?.email || "guest");
     setLoading(true);
     try {
       if (user) {
         // User is logged in, fetch from API
+        // Add small delay to ensure login process is complete
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        console.log("Fetching user cart...");
         const userCart = await apiClient.getCart();
         setCart(userCart);
+        console.log("User cart loaded:", userCart);
       } else {
+        console.log("Loading guest cart...");
         // Guest user, use localStorage
         const guestItems = GuestCart.getCart();
         setCart({
@@ -136,16 +142,28 @@ export function useCartProvider() {
       }
     } catch (error) {
       console.error("Failed to refresh cart:", error);
-      // Fallback to guest cart
-      const guestItems = GuestCart.getCart();
-      setCart({
-        items: guestItems,
-        total_price: GuestCart.getTotal(),
-        id: 0,
-        user_id: null,
-        created_at: new Date().toISOString(),
-        updated_at: null,
-      });
+      // If user is logged in but cart fetch fails, still try to show empty user cart
+      if (user) {
+        setCart({
+          items: [],
+          total_price: 0,
+          id: 0,
+          user_id: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: null,
+        });
+      } else {
+        // Fallback to guest cart
+        const guestItems = GuestCart.getCart();
+        setCart({
+          items: guestItems,
+          total_price: GuestCart.getTotal(),
+          id: 0,
+          user_id: null,
+          created_at: new Date().toISOString(),
+          updated_at: null,
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -179,12 +197,27 @@ export function useCartProvider() {
     }
   };
 
-  const updateQuantity = async (productId: number, quantity: number) => {
+  // const updateQuantity = async (productId: number, quantity: number) => {
+  //   if (user) {
+  //     await apiClient.updateCartItem(productId, quantity);
+  //     await refreshCart();
+  //   } else {
+  //     GuestCart.updateItem(productId, quantity);
+  //     await refreshCart();
+  //   }
+  // };
+  const updateQuantity = async (productId: number, newQuantity: number) => {
     if (user) {
-      await apiClient.updateCartItem(productId, quantity);
+      // Find current quantity from cart
+      const currentItem = cart?.items.find(
+        (item) => item.product_id === productId
+      );
+      const currentQuantity = currentItem?.quantity || 0;
+
+      await apiClient.updateCartItem(productId, newQuantity, currentQuantity);
       await refreshCart();
     } else {
-      GuestCart.updateItem(productId, quantity);
+      GuestCart.updateItem(productId, newQuantity);
       await refreshCart();
     }
   };

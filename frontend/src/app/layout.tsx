@@ -2,7 +2,10 @@ import type React from "react";
 import type { Metadata } from "next";
 import { Space_Grotesk, DM_Sans } from "next/font/google";
 import { AuthProvider, CartProvider } from "@/shared/components";
+import { CartSidebarProvider } from "@/features/cart/components";
+import { MainContentWrapper } from "@/shared/components/layout/MainContentWrapper";
 import "./globals.css";
+import { CartSidebarRenderer } from "@/shared/components/layout";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -33,9 +36,14 @@ export default function RootLayout({
       lang="en"
       className={`${spaceGrotesk.variable} ${dmSans.variable} antialiased`}
     >
-      <body className="font-sans">
+      <body className="font-sans overflow-x-hidden">
         <AuthProvider>
-          <CartProvider>{children}</CartProvider>
+          <CartSidebarProvider>
+            <CartProvider>
+              <MainContentWrapper>{children}</MainContentWrapper>
+              <CartSidebarRenderer />
+            </CartProvider>
+          </CartSidebarProvider>
         </AuthProvider>
       </body>
     </html>

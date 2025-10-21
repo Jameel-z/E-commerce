@@ -31,7 +31,7 @@ export function QuickAccessSection({ user }: QuickAccessSectionProps) {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
         <Card className="hover:shadow-lg transition-shadow border-0 bg-card/50 backdrop-blur-sm">
           <CardHeader className="text-center">
             <div className="bg-secondary/10 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3">
@@ -84,37 +84,6 @@ export function QuickAccessSection({ user }: QuickAccessSectionProps) {
             ) : (
               <Button className="w-full" asChild>
                 <Link href="/login">Sign In</Link>
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow border-0 bg-card/50 backdrop-blur-sm">
-          <CardHeader className="text-center">
-            <div className="bg-secondary/10 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <History className="h-6 w-6 text-secondary" />
-            </div>
-            <CardTitle>Order History</CardTitle>
-            <CardDescription>
-              {user ? "Track your purchases" : "Sign in to view orders"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {user ? (
-              <Button
-                className="w-full bg-transparent"
-                variant="outline"
-                asChild
-              >
-                <Link href="/orders">View Orders</Link>
-              </Button>
-            ) : (
-              <Button
-                className="w-full bg-transparent"
-                variant="outline"
-                disabled
-              >
-                Sign In Required
               </Button>
             )}
           </CardContent>

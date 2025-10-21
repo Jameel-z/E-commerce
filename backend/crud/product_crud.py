@@ -14,6 +14,8 @@ from fastapi import UploadFile
 import logging
 from services.image_services import ImageService
 from core.utils import generate_static_url
+# import func
+from sqlalchemy import func
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +35,11 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
                 Product.name,
                 Product.price,
                 Product.primary_image_url,
-                Category.name.label('category_name'),
+                # Category.name.label('category_name'),
+                func.coalesce(Category.name, "Uncategorized").label('category_name'),
                 Product.stock_quantity
             )
-            .join(Product.category)
+            .outerjoin(Product.category)  # Change from .join() to .outerjoin() to include products without categories
         )
 
         if category_id:
@@ -45,7 +48,7 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
         if search_term:
             query = query.filter(
                 Product.name.ilike(f"%{search_term}%") |
-                Product.description.ilike(f"%{search_term}")
+                Product.description.ilike(f"%{search_term}%")  # Fixed missing %
                 )
 
         return query.offset(skip).limit(limit).all()
@@ -83,23 +86,33 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
         if self.get_by_name(db, name=product_data.name):
             raise ValueError(f"Product with name '{product_data.name}' already exists")
         
-        if not category_crud.get(db, product_data.category_id):
-            raise ValueError(f"Category with ID {product_data.category_id} doesn't exist")
+        # Only validate category if category_id is provided
+        if product_data.category_id is not None:
+            if not category_crud.get(db, product_data.category_id):
+                raise ValueError(f"Category with ID {product_data.category_id} doesn't exist")
 
         relative_path = None
         uploaded_paths = []
         try:
             # Create product first
             product = self.create(db, obj_in=product_data)
+            logger.info(f"Created product with ID: {product.id}")
             
             # Handle primary image
+            logger.info(f"Processing primary_image: {type(primary_image)} - {primary_image}")
             if primary_image:
+                logger.info(f"Saving primary image for product {product.id}")
                 relative_path = await ImageService.save_product_image(primary_image, product.id)
                 uploaded_paths.append(relative_path)
                 product.primary_image_url = generate_static_url(relative_path)
+                logger.info(f"Primary image saved: {relative_path}")
+            else:
+                logger.info("No primary image to process")
             
             # Handle secondary images
-            for image in secondary_images:
+            logger.info(f"Processing secondary_images: {type(secondary_images)} - count: {len(secondary_images) if secondary_images else 0}")
+            for i, image in enumerate(secondary_images):
+                logger.info(f"Saving secondary image {i+1} for product {product.id}")
                 relative_path = await ImageService.save_product_image(image, product.id)
                 uploaded_paths.append(relative_path)
                 db_image = ProductImage(
@@ -115,7 +128,6 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
             db.rollback()
             logger.error(f"Failed to create product: {str(e)}")
             # Cleanup uploaded files if creation failed
-            # attempt to cleanup any uploaded files
             for p in uploaded_paths:
                 try:
                     ImageService.delete_image(p)

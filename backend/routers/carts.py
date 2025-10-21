@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, Response, HTTPException, status
+from fastapi import APIRouter, Depends, Request, Response, HTTPException, logger, status
 from typing import List, Optional
 from sqlalchemy.orm import Session
 
@@ -161,67 +161,36 @@ async def get_payment_methods():
 
 # New endpoint for merging guest cart into user cart after login
 @router.post("/merge", response_model=schemas.Cart)
-async def merge_carts(
-    request: Request,
-    response: Response,
+async def merge_guest_cart(
+    merge_request: schemas.GuestCartMergeRequest,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user),
 ):
     """
-    Merge guest cart into user cart after login
+    Merge guest cart items into user cart after login
     
-    This endpoint should be called after a guest user logs in. It transfers all items
-    from the guest cart to the user's cart, combining quantities for duplicate products.
+    This endpoint accepts guest cart data from frontend localStorage and merges it
+    with the user's existing cart, combining quantities for duplicate products.
+    
+    - **merge_request**: Guest cart items to merge
+    
+    Returns the updated user cart with merged items.
     """
-    guest_cart_id = request.cookies.get("guest_cart_id")
-    if not guest_cart_id:
-        raise HTTPException(
-            status_code=400,
-            detail="No guest cart found to merge"
-        )
-    
-    # Get guest cart
-    guest_cart = crud.cart_crud.get_cart_by_cart_id(db, guest_cart_id)
-    if not guest_cart:
-        raise HTTPException(
-            status_code=404,
-            detail="Guest cart not found"
-        )
-    
-    # Get or create user cart
-    user_cart = crud.cart_crud.get_or_create_cart(db, user_id=current_user.id)
-    
-    # Merge carts
-    for guest_item in guest_cart.items:
-        # Check if item exists in user cart
-        existing_item = next(
-            (item for item in user_cart.items if item.product_id == guest_item.product_id),
-            None
-        )
+    try:
+        # Get or create user cart (using existing CRUD method)
+        user_cart = crud.cart_crud.get_or_create_cart(db, user_id=current_user.id)
         
-        if existing_item:
-            # Combine quantities
-            new_quantity = existing_item.quantity + guest_item.quantity
-            # Check stock availability
-            if new_quantity > guest_item.product.stock_quantity:
-                # Cap at max available stock
-                existing_item.quantity = guest_item.product.stock_quantity
-            else:
-                existing_item.quantity = new_quantity
-            # Remove guest item
-            db.delete(guest_item)
-        else:
-            # Transfer item to user cart
-            guest_item.cart_id = user_cart.id
-    
-    # Delete guest cart
-    db.delete(guest_cart)
-    db.commit()
-    
-    # Update cart total
-    crud.cart_crud.update_cart_total(db, user_cart)
-    
-    # Clear guest cookie
-    response.delete_cookie("guest_cart_id")
-    
-    return user_cart
+        # Merge guest cart data using CRUD method
+        updated_cart = crud.cart_crud.merge_guest_cart_data(db, user_cart, merge_request.items)
+        
+        return updated_cart
+        
+    except HTTPException:
+        # Re-raise HTTPExceptions from CRUD layer
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error in merge endpoint: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to merge cart"
+        )

@@ -10,6 +10,8 @@ interface AuthContextType {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   isAdmin: boolean;
+  updateProfile: (data: { name: string; email?: string }) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,15 +46,18 @@ export function useAuthProvider() {
   const login = async (username: string, password: string) => {
     await apiClient.login(username, password);
     const userData = await apiClient.getCurrentUser();
-    setUser(userData);
 
-    // Merge guest cart if exists
+    // Merge guest cart with user cart (now properly implemented!)
     try {
       await apiClient.mergeCart();
+      console.log("Cart merge completed successfully");
     } catch (error) {
-      // Cart merge failed, but login succeeded
-      console.warn("Failed to merge cart:", error);
+      // Cart merge failed, but login succeeded - this is okay
+      console.warn("Failed to merge cart, but login succeeded:", error);
     }
+
+    // Set user after cart operations are complete
+    setUser(userData);
   };
 
   const register = async (name: string, email: string, password: string) => {
@@ -66,6 +71,17 @@ export function useAuthProvider() {
     await login(email, password);
   };
 
+  const updateProfile = async (data: { name: string; email?: string }) => {
+    // Note: backend doesn't support email updates, so we'll only send name
+    const updatedUser = await apiClient.updateCurrentUser({ name: data.name });
+    setUser(updatedUser);
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    await apiClient.updateCurrentUser({ password: newPassword });
+    // No need to update user state for password change
+  };
+
   const logout = () => {
     apiClient.logout();
     setUser(null);
@@ -77,6 +93,8 @@ export function useAuthProvider() {
     login,
     register,
     logout,
+    updateProfile,
+    updatePassword,
     isAdmin: user?.is_admin || false,
   };
 }

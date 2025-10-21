@@ -45,7 +45,7 @@ class ProductList(BaseSchema):
     name: str
     price: Decimal
     primary_image_url: Optional[str] = None
-    category_name: str
+    category_name: Optional[str] = None
     stock_quantity: int = Field(..., ge=0)
 
     model_config = ConfigDict(
@@ -85,7 +85,8 @@ class ProductBase(BaseSchema):
 class ProductCreate(ProductBase):
     """Schema for creating a new product"""
     stock_quantity: int = Field(..., ge=0, examples=[100])
-    category_id: int = Field(..., gt=0, examples=[1])
+    # category_id: int = Field(..., gt=0, examples=[1]) make this field optional
+    category_id: Optional[int] = Field(None, gt=0, examples=[1])
     class Config:
         arbitrary_types_allowed = True
 
@@ -115,10 +116,10 @@ class ProductDetail(TimestampSchema, ProductBase):
     """Schema for single product detail view"""
     id: int
     stock_quantity: int
-    category_id: int
+    category_id: Optional[int] = None
     primary_image_url: Optional[str] = None
     price: Optional[Decimal] = Field(gt=0, decimal_places=2)
-    category: "Category"
+    category: Optional["Category"] = None
     secondary_images: List[ProductImage] = Field(default_factory=list, alias="images")
     created_at: datetime
     updated_at: Optional[datetime] = None

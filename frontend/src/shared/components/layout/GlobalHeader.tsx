@@ -2,6 +2,7 @@
 
 import { Button } from "@/shared/components/ui/button";
 import { CartIcon } from "@/features/cart/components/cart-icon";
+import { useCartSidebar } from "@/features/cart/components";
 import { useAuth } from "@/shared/hooks/use-auth";
 import Link from "next/link";
 import { ShoppingBag, User, Shield, Menu, X } from "lucide-react";
@@ -14,6 +15,7 @@ interface GlobalHeaderProps {
 export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
   const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { openSidebar } = useCartSidebar();
 
   return (
     <header
@@ -38,7 +40,7 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
           <nav className="flex items-center gap-4">
             {/* Desktop Navigation - Hidden on Mobile */}
             <div className="hidden lg:flex items-center gap-4">
-              <CartIcon />
+              <CartIcon onClick={openSidebar} />
               {/* Auth section will go here */}
               {/* Authentication section */}
               {user ? (
@@ -78,7 +80,7 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
 
             {/* Mobile Navigation - Visible on Mobile Only */}
             <div className="lg:hidden flex items-center gap-2">
-              <CartIcon />
+              <CartIcon onClick={openSidebar} />
               <Button
                 variant="ghost"
                 size="sm"

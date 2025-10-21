@@ -141,9 +141,151 @@ export function ProductFilters({
               </Select>
             </div>
 
-            {/* Price Range Filter */}
+            {/* Enhanced Price Range Filter */}
             <div className="space-y-3">
               <Label>Price Range</Label>
+
+              {/* Input Fields for Min/Max Price */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label
+                    htmlFor="minPrice"
+                    className="text-xs text-muted-foreground"
+                  >
+                    Min Price
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm">
+                      $
+                    </span>
+                    <Input
+                      id="minPrice"
+                      type="number"
+                      placeholder="0"
+                      value={priceRange[0] === 0 ? "" : priceRange[0]}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "") {
+                          setPriceRange([0, priceRange[1]]);
+                        } else {
+                          const numValue = Number(value);
+                          if (!isNaN(numValue) && numValue >= 0) {
+                            setPriceRange([
+                              numValue,
+                              Math.max(numValue, priceRange[1]),
+                            ]);
+                          }
+                        }
+                      }}
+                      onFocus={(e) => e.target.select()} // Select all text on focus
+                      className="pl-7"
+                      min="0"
+                      step="any"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label
+                    htmlFor="maxPrice"
+                    className="text-xs text-muted-foreground"
+                  >
+                    Max Price
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm">
+                      $
+                    </span>
+                    <Input
+                      id="maxPrice"
+                      type="number"
+                      placeholder="No limit"
+                      value={priceRange[1] === 2000 ? "" : priceRange[1]}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "") {
+                          setPriceRange([priceRange[0], 2000]);
+                        } else {
+                          const numValue = Number(value);
+                          if (!isNaN(numValue) && numValue >= 0) {
+                            // 🔥 ALLOW ANY VALUE WHILE TYPING - NO VALIDATION YET
+                            setPriceRange([priceRange[0], numValue]);
+                          }
+                        }
+                      }}
+                      onBlur={(e) => {
+                        // 🔥 VALIDATE ONLY WHEN USER FINISHES TYPING
+                        const value = e.target.value;
+                        if (value !== "") {
+                          const numValue = Number(value);
+                          if (!isNaN(numValue) && numValue >= 0) {
+                            // Ensure max price is at least equal to min price
+                            setPriceRange([
+                              priceRange[0],
+                              Math.max(priceRange[0], numValue),
+                            ]);
+                          }
+                        }
+                      }}
+                      onFocus={(e) => e.target.select()}
+                      className="pl-7"
+                      min="0"
+                      step="any"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Price Range Buttons */}
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPriceRange([0, 50])}
+                  className="text-xs"
+                  type="button"
+                >
+                  Under $50
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPriceRange([50, 200])}
+                  className="text-xs"
+                  type="button"
+                >
+                  $50 - $200
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPriceRange([200, 500])}
+                  className="text-xs"
+                  type="button"
+                >
+                  $200 - $500
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPriceRange([500, 1000])}
+                  className="text-xs"
+                  type="button"
+                >
+                  $500 - $1K
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPriceRange([1000, 2000])}
+                  className="text-xs"
+                  type="button"
+                >
+                  $1K+
+                </Button>
+              </div>
+
+              {/* Slider (Optional - Keep or Remove) */}
               <div className="px-2">
                 <Slider
                   max={2000}
@@ -154,9 +296,11 @@ export function ProductFilters({
                   className="w-full"
                 />
               </div>
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>${priceRange[0]}</span>
-                <span>${priceRange[1]}</span>
+
+              {/* Current Range Display */}
+              <div className="text-center text-sm text-muted-foreground bg-gray-50 rounded-md py-2">
+                Current range: ${priceRange[0]} - $
+                {priceRange[1] === 2000 ? "∞" : priceRange[1]}
               </div>
             </div>
 
@@ -172,16 +316,19 @@ export function ProductFilters({
               </Label>
             </div>
 
-            {/* Clear Filters Button (Desktop) */}
-            <div className="hidden lg:block">
-              <Button
-                variant="outline"
-                onClick={handleClearFilters}
-                className="w-full flex items-center gap-2"
-              >
-                <X className="h-4 w-4" />
-                Clear All Filters
-              </Button>
+            {/* Spacer */}
+            <div className="pt-4 border-t border-gray-200">
+              {/* Clear Filters Button (Desktop) */}
+              <div className="hidden lg:block">
+                <Button
+                  variant="outline"
+                  onClick={handleClearFilters}
+                  className="w-full flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Clear All Filters
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

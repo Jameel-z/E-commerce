@@ -63,7 +63,7 @@ export function ProductImageGallery({
       <div className="relative">
         <div
           className={`
-            aspect-square relative overflow-hidden rounded-lg bg-muted group 
+            relative overflow-hidden rounded-lg bg-white border group max-h-[400px]
             ${isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"}
           `}
           onMouseMove={handleMouseMove}
@@ -73,9 +73,10 @@ export function ProductImageGallery({
           <Image
             src={selectedImage?.url || "/placeholder.svg"}
             alt={product.name}
-            fill
+            width={600}
+            height={400}
             className={`
-              object-cover transition-all duration-300
+              w-full h-auto max-h-[400px] object-contain transition-all duration-300
               ${isZoomed ? "scale-[2.5]" : "group-hover:scale-105"}
             `}
             style={

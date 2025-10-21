@@ -70,7 +70,27 @@ export function ProductCard({ product }: ProductCardProps) {
               ${Number(product.price).toFixed(2)}
             </span>
             <span className="text-sm text-muted-foreground">
-              Stock: {product.stock_quantity}
+              {user?.is_admin === true ? (
+                <span>Stock: {product.stock_quantity}</span>
+              ) : (
+                <div className="flex items-center gap-2">
+                  {product.stock_quantity > 0 ? (
+                    <>
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm text-green-700 font-medium">
+                        In Stock
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <span className="text-sm text-red-700 font-medium">
+                        Out of Stock
+                      </span>
+                    </>
+                  )}
+                </div>
+              )}
             </span>
           </div>
         </div>

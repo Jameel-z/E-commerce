@@ -41,7 +41,7 @@ export function AddToCartSection({
       <CardContent className="p-6 space-y-4">
         <QuantitySelector
           quantity={quantity}
-          maxQuantity={product.stock_quantity}
+          maxQuantity={100}
           onQuantityChange={onQuantityChange}
         />
 

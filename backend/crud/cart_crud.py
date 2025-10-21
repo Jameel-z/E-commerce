@@ -2,7 +2,7 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException, status, Request, Response
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime, timezone
 from uuid import uuid4
 import logging
@@ -263,6 +263,80 @@ class CartCRUD(CRUDBase[models.Cart, schemas.CartCreate, schemas.CartUpdate]):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to merge carts"
+            )
+
+    def merge_guest_cart_data(self, db: Session, user_cart: models.Cart, guest_items: List[schemas.GuestCartItemRequest]):
+        """
+        Merge guest cart items (from frontend localStorage) into user cart
+        
+        Args:
+            db: Database session
+            user_cart: User's existing cart
+            guest_items: List of guest cart items from frontend
+        
+        Returns:
+            Updated user cart with merged items
+        """
+        try:
+            # Process each guest cart item
+            for guest_item in guest_items:
+                # Validate product exists and get stock info
+                product = db.query(models.Product).filter(
+                    models.Product.id == guest_item.product_id
+                ).first()
+                
+                if not product or product.stock_quantity <= 0:
+                    # Skip unavailable products (graceful handling)
+                    logger.warning(f"Skipping unavailable product {guest_item.product_id}")
+                    continue
+                
+                # Check if item already exists in user cart
+                existing_item = db.query(models.CartItem).filter(
+                    and_(
+                        models.CartItem.cart_id == user_cart.id,
+                        models.CartItem.product_id == guest_item.product_id
+                    )
+                ).first()
+                
+                if existing_item:
+                    # Combine quantities with stock validation
+                    new_quantity = existing_item.quantity + guest_item.quantity
+                    if new_quantity > product.stock_quantity:
+                        # Cap at max available stock (same logic as your other methods)
+                        existing_item.quantity = product.stock_quantity
+                        logger.info(f"Capped quantity for product {guest_item.product_id} at stock limit")
+                    else:
+                        existing_item.quantity = new_quantity
+                    
+                    existing_item.updated_at = datetime.now(timezone.utc)
+                else:
+                    # Add new item to cart (same pattern as add_item_to_cart)
+                    max_quantity = min(guest_item.quantity, product.stock_quantity)
+                    new_cart_item = models.CartItem(
+                        cart_id=user_cart.id,
+                        product_id=guest_item.product_id,
+                        quantity=max_quantity,
+                        added_at=datetime.now(timezone.utc)
+                    )
+                    db.add(new_cart_item)
+            
+            # Commit all changes
+            db.commit()
+            
+            # Update cart total (using your existing method)
+            self.update_cart_total(db, user_cart)
+            
+            # Refresh cart to get latest data
+            db.refresh(user_cart)
+            
+            return user_cart
+            
+        except SQLAlchemyError as e:
+            db.rollback()
+            logger.error(f"Failed to merge guest cart data: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to merge cart data"
             )
 
 

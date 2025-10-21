@@ -217,7 +217,10 @@ export default function CheckoutPage() {
                         </p>
                       </div>
                       <p className="font-medium">
-                        ${(item.product.price * item.quantity).toFixed(2)}
+                        $
+                        {(
+                          parseFloat(item.product.price) * item.quantity
+                        ).toFixed(2)}
                       </p>
                     </div>
                   ))}
@@ -234,13 +237,18 @@ export default function CheckoutPage() {
                   <div className="flex justify-between">
                     <span>Shipping</span>
                     <span>
-                      {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
+                      {shipping === 0 ? (
+                        <span className="text-green-600 font-medium">Free</span>
+                      ) : (
+                        `$${shipping.toFixed(2)}`
+                      )}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Tax</span>
-                    <span>${tax.toFixed(2)}</span>
-                  </div>
+                  {subtotal <= 50 && (
+                    <p className="text-xs text-muted-foreground">
+                      Add ${(50 - subtotal).toFixed(2)} more for free shipping
+                    </p>
+                  )}
                   <Separator />
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
