@@ -12,13 +12,6 @@ import {
   CartItemOperations,
 } from "@/features/cart/types/cart.types";
 
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-};
-
 interface CartItemProps {
   item: CartItemType;
   operations: CartItemOperations;
@@ -37,9 +30,18 @@ export function CartItem({ item, operations }: CartItemProps) {
       setQuantity(newQuantity);
     } catch (error) {
       console.error("Failed to update quantity:", error);
-      setQuantity(item.quantity); // Reset on error
+      setQuantity(item.quantity);
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleQuantityInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = parseInt(e.target.value);
+    if (value > 0 && value <= 99) {
+      updateQuantity(value);
     }
   };
 
@@ -54,101 +56,74 @@ export function CartItem({ item, operations }: CartItemProps) {
     }
   };
 
-  const handleQuantityInputChange = (value: string) => {
-    const newQuantity = parseInt(value, 10);
-    if (!isNaN(newQuantity) && newQuantity > 0) {
-      setQuantity(newQuantity);
-    }
-  };
-
-  const handleQuantityInputBlur = () => {
-    updateQuantity(quantity);
-  };
-
-  const handleQuantityInputKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      updateQuantity(quantity);
-    }
-  };
-
-  // Convert string price to number and get proper image URL
   const productPrice = Number(item.product.price);
   const imageUrl = getProductImageUrl(item.product);
 
   return (
-    <div className="border border-border rounded-lg p-4 bg-card">
-      <div className="flex gap-4">
+    <div className="py-3 border-b border-border last:border-b-0">
+      {/* Top Row: Product Name */}
+      <div className="mb-2">
+        <Link href={`/products/${item.product.id}`}>
+          <h3 className="font-medium text-sm text-foreground hover:text-primary truncate">
+            {item.product.name}
+          </h3>
+        </Link>
+      </div>
+
+      {/* Bottom Row: Image, Price, and Controls */}
+      <div className="flex items-center gap-3">
         {/* Product Image */}
-        <Link href={`/products/${item.product.id}`} className="flex-shrink-0">
-          <div className="relative w-20 h-20 rounded overflow-hidden border border-border">
+        <Link href={`/products/${item.product.id}`}>
+          <div className="relative w-12 h-12 rounded-md overflow-hidden bg-gray-100 flex-shrink-0 border">
             <Image
               src={imageUrl}
               alt={item.product.name}
               fill
-              className="object-cover hover:scale-105 transition-transform duration-200"
+              className="object-cover hover:scale-105 transition-transform"
             />
           </div>
         </Link>
 
-        {/* Product Info */}
-        <div className="flex-1 min-w-0">
-          <Link href={`/products/${item.product.id}`} className="group">
-            <h3 className="font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2">
-              {item.product.name}
-            </h3>
-          </Link>
-
-          {item.product.category && (
-            <p className="text-sm text-muted-foreground mt-1">
-              {item.product.category.name}
-            </p>
-          )}
-
-          <div className="mt-2">
-            <p className="text-lg font-semibold text-foreground">
-              {formatCurrency(productPrice)}
-            </p>
-            {item.quantity > 1 && (
-              <p className="text-sm text-muted-foreground">
-                {formatCurrency(productPrice * item.quantity)} total
-              </p>
-            )}
-          </div>
+        {/* Unit Price */}
+        <div className="flex-1">
+          <p className="text-sm text-muted-foreground">
+            ${productPrice.toFixed(2)} each
+          </p>
+          <p className="text-sm font-semibold text-foreground">
+            ${(productPrice * quantity).toFixed(2)} total
+          </p>
         </div>
 
-        {/* Quantity and Actions */}
-        <div className="flex flex-col items-end gap-3">
+        {/* Right Side: Quantity Controls & Remove */}
+        <div className="flex flex-col gap-2">
           {/* Quantity Controls */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Button
-              variant="outline"
               size="sm"
+              variant="outline"
+              className="h-7 w-7 p-0 hover:bg-accent"
               onClick={() => updateQuantity(quantity - 1)}
               disabled={isUpdating || quantity <= 1}
-              className="h-8 w-8 p-0"
             >
               <Minus className="h-3 w-3" />
             </Button>
 
             <Input
               type="number"
-              min="1"
               value={quantity}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleQuantityInputChange(e.target.value)
-              }
-              onBlur={handleQuantityInputBlur}
-              onKeyDown={handleQuantityInputKeyDown}
+              onChange={handleQuantityInputChange}
+              className="w-12 h-7 text-center text-xs font-medium"
+              min="1"
+              max="99"
               disabled={isUpdating}
-              className="w-16 h-8 text-center"
             />
 
             <Button
-              variant="outline"
               size="sm"
+              variant="outline"
+              className="h-7 w-7 p-0 hover:bg-accent"
               onClick={() => updateQuantity(quantity + 1)}
               disabled={isUpdating}
-              className="h-8 w-8 p-0"
             >
               <Plus className="h-3 w-3" />
             </Button>
@@ -159,10 +134,10 @@ export function CartItem({ item, operations }: CartItemProps) {
             variant="ghost"
             size="sm"
             onClick={removeItem}
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive h-7 px-2 text-xs"
             disabled={isUpdating}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
           >
-            <Trash2 className="h-4 w-4 mr-1" />
+            <Trash2 className="h-3 w-3 mr-1" />
             Remove
           </Button>
         </div>

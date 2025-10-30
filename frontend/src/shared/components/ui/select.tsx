@@ -53,6 +53,7 @@ interface SelectTriggerProps {
   isOpen?: boolean;
   setIsOpen?: (isOpen: boolean) => void;
   value?: string;
+  className?: string; // ✅ Added className prop
 }
 
 export const SelectTrigger: React.FC<SelectTriggerProps> = ({
@@ -60,13 +61,15 @@ export const SelectTrigger: React.FC<SelectTriggerProps> = ({
   isOpen,
   setIsOpen,
   value,
+  className, // ✅ Added className parameter
 }) => (
   <div
     className={clsx(
       "flex h-10 w-full items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer",
       {
         "ring-2 ring-ring ring-offset-2": isOpen,
-      }
+      },
+      className // ✅ Merged custom className
     )}
     onClick={() => setIsOpen?.(!isOpen)}
   >
@@ -117,22 +120,14 @@ export const SelectContent: React.FC<SelectContentProps> = ({
 };
 
 interface SelectValueProps {
-  placeholder: string;
+  placeholder?: string;
   value?: string;
 }
 
 export const SelectValue: React.FC<SelectValueProps> = ({
   placeholder,
   value,
-}) => (
-  <span className="text-foreground">
-    {value && value !== "all" ? (
-      value
-    ) : (
-      <span className="text-muted-foreground">{placeholder}</span>
-    )}
-  </span>
-);
+}) => <span className="text-sm">{value || placeholder}</span>;
 
 interface SelectItemProps {
   value: string;

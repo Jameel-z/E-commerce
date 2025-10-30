@@ -72,7 +72,7 @@ export function ProductFilters({
   const handleClearFilters = () => {
     setSearch("");
     setSelectedCategory("all");
-    setPriceRange([0, 1000]);
+    setPriceRange([0, 2000]);
     setInStockOnly(false);
     onClearFilters();
   };
@@ -169,7 +169,11 @@ export function ProductFilters({
                           setPriceRange([0, priceRange[1]]);
                         } else {
                           const numValue = Number(value);
-                          if (!isNaN(numValue) && numValue >= 0) {
+                          if (
+                            !isNaN(numValue) &&
+                            numValue >= 0 &&
+                            numValue <= 2000
+                          ) {
                             setPriceRange([
                               numValue,
                               Math.max(numValue, priceRange[1]),
@@ -236,55 +240,6 @@ export function ProductFilters({
                 </div>
               </div>
 
-              {/* Quick Price Range Buttons */}
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPriceRange([0, 50])}
-                  className="text-xs"
-                  type="button"
-                >
-                  Under $50
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPriceRange([50, 200])}
-                  className="text-xs"
-                  type="button"
-                >
-                  $50 - $200
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPriceRange([200, 500])}
-                  className="text-xs"
-                  type="button"
-                >
-                  $200 - $500
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPriceRange([500, 1000])}
-                  className="text-xs"
-                  type="button"
-                >
-                  $500 - $1K
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPriceRange([1000, 2000])}
-                  className="text-xs"
-                  type="button"
-                >
-                  $1K+
-                </Button>
-              </div>
-
               {/* Slider (Optional - Keep or Remove) */}
               <div className="px-2">
                 <Slider
@@ -295,12 +250,6 @@ export function ProductFilters({
                   onValueChange={setPriceRange}
                   className="w-full"
                 />
-              </div>
-
-              {/* Current Range Display */}
-              <div className="text-center text-sm text-muted-foreground bg-gray-50 rounded-md py-2">
-                Current range: ${priceRange[0]} - $
-                {priceRange[1] === 2000 ? "∞" : priceRange[1]}
               </div>
             </div>
 

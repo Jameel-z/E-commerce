@@ -85,14 +85,24 @@ class CartCRUD(CRUDBase[models.Cart, schemas.CartCreate, schemas.CartUpdate]):
     def update_cart_total(self, db: Session, cart: models.Cart):
         """Recalculate and update the total price of the cart efficiently"""
         try:
-            # Calculate total by summing up each item's (price * quantity)
-            total = sum(
-                float(item.product.price) * item.quantity
-                for item in cart.items
-                if item.product  # Safety check to handle any null products
-            )
-            
-            # Round to 2 decimal places for currency
+            total = 0.0
+            for item in cart.items:
+                if item.product and item.product.price is not None:
+                    try:
+                        price = float(item.product.price)
+                        quantity = item.quantity or 0
+                        if not isinstance(price, (int, float)) or price < 0:
+                            logger.warning(f"Skipping invalid price {item.product.price} for product {item.product.id}")
+                            continue
+                        if not isinstance(quantity, int) or quantity < 0:
+                            logger.warning(f"Skipping invalid quantity {quantity} for product {item.product.id}")
+                            continue
+                        total += price * quantity
+                    except (ValueError, TypeError):
+                        logger.warning(f"Error converting price for product {item.product.id}, skipping")
+                        continue
+                else:
+                    logger.warning(f"Item {item.id} has no product or price")
             cart.total_price = round(total, 2)
             cart.updated_at = datetime.now(timezone.utc)
             db.commit()
@@ -100,7 +110,8 @@ class CartCRUD(CRUDBase[models.Cart, schemas.CartCreate, schemas.CartUpdate]):
         except SQLAlchemyError as e:
             db.rollback()
             logger.error(f"Failed to update cart total: {str(e)}")
-            # Don't fail the request, just log the error
+            cart.total_price = 0.0  # Fallback
+            db.commit()
 
     def add_item_to_cart(self, db: Session, cart: models.Cart, item: schemas.CartItemCreate):
         """Add or update an item in the cart with atomic operations"""
@@ -188,10 +199,8 @@ class CartCRUD(CRUDBase[models.Cart, schemas.CartCreate, schemas.CartUpdate]):
     def clear_cart(self, db: Session, cart: models.Cart):
         """Remove all items from cart efficiently"""
         try:
-            # Fix: Use cart_id instead of id for filtering cart items
             db.query(models.CartItem).filter(
-                models.CartItem.cart_id == cart.id  # Assuming cart.id is the primary key of the Cart model
-            ).delete(synchronize_session=False)
+                models.CartItem.cart_id == cart.id ).delete(synchronize_session=False)
             
             db.commit()
             # Update the cart's in-memory items list and total
@@ -339,5 +348,28 @@ class CartCRUD(CRUDBase[models.Cart, schemas.CartCreate, schemas.CartUpdate]):
                 detail="Failed to merge cart data"
             )
 
+    def update_item_quantity(self, db: Session, cart: models.Cart, product_id: int, quantity: int):
+        """Update the quantity of an item in the cart"""
+        try:
+            if quantity <= 0:
+                raise HTTPException(status_code=400, detail="Quantity must be greater than 0.")
+            
+            cart_item = db.query(models.CartItem).filter(
+                models.CartItem.cart_id == cart.id,
+                models.CartItem.product_id == product_id
+            ).first()
+            
+            if not cart_item:
+                raise HTTPException(status_code=404, detail="Item not found in cart.")
+            
+            # Removed stock check - allow unlimited quantities
+            cart_item.quantity = quantity
+            db.commit()
+            self.update_cart_total(db, cart)
+            return cart
+        except SQLAlchemyError as e:
+            db.rollback()
+            logger.error(f"Failed to update item quantity: {str(e)}")
+            raise HTTPException(status_code=500, detail="Failed to update item quantity")
 
 cart_crud = CartCRUD(models.Cart)

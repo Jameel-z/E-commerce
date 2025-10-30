@@ -35,6 +35,7 @@ export interface Product {
   primary_image_url: string | null;
   category_name: string;
   stock_quantity: number;
+  description: string | null;
 }
 
 /**

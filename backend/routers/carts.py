@@ -56,51 +56,23 @@ async def add_to_cart(
 def update_cart_item(
     request: Request,
     response: Response,
-    update_data: schemas.CartUpdate,
+    update_data: schemas.CartItemUpdate,
     db: Session = Depends(get_db),
     current_user: Optional[models.User] = Depends(get_current_active_user_optional),
 ):
     """
-    Update Cart Item
+    Update Cart Item Quantity Directly
 
-    This endpoint allows you to increment (+) or decrement (-) the quantity of an item in the cart.
-    If the quantity reaches 1 and we decrement, the item will be removed from the cart.
-
-    - **action**: Specify "increment" (+) to add one or "decrement" (-) to remove one.
+    This endpoint sets the quantity of an item in the cart directly.
     - **product_id**: The ID of the product to update.
+    - **quantity**: The new quantity to set (must be > 0 and <= stock).
 
     Returns the updated cart with all items and the total price.
     """
     cart = crud.cart_crud.get_cart_for_user_or_guest(request, response, db, current_user)
-    cart_item = crud.cart_crud.get_cart_item(db, cart, update_data.product_id)
-
-    if not cart_item:
-        raise HTTPException(status_code=404, detail="Item not found in cart.")
-
-    # Get product for stock validation
-    product = cart_item.product
     
-    if update_data.action == "increment":
-        # Check stock before incrementing
-        if cart_item.quantity >= product.stock_quantity:
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Cannot add more than available stock. Only {product.stock_quantity} available."
-            )
-        cart_item.quantity += 1
-    elif update_data.action == "decrement":
-        if cart_item.quantity == 1:
-            # Remove item if decrementing from 1
-            return crud.cart_crud.remove_item_from_cart(
-                db, cart, update_data.product_id
-            )
-        cart_item.quantity -= 1
-    else:
-        raise HTTPException(status_code=400, detail="Invalid action. Use 'increment' or 'decrement'.")
-
-    db.commit()
-    crud.cart_crud.update_cart_total(db, cart)
-    return cart
+    # Use the direct quantity update method
+    return crud.cart_crud.update_item_quantity(db, cart, update_data.product_id, update_data.quantity)
 
 # api to remove an item from the cart using the remove_item_from_cart function
 @router.delete("/remove-item/{product_id}", response_model=schemas.Cart)

@@ -63,7 +63,7 @@ export function ProductCard({ product }: ProductCardProps) {
             {product.name}
           </h3>
           <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-            Category: {product.category_name}
+            {product.description}
           </p>
           <div className="flex items-center justify-between">
             <span className="text-2xl font-bold text-primary">

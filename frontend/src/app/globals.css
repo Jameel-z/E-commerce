@@ -1,79 +1,104 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+.whatsapp-button {
+  background-color: #1cd460 !important;
+  /* color: black; */
+  border: none !important;
+}
+
+.whatsapp-button:hover {
+  background-color: #128c7e !important;
+}
+
+.whatsapp-button:focus {
+  background-color: #128c7e !important;
+  box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.2) !important;
+}
+
+* {
+  transition: background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.grid {
+  max-height: none;
+  overflow: visible;
+}
+
+.parent-container {
+  max-height: none;
+  overflow: visible;
+}
 
 :root {
-  /* Updated to modern gray/purple color scheme from design brief */
   --background: #ffffff;
   --foreground: #1f2937;
-  --card: #f1f5f9;
-  --card-foreground: #374151;
+  --card: #f8fafc;
+  --card-foreground: #1f2937;
   --popover: #ffffff;
   --popover-foreground: #1f2937;
   --primary: #1f2937;
   --primary-foreground: #ffffff;
-  --secondary: #8b5cf6;
+  --secondary: #497dee;
   --secondary-foreground: #ffffff;
   --muted: #f1f5f9;
-  --muted-foreground: #6b7280;
-  --accent: #8b5cf6;
+  --muted-foreground: #0c0c0c;
+  --accent: #3b82f6;
   --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #e5e7eb;
+  --border: #e2e8f0;
   --input: #f1f5f9;
-  --ring: rgba(139, 92, 246, 0.5);
-  --chart-1: #8b5cf6;
+  --ring: rgba(31, 41, 55, 0.5);
+  --chart-1: #1f2937;
   --chart-2: #dc2626;
   --chart-3: #f59e0b;
-  --chart-4: #4b5563;
+  --chart-4: #64748b;
   --chart-5: #a16207;
   --radius: 0.5rem;
   --sidebar: #f1f5f9;
   --sidebar-foreground: #1f2937;
   --sidebar-primary: #ffffff;
   --sidebar-primary-foreground: #1f2937;
-  --sidebar-accent: #8b5cf6;
+  --sidebar-accent: #3b82f6;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #e5e7eb;
-  --sidebar-ring: rgba(139, 92, 246, 0.5);
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: rgba(31, 41, 55, 0.5);
 }
-
 .dark {
-  /* Updated dark mode colors to complement new design */
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --card: #1e293b;
-  --card-foreground: #f8fafc;
-  --popover: #1e293b;
-  --popover-foreground: #f8fafc;
-  --primary: #f8fafc;
-  --primary-foreground: #0f172a;
-  --secondary: #8b5cf6;
-  --secondary-foreground: #f8fafc;
+  --background: #0a0f1c;
+  --foreground: #f1f3f5;
+  --card: #1a2332;
+  --card-foreground: #f1f5f9;
+  --popover: #1a2332;
+  --popover-foreground: #f1f5f9;
+  --primary: #ffffff;
+  --primary-foreground: #0a0f1c;
+  --secondary: #609df1;
+  --secondary-foreground: #f1f5f9;
   --muted: #334155;
-  --muted-foreground: #94a3b8;
-  --accent: #8b5cf6;
-  --accent-foreground: #f8fafc;
+  --muted-foreground: #cbd5e1;
+  --accent: #14b8a6;
+  --accent-foreground: #0a0f1c;
   --destructive: #dc2626;
-  --destructive-foreground: #f8fafc;
-  --border: #334155;
-  --input: #334155;
-  --ring: rgba(139, 92, 246, 0.5);
-  --chart-1: #8b5cf6;
+  --destructive-foreground: #f1f5f9;
+  --border: #374151;
+  --input: #1a2332;
+  --ring: rgba(14, 165, 233, 0.5);
+  --chart-1: #0ea5e9;
   --chart-2: #dc2626;
   --chart-3: #f59e0b;
   --chart-4: #64748b;
   --chart-5: #a16207;
-  --sidebar: #1e293b;
-  --sidebar-foreground: #f8fafc;
-  --sidebar-primary: #8b5cf6;
-  --sidebar-primary-foreground: #f8fafc;
+  --sidebar: #1a2332;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #0ea5e9;
+  --sidebar-primary-foreground: #0a0f1c;
   --sidebar-accent: #334155;
-  --sidebar-accent-foreground: #f8fafc;
-  --sidebar-border: #334155;
-  --sidebar-ring: rgba(139, 92, 246, 0.5);
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: #374151;
+  --sidebar-ring: rgba(14, 165, 233, 0.5);
 }
 
 @theme inline {
@@ -122,4 +147,24 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Custom Swiper navigation button colors */
+.swiper-button-next,
+.swiper-button-prev {
+  background-color: var(
+    --primary
+  ) !important; /* Use primary color (dark gray) */
+  color: var(--primary-foreground) !important; /* White text */
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  background-color: var(
+    --accent
+  ) !important; /* Use accent color (purple) on hover */
 }

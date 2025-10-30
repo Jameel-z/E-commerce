@@ -1,7 +1,5 @@
 "use client";
 
-"use client";
-
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -12,6 +10,7 @@ import {
 } from "@/shared/components/ui/card";
 import Link from "next/link";
 import { ShoppingBag, User, Package, History } from "lucide-react";
+import { useCartSidebar } from "@/features/cart/components"; // Add this import
 // import user type from features/auth/types;
 import { type User as ApiUser } from "@/features/auth/types";
 
@@ -20,6 +19,8 @@ interface QuickAccessSectionProps {
 }
 
 export function QuickAccessSection({ user }: QuickAccessSectionProps) {
+  const { openSidebar } = useCartSidebar(); // Add this hook
+
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div className="text-center mb-12">
@@ -47,6 +48,7 @@ export function QuickAccessSection({ user }: QuickAccessSectionProps) {
           </CardContent>
         </Card>
 
+        {/* Updated Shopping Cart Card */}
         <Card className="hover:shadow-lg transition-shadow border-0 bg-card/50 backdrop-blur-sm">
           <CardHeader className="text-center">
             <div className="bg-secondary/10 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3">
@@ -56,8 +58,12 @@ export function QuickAccessSection({ user }: QuickAccessSectionProps) {
             <CardDescription>Review your selected items</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full bg-transparent" variant="outline" asChild>
-              <Link href="/cart">View Cart</Link>
+            <Button
+              className="w-full bg-transparent"
+              variant="outline"
+              onClick={openSidebar} // Changed from Link to onClick
+            >
+              View Cart
             </Button>
           </CardContent>
         </Card>

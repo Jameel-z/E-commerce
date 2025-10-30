@@ -6,6 +6,11 @@ import Link from "next/link";
 import { Package } from "lucide-react";
 import { type Product } from "@/shared/types";
 import { getProductImageUrl } from "@/shared/utils/image";
+import { Swiper, SwiperSlide } from "swiper/react"; 
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 interface FeaturedProductsSectionProps {
   products: Product[];
@@ -18,6 +23,8 @@ export function FeaturedProductsSection({
   loading,
   error,
 }: FeaturedProductsSectionProps) {
+  const randomProducts = products.sort(() => 0.5 - Math.random()).slice(0, 9);
+
   return (
     <section className="py-16 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -31,8 +38,8 @@ export function FeaturedProductsSection({
         </div>
 
         {loading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
+          <div className="grid md:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
               <Card key={i} className="animate-pulse">
                 <div className="h-48 bg-muted rounded-t-lg"></div>
                 <CardContent className="p-4">
@@ -43,36 +50,50 @@ export function FeaturedProductsSection({
               </Card>
             ))}
           </div>
-        ) : products.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <Card
-                key={product.id}
-                className="hover:shadow-lg transition-shadow border-0 bg-card/50 backdrop-blur-sm overflow-hidden"
-              >
-                <div className="aspect-square relative overflow-hidden">
-                  <img
-                    src={getProductImageUrl(product)}
-                    alt={product.name}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <CardContent className="p-4">
-                  <h4 className="font-semibold text-lg mb-2 line-clamp-1">
-                    {product.name}
-                  </h4>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-secondary">
-                      ${product.price}
-                    </span>
-                    <Button size="sm" asChild>
-                      <Link href={`/products/${product.id}`}>View Details</Link>
-                    </Button>
+        ) : randomProducts.length > 0 ? (
+          <Swiper
+            modules={[Autoplay, Navigation, Pagination]}
+            spaceBetween={20}
+            slidesPerView={1}
+            breakpoints={{
+              640: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+            }}
+            autoplay={{ delay: 3000, disableOnInteraction: false }}
+            navigation
+            pagination={{ clickable: true }}
+            loop
+            className="pb-10"
+          >
+            {randomProducts.map((product) => (
+              <SwiperSlide key={product.id}>
+                <Card className="hover:shadow-lg transition-shadow border-0 bg-card/50 backdrop-blur-sm overflow-hidden group">
+                  <div className="aspect-square relative overflow-hidden">
+                    <img
+                      src={getProductImageUrl(product)}
+                      alt={product.name}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
                   </div>
-                </CardContent>
-              </Card>
+                  <CardContent className="p-4">
+                    <h4 className="font-semibold text-lg mb-2 line-clamp-1">
+                      {product.name}
+                    </h4>
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-bold text-secondary">
+                        ${product.price}
+                      </span>
+                      <Button size="sm" asChild>
+                        <Link href={`/products/${product.id}`}>
+                          View Details
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </SwiperSlide>
             ))}
-          </div>
+          </Swiper>
         ) : !error ? (
           <div className="text-center py-12">
             <Card className="max-w-md mx-auto">

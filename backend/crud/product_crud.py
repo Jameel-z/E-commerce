@@ -35,7 +35,7 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
                 Product.name,
                 Product.price,
                 Product.primary_image_url,
-                # Category.name.label('category_name'),
+                Product.description,
                 func.coalesce(Category.name, "Uncategorized").label('category_name'),
                 Product.stock_quantity
             )

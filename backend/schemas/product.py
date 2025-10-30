@@ -47,6 +47,7 @@ class ProductList(BaseSchema):
     primary_image_url: Optional[str] = None
     category_name: Optional[str] = None
     stock_quantity: int = Field(..., ge=0)
+    description: Optional[str] = None
 
     model_config = ConfigDict(
         from_attributes=True,

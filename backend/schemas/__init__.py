@@ -4,7 +4,7 @@ from .base import BaseSchema, TimestampSchema
 from .user import UserBase, UserCreate, UserUpdate, User, UserInDB
 from .category import CategoryBase, CategoryCreate, Category, CategoryUpdate  # Import Category first
 from .product import ProductBase, ProductCreate, ProductUpdate  # Then Product
-from .cart import CartBase, CartItemCreate, CartItem, Cart, CartCreate, CartUpdate, OfflineCheckout, ShippingOption, GuestCartMergeRequest, GuestCartItemRequest
+from .cart import CartBase, CartItemCreate, CartItem, CartItemUpdate, Cart, CartCreate, CartUpdate, OfflineCheckout, ShippingOption, GuestCartMergeRequest, GuestCartItemRequest
 from .order_item import OrderItemBase, OrderItemCreate, OrderItem
 from .order import OrderBase, OrderCreate, Order, OrderUpdate
 
@@ -54,6 +54,7 @@ __all__ = [
     'ShippingOption',
     'GuestCartMergeRequest',
     'GuestCartItemRequest',
+    'CartItemUpdate',
 
     # OrderItem schemas
     'OrderItemBase',

@@ -35,6 +35,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${spaceGrotesk.variable} ${dmSans.variable} antialiased`}
+      suppressHydrationWarning
     >
       <body className="font-sans overflow-x-hidden">
         <AuthProvider>

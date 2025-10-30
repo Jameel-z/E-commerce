@@ -197,26 +197,60 @@ export function useCartProvider() {
     }
   };
 
-  // const updateQuantity = async (productId: number, quantity: number) => {
-  //   if (user) {
-  //     await apiClient.updateCartItem(productId, quantity);
-  //     await refreshCart();
-  //   } else {
-  //     GuestCart.updateItem(productId, quantity);
-  //     await refreshCart();
-  //   }
-  // };
   const updateQuantity = async (productId: number, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      await removeItem(productId);
+      return;
+    }
+
     if (user) {
-      // Find current quantity from cart
-      const currentItem = cart?.items.find(
+      // AUTHENTICATED USER
+      if (!cart) return;
+
+      const currentItem = cart.items.find(
         (item) => item.product_id === productId
       );
-      const currentQuantity = currentItem?.quantity || 0;
+      if (!currentItem) return;
 
-      await apiClient.updateCartItem(productId, newQuantity, currentQuantity);
-      await refreshCart();
+      // Removed stock check - allow unlimited
+
+      // 1. Update UI INSTANTLY (like guest users)
+      const updatedItems = cart.items.map((item) =>
+        item.product_id === productId
+          ? {
+              ...item,
+              quantity: newQuantity,
+              total_price: Number(item.product.price) * newQuantity,
+            }
+          : item
+      );
+
+      const updatedCart = {
+        ...cart,
+        items: updatedItems,
+        total_price: updatedItems.reduce(
+          (total, item) => total + item.total_price,
+          0
+        ),
+      };
+
+      // Update UI immediately - SAME AS GUEST!
+      setCart(updatedCart);
+
+      try {
+        // 2. API call happens in background (silent)
+        const serverUpdatedCart = await apiClient.updateCartItem(
+          productId,
+          newQuantity
+        );
+        setCart(serverUpdatedCart); // Update with server response
+      } catch (error) {
+        // 3. Revert if API fails
+        setCart(cart);
+        throw error;
+      }
     } else {
+      // GUEST USER
       GuestCart.updateItem(productId, newQuantity);
       await refreshCart();
     }
@@ -224,9 +258,37 @@ export function useCartProvider() {
 
   const removeItem = async (productId: number) => {
     if (user) {
-      await apiClient.removeFromCart(productId);
-      await refreshCart();
+      // Optimistic update for authenticated users
+      if (!cart) return;
+
+      // 1. Update UI immediately (optimistic)
+      const updatedItems = cart.items.filter(
+        (item) => item.product_id !== productId
+      );
+      const updatedCart = {
+        ...cart,
+        items: updatedItems,
+        total_price: updatedItems.reduce(
+          (total, item) => total + item.total_price,
+          0
+        ),
+      };
+
+      // Update UI instantly
+      setCart(updatedCart);
+
+      try {
+        // 2. API call in background (silent)
+        await apiClient.removeFromCart(productId);
+        // Optionally sync with server silently
+        // await refreshCart();
+      } catch (error) {
+        // 3. Revert optimistic update on error
+        setCart(cart);
+        throw error;
+      }
     } else {
+      // Guest users (already smooth)
       GuestCart.removeItem(productId);
       await refreshCart();
     }

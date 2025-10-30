@@ -238,3 +238,7 @@ class GuestCartMergeRequest(BaseModel):
                 ]
             }
         }
+
+class CartItemUpdate(BaseModel):
+    product_id: int
+    quantity: int = Field(gt=0, description="Direct quantity to set")

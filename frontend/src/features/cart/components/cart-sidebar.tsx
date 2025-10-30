@@ -2,13 +2,17 @@
 
 import { useEffect } from "react";
 import { useCart } from "@/shared/hooks/use-cart";
-import { CartItem, CartEmptyState } from "@/features/cart/components";
+import { CartItem } from "@/features/cart/components";
 import { CartItemOperations } from "@/features/cart/types/cart.types";
 import { Button } from "@/shared/components/ui/button";
-import { Badge } from "@/shared/components/ui/badge";
-import { X, ShoppingCart, Trash2 } from "lucide-react";
+import { X, ShoppingCart, Trash2, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/shared/hooks/use-toast";
+import {
+  generateWhatsAppOrderMessage,
+  openWhatsApp,
+} from "@/shared/utils/whatsapp";
+import { siWhatsapp } from "simple-icons/icons";
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -38,11 +42,6 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
     };
   }, [isOpen, onClose]);
 
-  const handleCheckout = () => {
-    onClose();
-    router.push("/checkout");
-  };
-
   const handleClearCart = async () => {
     try {
       await clearCart();
@@ -56,6 +55,17 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
         description: "Failed to clear cart",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleWhatsAppOrder = () => {
+    if (!cart || cart.items.length === 0) return;
+
+    try {
+      const message = generateWhatsAppOrderMessage(cart);
+      openWhatsApp(message);
+    } catch (error) {
+      console.error("Failed to open WhatsApp:", error);
     }
   };
 
@@ -104,22 +114,22 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       {/* Full Height Sidebar */}
       <div
         className={`
-          fixed top-0 right-0 h-screen w-full sm:w-96 bg-white dark:bg-gray-900 
+          fixed top-0 right-0 h-screen w-full sm:w-96 bg-card 
           shadow-2xl z-50 transform transition-transform duration-300 ease-out
           flex flex-col
           ${isOpen ? "translate-x-0" : "translate-x-full"}
         `}
       >
         {/* Fixed Header */}
-        <div className="flex items-center justify-between p-4 border-b bg-gray-50 dark:bg-gray-800">
+        <div className="flex items-center justify-between p-4 border-b bg-muted">
           <div className="flex items-center gap-3">
             <ShoppingCart className="h-6 w-6 text-primary" />
             <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              <h2 className="text-lg font-bold text-card-foreground">
                 Shopping Cart
               </h2>
               {itemCount > 0 && (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   {itemCount} {itemCount === 1 ? "item" : "items"}
                 </p>
               )}
@@ -129,7 +139,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="hover:bg-gray-200 dark:hover:bg-gray-700"
+            className="hover:bg-muted"
           >
             <X className="h-5 w-5" />
           </Button>
@@ -141,17 +151,17 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-gray-500">Loading your cart...</p>
+                <p className="text-muted-foreground">Loading your cart...</p>
               </div>
             </div>
           ) : !cart || cart.items.length === 0 ? (
             <div className="flex-1 flex items-center justify-center p-6">
               <div className="text-center">
-                <ShoppingCart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                <ShoppingCart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-card-foreground mb-2">
                   Your cart is empty
                 </h3>
-                <p className="text-gray-500 mb-6">
+                <p className="text-muted-foreground mb-6">
                   Add some products to get started
                 </p>
                 <Button onClick={onClose} className="w-full">
@@ -164,53 +174,57 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
               {/* Cart Items - Scrollable */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {cart.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3"
-                  >
+                  <div key={item.id} className="bg-muted rounded-lg p-3">
                     <CartItem item={item} operations={cartItemOperations} />
                   </div>
                 ))}
               </div>
 
               {/* Fixed Footer */}
-              <div className="border-t bg-gray-50 dark:bg-gray-800 p-4 space-y-4">
+              <div className="border-t bg-muted p-4 space-y-4">
                 {/* Clear Cart */}
                 <Button
                   variant="outline"
                   onClick={handleClearCart}
-                  className="w-full text-red-600 border-red-200 hover:bg-red-50"
+                  className="w-full text-destructive border-destructive hover:bg-destructive/10"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Clear Cart
                 </Button>
 
-                {/* Total */}
-                <div className="bg-white dark:bg-gray-900 rounded-lg p-4 shadow-sm">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-600 dark:text-gray-300">
-                      Subtotal:
-                    </span>
-                    <span className="font-medium">
-                      ${cart.total_price.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-lg font-bold">
-                    <span>Total:</span>
-                    <span className="text-primary">
-                      ${cart.total_price.toFixed(2)}
-                    </span>
+                {/* WhatsApp Order Button */}
+                <div className="p-6 border-t bg-card/50">
+                  <div className="space-y-4">
+                    {/* Order Summary */}
+                    <div className="flex justify-between items-center text-lg font-semibold text-card-foreground">
+                      <span>Total</span>
+                      <span>
+                        $
+                        {isNaN(cart.total_price)
+                          ? "0.00"
+                          : cart.total_price.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <Button
+                      onClick={handleWhatsAppOrder}
+                      className="w-full whatsapp-button text-primary-foreground font-medium py-3"
+                      size="lg"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="h-5 w-5 mr-2"
+                        dangerouslySetInnerHTML={{ __html: siWhatsapp.svg }}
+                      />
+                      Order via WhatsApp
+                    </Button>
+
+                    <p className="text-xs text-center text-muted-foreground">
+                      You'll be redirected to WhatsApp to complete your order
+                    </p>
                   </div>
                 </div>
-
-                {/* Checkout Button */}
-                <Button
-                  onClick={handleCheckout}
-                  className="w-full h-12 text-lg font-medium"
-                  size="lg"
-                >
-                  Proceed to Checkout
-                </Button>
               </div>
             </>
           )}

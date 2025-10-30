@@ -5,8 +5,10 @@ import { CartIcon } from "@/features/cart/components/cart-icon";
 import { useCartSidebar } from "@/features/cart/components";
 import { useAuth } from "@/shared/hooks/use-auth";
 import Link from "next/link";
-import { ShoppingBag, User, Shield, Menu, X } from "lucide-react";
+import { ShoppingBag, User, Shield, Menu, X, Moon, Sun } from "lucide-react";
 import { useState } from "react";
+import { useTheme } from "@/shared/hooks/use-theme";
+import { Monitor } from "lucide-react";
 
 interface GlobalHeaderProps {
   className?: string;
@@ -16,6 +18,13 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
   const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { openSidebar } = useCartSidebar();
+  const { theme, setTheme } = useTheme();
+
+  const toggleTheme = () => {
+    setTheme(
+      theme === "light" ? "dark" : theme === "dark" ? "system" : "light"
+    );
+  };
 
   return (
     <header
@@ -29,10 +38,12 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
               href="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <div className="bg-secondary p-2 rounded-lg">
-                <ShoppingBag className="h-5 w-5 text-secondary-foreground" />
+              <div className="bg-card p-2 rounded-lg">
+                <ShoppingBag className="h-5 w-5 text-primary" />
               </div>
-              <h1 className="text-2xl font-bold text-primary">Ecom</h1>
+              <h1 className="text-2xl font-bold text-primary">
+                Hamdan Computers
+              </h1>
             </Link>
           </div>
 
@@ -40,9 +51,16 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
           <nav className="flex items-center gap-4">
             {/* Desktop Navigation - Hidden on Mobile */}
             <div className="hidden lg:flex items-center gap-4">
+              <Button variant="ghost" size="sm" onClick={toggleTheme}>
+                {theme === "light" ? (
+                  <Sun className="h-4 w-4" />
+                ) : theme === "dark" ? (
+                  <Moon className="h-4 w-4" />
+                ) : (
+                  <Monitor className="h-4 w-4" />
+                )}
+              </Button>
               <CartIcon onClick={openSidebar} />
-              {/* Auth section will go here */}
-              {/* Authentication section */}
               {user ? (
                 <>
                   <span className="text-sm text-muted-foreground hidden sm:block">
@@ -80,6 +98,15 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
 
             {/* Mobile Navigation - Visible on Mobile Only */}
             <div className="lg:hidden flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={toggleTheme}>
+                {theme === "light" ? (
+                  <Sun className="h-4 w-4" />
+                ) : theme === "dark" ? (
+                  <Moon className="h-4 w-4" />
+                ) : (
+                  <Monitor className="h-4 w-4" />
+                )}
+              </Button>
               <CartIcon onClick={openSidebar} />
               <Button
                 variant="ghost"

@@ -48,6 +48,13 @@ export function RegisterForm({
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     mode: "onBlur",
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      terms: false,
+    },
   });
 
   const password = watch("password");
@@ -112,6 +119,7 @@ export function RegisterForm({
         error={errors.email?.message}
         required
         disabled={isSubmitting}
+        autoComplete="off"
       />
 
       {/* Password Field */}
@@ -126,6 +134,7 @@ export function RegisterForm({
         disabled={isSubmitting}
         showStrength={true}
         value={password}
+        autoComplete="new-password"
       />
 
       {/* Confirm Password Field */}

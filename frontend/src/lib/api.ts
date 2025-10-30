@@ -349,30 +349,10 @@ class ApiClient {
   /**
    * Update cart item quantity - matches backend /carts/update-item PATCH endpoint
    */
-  // async updateCartItem(product_id: number, quantity: number): Promise<Cart> {
-  //   return this.request<Cart>("/carts/update-item", {
-  //     method: "PATCH",
-  //     body: JSON.stringify({ product_id, quantity, action: "set" }),
-  //   });
-  // }
-  async updateCartItem(
-    product_id: number,
-    newQuantity: number,
-    currentQuantity: number
-  ): Promise<Cart> {
-    const difference = newQuantity - currentQuantity;
-
-    if (difference === 0) {
-      // No change needed, just return current cart
-      return this.getCart();
-    }
-
-    const action = difference > 0 ? "increment" : "decrement";
-    const quantity = Math.abs(difference);
-
+  async updateCartItem(product_id: number, quantity: number): Promise<Cart> {
     return this.request<Cart>("/carts/update-item", {
       method: "PATCH",
-      body: JSON.stringify({ product_id, quantity, action }),
+      body: JSON.stringify({ product_id, quantity }),
     });
   }
 
