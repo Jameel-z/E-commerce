@@ -3,7 +3,7 @@ import { clsx } from "clsx";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "ghost" | "outline";
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "icon"; // ← Added "icon"
   asChild?: boolean;
   children: React.ReactNode;
 }
@@ -30,6 +30,7 @@ const Button: React.FC<ButtonProps> = ({
     sm: "h-9 rounded-md px-3 text-xs",
     md: "h-10 px-4 py-2",
     lg: "h-11 rounded-md px-8",
+    icon: "h-9 w-9 p-0", // ← Added icon size (square button)
   };
 
   if (asChild) {
@@ -62,5 +63,4 @@ const Button: React.FC<ButtonProps> = ({
 };
 
 export { Button }; // Named export
-// or
 export default Button; // Default export

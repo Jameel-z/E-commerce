@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ProductFilters,
   ProductsLoading,
-  ProductsEmptyState,
-  ProductsErrorState,
-  ProductsGridLoading,
-  ProductsGrid,
+  PaginatedProducts,
+  ActiveFilters,
 } from "@/features/products/components";
 import { type ProductFiltersState } from "@/features/products/types";
 import { ErrorBanner, UnifiedLayout } from "@/shared/components";
@@ -25,21 +24,34 @@ import { SlidersHorizontal } from "lucide-react";
 type SortOption = "name-asc" | "name-desc" | "price-asc" | "price-desc";
 
 export default function ProductsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isInitialMount = useRef(true);
+
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true); // Set to true for loading state
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<SortOption>("name-asc");
-  const [showFilters, setShowFilters] = useState(false); // For mobile
+  const [showFilters, setShowFilters] = useState(false);
 
+  // State
+  const [sortBy, setSortBy] = useState<SortOption>("name-asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [currentFilters, setCurrentFilters] = useState<ProductFiltersState>({
+    search: "",
+    category: [],
+    minPrice: 0,
+    maxPrice: 100000,
+    inStock: false,
+  });
+
+  // Fetch products on mount
   useEffect(() => {
-    // Fetch products from the API
     const fetchProducts = async () => {
       try {
         const productsData = await apiClient.getProducts();
-        console.log("Fetched products:", productsData); // Debug log
         setProducts(productsData);
-        setFilteredProducts(productsData);
         setError(null);
       } catch (error) {
         console.error("Failed to fetch products:", error);
@@ -47,7 +59,6 @@ export default function ProductsPage() {
           "Unable to load products. Please check your connection and try again."
         );
         setProducts([]);
-        setFilteredProducts([]);
       } finally {
         setLoading(false);
       }
@@ -56,10 +67,59 @@ export default function ProductsPage() {
     fetchProducts();
   }, []);
 
-  // Sorting logic
-  const sortProducts = useCallback((products: Product[], sort: SortOption) => {
-    return [...products].sort((a, b) => {
-      switch (sort) {
+  // Apply filters and sorting
+  useEffect(() => {
+    if (!products.length) {
+      setFilteredProducts([]);
+      return;
+    }
+
+    let filtered = [...products];
+
+    // Apply search filter
+    if (currentFilters.search) {
+      filtered = filtered.filter(
+        (product) =>
+          product.name
+            .toLowerCase()
+            .includes(currentFilters.search.toLowerCase()) ||
+          product.category_name
+            .toLowerCase()
+            .includes(currentFilters.search.toLowerCase())
+      );
+    }
+
+    // Apply category filter (support both string and array)
+    const categories = Array.isArray(currentFilters.category)
+      ? currentFilters.category
+      : currentFilters.category
+      ? [currentFilters.category]
+      : [];
+
+    if (categories.length > 0) {
+      filtered = filtered.filter((product) => {
+        // If product has no category, treat it as "Uncategorized"
+        const productCategory = product.category_name || "Uncategorized";
+        return categories.includes(productCategory);
+      });
+    }
+
+    // Apply price range filter
+    filtered = filtered.filter((product) => {
+      const price = Number(product.price);
+      return (
+        price >= currentFilters.minPrice && price <= currentFilters.maxPrice
+      );
+    });
+
+    // Apply stock filter
+    if (currentFilters.inStock) {
+      filtered = filtered.filter((product) => product.stock_quantity > 0);
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (sortBy) {
         case "name-asc":
           return a.name.localeCompare(b.name);
         case "name-desc":
@@ -72,57 +132,104 @@ export default function ProductsPage() {
           return 0;
       }
     });
+
+    setFilteredProducts(filtered);
+  }, [products, currentFilters, sortBy]);
+
+  // Update URL when state changes
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    const params = new URLSearchParams();
+
+    if (currentFilters.search) params.set("search", currentFilters.search);
+
+    // Handle category array
+    const categories = Array.isArray(currentFilters.category)
+      ? currentFilters.category
+      : currentFilters.category
+      ? [currentFilters.category]
+      : [];
+
+    if (categories.length > 0) {
+      params.set("category", categories.join(","));
+    }
+
+    if (currentFilters.minPrice > 0)
+      params.set("minPrice", String(currentFilters.minPrice));
+    if (currentFilters.maxPrice < 100000)
+      params.set("maxPrice", String(currentFilters.maxPrice));
+    if (currentFilters.inStock) params.set("inStock", "true");
+    if (sortBy !== "name-asc") params.set("sort", sortBy);
+    if (currentPage > 1) params.set("page", String(currentPage));
+    if (itemsPerPage !== 10) params.set("perPage", String(itemsPerPage));
+
+    const newUrl = params.toString()
+      ? `/products?${params.toString()}`
+      : "/products";
+    router.replace(newUrl, { scroll: false });
+  }, [currentFilters, sortBy, currentPage, itemsPerPage, router]);
+
+  const handleFiltersChange = useCallback((filters: ProductFiltersState) => {
+    setCurrentFilters(filters);
+    setCurrentPage(1);
   }, []);
 
-  const handleFiltersChange = useCallback(
-    (filters: ProductFiltersState) => {
-      let filtered = [...products];
+  const handleRemoveFilter = useCallback(
+    (filterKey: keyof ProductFiltersState) => {
+      const newFilters = { ...currentFilters };
 
-      // Search
-      if (filters.search) {
-        filtered = filtered.filter(
-          (product) =>
-            product.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-            product.category_name
-              .toLowerCase()
-              .includes(filters.search.toLowerCase())
-        );
+      switch (filterKey) {
+        case "search":
+          newFilters.search = "";
+          break;
+        case "category":
+          newFilters.category = [];
+          break;
+        case "minPrice":
+        case "maxPrice":
+          newFilters.minPrice = 0;
+          newFilters.maxPrice = 100000;
+          break;
+        case "inStock":
+          newFilters.inStock = false;
+          break;
       }
 
-      // Category
-      if (filters.category && filters.category !== "all") {
-        filtered = filtered.filter(
-          (product) => product.category_name === filters.category
-        );
-      }
-
-      // Price
-      filtered = filtered.filter((product) => {
-        const price = Number(product.price);
-        return price >= filters.minPrice && price <= filters.maxPrice;
-      });
-
-      // Stock
-      if (filters.inStock) {
-        filtered = filtered.filter((product) => product.stock_quantity > 0);
-      }
-
-      // Apply sorting
-      filtered = sortProducts(filtered, sortBy);
-      setFilteredProducts(filtered);
+      setCurrentFilters(newFilters);
+      setCurrentPage(1);
     },
-    [products, sortBy, sortProducts]
+    [currentFilters]
   );
 
+  const handleClearAllFilters = useCallback(() => {
+    setCurrentFilters({
+      search: "",
+      category: [],
+      minPrice: 0,
+      maxPrice: 100000,
+      inStock: false,
+    });
+    setCurrentPage(1);
+  }, []);
+
   const handleSortChange = (value: string) => {
-    const sortValue = value as SortOption; // Cast to SortOption
-    setSortBy(sortValue);
-    setFilteredProducts(sortProducts(filteredProducts, sortValue));
+    setSortBy(value as SortOption);
+    setCurrentPage(1);
   };
 
-  const handleClearFilters = () => {
-    setFilteredProducts(sortProducts(products, sortBy));
+  const handleItemsPerPageChange = (value: string) => {
+    setItemsPerPage(Number(value));
+    setCurrentPage(1);
   };
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   if (loading) {
     return <ProductsLoading />;
@@ -141,7 +248,6 @@ export default function ProductsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-4 gap-8">
-          {/* Filters Sidebar - Collapsible on Mobile */}
           <div
             className={`lg:col-span-1 ${
               showFilters ? "block" : "hidden lg:block"
@@ -149,20 +255,17 @@ export default function ProductsPage() {
           >
             <ProductFilters
               onFiltersChange={handleFiltersChange}
-              onClearFilters={handleClearFilters}
+              allProducts={products}
             />
           </div>
 
-          {/* Products Section */}
           <div className="lg:col-span-3">
-            {/* Header with Controls */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
               <div className="flex items-center gap-4">
                 <h2 className="text-xl font-bold text-foreground">
                   {filteredProducts.length}{" "}
                   {filteredProducts.length === 1 ? "Product" : "Products"}
                 </h2>
-                {/* Mobile Filter Toggle */}
                 <Button
                   variant="outline"
                   size="sm"
@@ -175,7 +278,6 @@ export default function ProductsPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                {/* Sort Dropdown */}
                 <Select value={sortBy} onValueChange={handleSortChange}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Sort by" />
@@ -191,19 +293,59 @@ export default function ProductsPage() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
+
+                <Select
+                  value={String(itemsPerPage)}
+                  onValueChange={handleItemsPerPageChange}
+                >
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Items per page" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5 per page</SelectItem>
+                    <SelectItem value="10">10 per page</SelectItem>
+                    <SelectItem value="20">20 per page</SelectItem>
+                    <SelectItem value="50">50 per page</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
-            {/* Products Display */}
-            {loading ? (
-              <ProductsGridLoading />
-            ) : error ? (
-              <ProductsErrorState />
-            ) : filteredProducts.length === 0 ? (
-              <ProductsEmptyState />
-            ) : (
-              <ProductsGrid products={filteredProducts} />
+            <ActiveFilters
+              filters={currentFilters}
+              onRemoveFilter={handleRemoveFilter}
+              onClearAll={handleClearAllFilters}
+              totalProducts={filteredProducts.length}
+            />
+
+            {filteredProducts.length > 0 && (
+              <div className="mb-4 text-sm text-muted-foreground">
+                Showing{" "}
+                <span className="font-medium text-foreground">
+                  {(currentPage - 1) * itemsPerPage + 1}
+                </span>
+                {" - "}
+                <span className="font-medium text-foreground">
+                  {Math.min(
+                    currentPage * itemsPerPage,
+                    filteredProducts.length
+                  )}
+                </span>
+                {" of "}
+                <span className="font-medium text-foreground">
+                  {filteredProducts.length}
+                </span>{" "}
+                {filteredProducts.length === 1 ? "product" : "products"}
+              </div>
             )}
+
+            <PaginatedProducts
+              products={filteredProducts}
+              itemsPerPage={itemsPerPage}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              onPageChange={handlePageChange}
+            />
           </div>
         </div>
       </div>

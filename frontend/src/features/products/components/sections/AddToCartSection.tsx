@@ -24,12 +24,21 @@ export function AddToCartSection({
   if (product.stock_quantity === 0) {
     return (
       <Card className={className}>
-        <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground mb-4">
-            This product is currently out of stock.
-          </p>
-          <Button variant="outline" asChild>
-            <Link href="/products">Browse Other Products</Link>
+        <CardContent className="p-6 space-y-4">
+          <QuantitySelector
+            quantity={quantity}
+            maxQuantity={100}
+            onQuantityChange={onQuantityChange}
+          />
+
+          <Button
+            onClick={onAddToCart}
+            disabled={isAddingToCart}
+            className="w-full"
+            size="lg"
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            {isAddingToCart ? "Adding to Cart..." : "Add to Cart Anyway"}
           </Button>
         </CardContent>
       </Card>

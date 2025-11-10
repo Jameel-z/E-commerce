@@ -8,7 +8,7 @@ import { Product, Category } from "@/shared/types";
 // Core filter state interface that matches current implementation
 export interface ProductFiltersState {
   search: string;
-  category: string;
+  category: string | string[];
   minPrice: number;
   maxPrice: number;
   inStock: boolean;
