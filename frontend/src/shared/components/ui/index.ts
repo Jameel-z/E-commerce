@@ -18,3 +18,13 @@ export { default as Separator } from "./separator";
 export { Alert, AlertDescription } from "./alert";
 export { ErrorBanner } from "./ErrorBanner";
 export { QuantitySelector } from "../../../features/products/components/ui/QuantitySelector";
+export {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "./dialog";

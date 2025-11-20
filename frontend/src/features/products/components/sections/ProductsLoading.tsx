@@ -1,3 +1,5 @@
+import { ProductCardSkeleton } from "../ui/ProductCardSkeleton";
+
 // src/shared/components/sections/ProductsLoading.tsx
 export function ProductsLoading() {
   return (
@@ -10,10 +12,7 @@ export function ProductsLoading() {
           <div className="lg:col-span-3">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-96 bg-muted animate-pulse rounded-lg"
-                ></div>
+                <ProductCardSkeleton key={i} />
               ))}
             </div>
           </div>
