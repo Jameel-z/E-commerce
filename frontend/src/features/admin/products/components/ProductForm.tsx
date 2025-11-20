@@ -24,11 +24,12 @@ import type { ProductDetail, Category } from "@/lib/api";
 interface ProductFormData {
   name: string;
   description: string;
-  price: string;
   stock_quantity: string;
   category_id: string;
   primary_image: File | null;
   secondary_images: File[];
+  regular_price: string;
+  sale_price: string;
 }
 
 interface ProductFormProps {
@@ -42,11 +43,12 @@ interface ProductFormProps {
 const initialFormData: ProductFormData = {
   name: "",
   description: "",
-  price: "",
   stock_quantity: "",
   category_id: "",
   primary_image: null,
   secondary_images: [],
+  regular_price: "",
+  sale_price: "",
 };
 
 export function ProductForm({
@@ -84,10 +86,37 @@ export function ProductForm({
       return false;
     }
 
-    if (!formData.price || Number.parseFloat(formData.price) <= 0) {
+    if (
+      !formData.regular_price ||
+      Number.parseFloat(formData.regular_price) <= 0
+    ) {
       toast({
         title: "Validation Error",
-        description: "Valid price is required",
+        description: "Regular price is required and must be greater than 0",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Validate sale price if provided
+    const regularPrice = Number.parseFloat(formData.regular_price);
+    const salePrice = formData.sale_price
+      ? Number.parseFloat(formData.sale_price)
+      : null;
+
+    if (salePrice && salePrice <= 0) {
+      toast({
+        title: "Validation Error",
+        description: "Sale price must be greater than 0",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (salePrice && salePrice >= regularPrice) {
+      toast({
+        title: "Validation Error",
+        description: "Sale price must be less than regular price",
         variant: "destructive",
       });
       return false;
@@ -106,10 +135,15 @@ export function ProductForm({
     try {
       if (mode === "edit" && product) {
         // 🔥 EDIT MODE - Different data structure for backend
+        const regularPrice = Number.parseFloat(formData.regular_price);
+        const salePrice = formData.sale_price
+          ? Number.parseFloat(formData.sale_price)
+          : null;
+
         const updateData = {
           name: formData.name,
           description: formData.description || undefined,
-          price: Number.parseFloat(formData.price),
+          price: salePrice || regularPrice, // Use sale price if available, otherwise regular price
           stock_quantity: Number.parseInt(formData.stock_quantity) || 0,
           category_id: formData.category_id
             ? Number.parseInt(formData.category_id)
@@ -117,6 +151,8 @@ export function ProductForm({
           primary_image: formData.primary_image || undefined,
           keep_image_ids: keepSecondaryImageIds.join(","), // 🔑 CSV string for backend
           new_images: formData.secondary_images, // 🔑 New secondary images only
+          regular_price: regularPrice,
+          sale_price: salePrice || undefined,
         };
 
         await apiClient.updateProduct(product.id, updateData);
@@ -126,16 +162,23 @@ export function ProductForm({
         });
       } else {
         // 🔥 CREATE MODE - Original data structure
+        const regularPrice = Number.parseFloat(formData.regular_price);
+        const salePrice = formData.sale_price
+          ? Number.parseFloat(formData.sale_price)
+          : null;
+
         const productData = {
           name: formData.name,
           description: formData.description || undefined,
-          price: Number.parseFloat(formData.price),
+          price: salePrice || regularPrice, // Use sale price if available, otherwise regular price
           stock_quantity: Number.parseInt(formData.stock_quantity) || 0,
           category_id: formData.category_id
             ? Number.parseInt(formData.category_id)
             : undefined,
           primary_image: formData.primary_image || undefined,
           secondary_images: formData.secondary_images,
+          regular_price: regularPrice,
+          sale_price: salePrice || undefined,
         };
 
         await apiClient.createProduct(productData);
@@ -159,14 +202,20 @@ export function ProductForm({
 
   useEffect(() => {
     if (mode === "edit" && product) {
+      // For existing products without sale pricing, use current price as regular_price
+      const regularPrice =
+        product.regular_price?.toString() || product.price?.toString() || "";
+      const salePrice = product.sale_price?.toString() || "";
+
       setFormData({
         name: product.name || "",
         description: product.description || "",
-        price: product.price?.toString() || "",
         stock_quantity: product.stock_quantity?.toString() || "",
         category_id: product.category_id?.toString() || "",
         primary_image: null,
         secondary_images: [],
+        regular_price: regularPrice,
+        sale_price: salePrice,
       });
 
       // Load primary image
@@ -300,18 +349,91 @@ export function ProductForm({
             />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="price">Price ($)</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) => updateField("price", e.target.value)}
-                required
-              />
+          {/* Pricing Section */}
+          <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Pricing</h3>
+                <p className="text-sm text-muted-foreground">
+                  Set regular price and optional sale price
+                </p>
+              </div>
+              {formData.regular_price &&
+                formData.sale_price &&
+                Number.parseFloat(formData.sale_price) <
+                  Number.parseFloat(formData.regular_price) && (
+                  <span className="text-lg font-bold text-destructive">
+                    -
+                    {Math.round(
+                      (1 -
+                        Number.parseFloat(formData.sale_price) /
+                          Number.parseFloat(formData.regular_price)) *
+                        100
+                    )}
+                    % OFF
+                  </span>
+                )}
             </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="regular_price">
+                  Regular Price ($) <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="regular_price"
+                  type="number"
+                  step="0.01"
+                  value={formData.regular_price}
+                  onChange={(e) => updateField("regular_price", e.target.value)}
+                  placeholder="0.00"
+                  required
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Original/Display price
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="sale_price">Sale Price ($)</Label>
+                <Input
+                  id="sale_price"
+                  type="number"
+                  step="0.01"
+                  value={formData.sale_price}
+                  onChange={(e) => updateField("sale_price", e.target.value)}
+                  placeholder="Optional"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Discounted price (must be less than regular)
+                </p>
+              </div>
+            </div>
+
+            {/* Sale Preview */}
+            {formData.regular_price &&
+              formData.sale_price &&
+              Number.parseFloat(formData.sale_price) <
+                Number.parseFloat(formData.regular_price) && (
+                <div className="bg-background p-4 rounded-lg border-2 border-destructive/20">
+                  <p className="text-sm font-medium mb-2 text-muted-foreground">
+                    Customer will see:
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl font-bold text-destructive">
+                      ${Number.parseFloat(formData.sale_price).toFixed(2)}
+                    </span>
+                    <span className="text-lg text-muted-foreground line-through">
+                      ${Number.parseFloat(formData.regular_price).toFixed(2)}
+                    </span>
+                    <span className="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs font-bold">
+                      SALE
+                    </span>
+                  </div>
+                </div>
+              )}
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="stock_quantity">Stock Quantity</Label>
               <Input

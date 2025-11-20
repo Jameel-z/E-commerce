@@ -15,7 +15,7 @@ import logging
 from services.image_services import ImageService
 from core.utils import generate_static_url
 # import func
-from sqlalchemy import func
+from sqlalchemy import func, Integer, case
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,31 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
             search_term: Optional[str] = None
     ):
         """Get products for main page listing with optional category filter"""
+        # Computed is_on_sale: True when both regular_price and sale_price exist and sale < regular
+        is_on_sale_expr = case(
+            (
+                (Product.regular_price.isnot(None)) & 
+                (Product.sale_price.isnot(None)) & 
+                (Product.sale_price < Product.regular_price),
+                True
+            ),
+            else_=False
+        ).label('is_on_sale')
+        
+        # Computed discount_percentage: only when on sale
+        discount_percentage_expr = case(
+            (
+                (Product.regular_price.isnot(None)) & 
+                (Product.sale_price.isnot(None)) & 
+                (Product.sale_price < Product.regular_price),
+                func.cast(
+                    func.round((1 - Product.sale_price / Product.regular_price) * 100),
+                    Integer
+                )
+            ),
+            else_=None
+        ).label('discount_percentage')
+        
         query = (
             db.query(
                 Product.id,
@@ -37,7 +62,11 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
                 Product.primary_image_url,
                 Product.description,
                 func.coalesce(Category.name, "Uncategorized").label('category_name'),
-                Product.stock_quantity
+                Product.stock_quantity,
+                Product.regular_price,
+                Product.sale_price,
+                is_on_sale_expr,
+                discount_percentage_expr
             )
             .outerjoin(Product.category)  # Change from .join() to .outerjoin() to include products without categories
         )
@@ -51,7 +80,9 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
                 Product.description.ilike(f"%{search_term}%")  # Fixed missing %
                 )
 
-        return query.offset(skip).limit(limit).all()
+        # Convert Row objects to dictionaries for Pydantic
+        results = query.offset(skip).limit(limit).all()
+        return [row._asdict() for row in results]
 
     def get_by_name(self, db: Session, *, name: str) -> Optional[Product]:
         """Get product by exact name match"""
@@ -90,6 +121,12 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
         if product_data.category_id is not None:
             if not category_crud.get(db, product_data.category_id):
                 raise ValueError(f"Category with ID {product_data.category_id} doesn't exist")
+        
+        # Sync price with sale_price if on sale
+        if product_data.sale_price is not None and product_data.regular_price is not None:
+            product_data.price = product_data.sale_price
+        elif product_data.regular_price is not None:
+            product_data.price = product_data.regular_price
 
         relative_path = None
         uploaded_paths = []
@@ -151,6 +188,15 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
         try:
             # Update basic product info
             update_data = product_data.model_dump(exclude_unset=True)
+            
+            # Sync price with sale_price if on sale
+            if "sale_price" in update_data and "regular_price" in update_data:
+                if update_data["sale_price"] is not None and update_data["regular_price"] is not None:
+                    update_data["price"] = update_data["sale_price"]
+            elif "regular_price" in update_data and "sale_price" not in update_data:
+                if update_data["regular_price"] is not None:
+                    update_data["price"] = update_data["regular_price"]
+            
             if update_data:
                 for field, value in update_data.items():
                     setattr(db_product, field, value)

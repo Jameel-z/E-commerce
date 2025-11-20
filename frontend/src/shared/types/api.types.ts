@@ -36,6 +36,13 @@ export interface Product {
   category_name: string;
   stock_quantity: number;
   description: string | null;
+  regular_price: number | null;
+  sale_price: number | null;
+  is_on_sale: boolean;
+  discount_percentage: number | null;
+}
+  is_on_sale: boolean;
+  discount_percentage: number | null;
 }
 
 /**
@@ -54,6 +61,10 @@ export interface ProductDetail {
   images: ProductImage[]; // Updated to match backend response
   created_at: string;
   updated_at: string | null;
+  regular_price: string | null;
+  sale_price: string | null;
+  is_on_sale: boolean;
+  discount_percentage: number | null;
 }
 
 // ========================================
@@ -71,4 +82,6 @@ export interface ProductCreateRequest {
   category_id?: number; // Make optional
   primary_image?: File;
   secondary_images?: File[];
+  regular_price?: number;
+  sale_price?: number;
 }

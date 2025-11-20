@@ -42,6 +42,7 @@ export function ProductFilters({
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [onSaleOnly, setOnSaleOnly] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [showCategoryList, setShowCategoryList] = useState(true);
@@ -85,6 +86,7 @@ export function ProductFilters({
       minPrice: priceRange[0],
       maxPrice: priceRange[1],
       inStock: inStockOnly,
+      onSale: onSaleOnly,
     };
     onFiltersChange(filters);
   }, [
@@ -92,6 +94,7 @@ export function ProductFilters({
     selectedCategories,
     priceRange,
     inStockOnly,
+    onSaleOnly,
     onFiltersChange,
   ]);
 
@@ -131,6 +134,7 @@ export function ProductFilters({
     setSelectedCategories([]);
     setPriceRange([0, 100000]);
     setInStockOnly(false);
+    setOnSaleOnly(false);
   };
 
   return (
@@ -397,6 +401,36 @@ export function ProductFilters({
                 className="text-sm font-normal cursor-pointer"
               >
                 In stock only
+              </Label>
+            </div>
+
+            {/* On Sale Filter */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="onSale"
+                checked={onSaleOnly}
+                onCheckedChange={(checked) => setOnSaleOnly(checked === true)}
+              />
+              <Label
+                htmlFor="onSale"
+                className="text-sm font-normal cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5">
+                  <svg
+                    className="w-4 h-4 text-destructive"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                    />
+                  </svg>
+                  On sale only
+                </span>
               </Label>
             </div>
 

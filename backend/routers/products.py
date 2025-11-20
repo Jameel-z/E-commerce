@@ -122,6 +122,8 @@ async def create_product(
     category_id: Annotated[str, Form()] = "",  # Accept as string to handle empty values
     stock_quantity: Annotated[Optional[int], Form()] = 0,
     description: Annotated[Optional[str], Form(max_length=500)] = None,
+    regular_price: Annotated[Optional[Decimal], Form(gt=0)] = None,
+    sale_price: Annotated[Optional[Decimal], Form(gt=0)] = None,
     primary_image: Union[UploadFile, str, None] = File(None),
     secondary_images: Union[List[UploadFile], str, None] = File([]),
     db: Session = Depends(get_db),
@@ -155,7 +157,9 @@ async def create_product(
             price=price,
             category_id=parsed_category_id,
             stock_quantity=stock_quantity,
-            description=description
+            description=description,
+            regular_price=regular_price,
+            sale_price=sale_price,
         )
         
         # Use your existing CRUD logic
@@ -191,6 +195,8 @@ async def update_product(
     price: Annotated[Optional[Decimal], Form(gt=0)] = None,
     stock_quantity: Annotated[Optional[int], Form(ge=0)] = None,
     category_id: Annotated[Optional[int], Form()] = None,
+    regular_price: Annotated[Optional[Decimal], Form(gt=0)] = None,
+    sale_price: Annotated[Optional[Decimal], Form(gt=0)] = None,
     primary_image: Union[UploadFile, str, None] = File(None),
     keep_image_ids: Annotated[Optional[str], Form()] = None,
     new_images: Union[List[UploadFile], str, None] = File([]),
@@ -220,6 +226,8 @@ async def update_product(
             price=price,
             stock_quantity=stock_quantity,
             category_id=category_id,
+            regular_price=regular_price,
+            sale_price=sale_price,
         )
 
         # Prepare image data

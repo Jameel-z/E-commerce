@@ -183,6 +183,14 @@ class ApiClient {
       formData.append("category_id", productData.category_id.toString());
     }
 
+    // Sale pricing fields
+    if (productData.regular_price !== undefined) {
+      formData.append("regular_price", productData.regular_price.toString());
+    }
+    if (productData.sale_price !== undefined) {
+      formData.append("sale_price", productData.sale_price.toString());
+    }
+
     // Handle file uploads
     if (productData.primary_image) {
       formData.append("primary_image", productData.primary_image);
@@ -239,6 +247,12 @@ class ApiClient {
     }
     if (productData.category_id !== undefined) {
       formData.append("category_id", productData.category_id.toString());
+    }
+    if (productData.regular_price !== undefined) {
+      formData.append("regular_price", productData.regular_price.toString());
+    }
+    if (productData.sale_price !== undefined) {
+      formData.append("sale_price", productData.sale_price.toString());
     }
 
     // Handle primary image

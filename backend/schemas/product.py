@@ -44,6 +44,10 @@ class ProductList(BaseSchema):
     id: int
     name: str
     price: Decimal
+    regular_price: Optional[Decimal] = None
+    sale_price: Optional[Decimal] = None
+    is_on_sale: bool = False
+    discount_percentage: Optional[int] = None
     primary_image_url: Optional[str] = None
     category_name: Optional[str] = None
     stock_quantity: int = Field(..., ge=0)
@@ -56,6 +60,10 @@ class ProductList(BaseSchema):
                 "id": 1,
                 "name": "Premium Wireless Headphones",
                 "price": 199.99,
+                "regular_price": 249.99,
+                "sale_price": 199.99,
+                "is_on_sale": True,
+                "discount_percentage": 20,
                 "primary_image_url": "/static/products/1/main.jpg",
                 "category_name": "Electronics"
             }
@@ -76,11 +84,21 @@ class ProductBase(BaseSchema):
         examples=["Noise-cancelling Bluetooth headphones..."]
     )
     price: Decimal = Field(..., gt=0, decimal_places=2)
+    regular_price: Optional[Decimal] = Field(None, gt=0, decimal_places=2)
+    sale_price: Optional[Decimal] = Field(None, gt=0, decimal_places=2)
 
     @field_validator("price")
     def validate_price(cls, v):
         if v <= 0:
             raise ValueError("Price must be greater than zero")
+        return v
+    
+    @field_validator("sale_price")
+    def validate_sale_price(cls, v, info):
+        if v is not None:
+            regular_price = info.data.get("regular_price")
+            if regular_price and v >= regular_price:
+                raise ValueError("Sale price must be less than regular price")
         return v
 
 class ProductCreate(ProductBase):
@@ -103,6 +121,8 @@ class ProductUpdate(BaseSchema):
     name: Optional[str] = Field(None, min_length=2, max_length=100)
     description: Optional[str] = Field(None, max_length=500)
     price: Optional[Annotated[Decimal, Field(gt=0, decimal_places=2)]] = None
+    regular_price: Optional[Annotated[Decimal, Field(gt=0, decimal_places=2)]] = None
+    sale_price: Optional[Annotated[Decimal, Field(gt=0, decimal_places=2)]] = None
     stock_quantity: Optional[int] = Field(None, ge=0)
     category_id: Optional[int] = None
 
@@ -112,6 +132,14 @@ class ProductUpdate(BaseSchema):
         if v is not None and len(v.strip()) < 2:
             raise ValueError("Name must be at least 2 characters long")
         return v.title() if v else None
+    
+    @field_validator("sale_price")
+    def validate_sale_price(cls, v, info):
+        if v is not None:
+            regular_price = info.data.get("regular_price")
+            if regular_price and v >= regular_price:
+                raise ValueError("Sale price must be less than regular price")
+        return v
 
 class ProductDetail(TimestampSchema, ProductBase):
     """Schema for single product detail view"""
@@ -120,6 +148,10 @@ class ProductDetail(TimestampSchema, ProductBase):
     category_id: Optional[int] = None
     primary_image_url: Optional[str] = None
     price: Optional[Decimal] = Field(gt=0, decimal_places=2)
+    regular_price: Optional[Decimal] = None
+    sale_price: Optional[Decimal] = None
+    is_on_sale: bool = False
+    discount_percentage: Optional[int] = None
     category: Optional["Category"] = None
     secondary_images: List[ProductImage] = Field(default_factory=list, alias="images")
     created_at: datetime
@@ -134,6 +166,10 @@ class ProductDetail(TimestampSchema, ProductBase):
                 "name": "Premium Wireless Headphones",
                 "description": "Noise-cancelling Bluetooth headphones...",
                 "price": 199.99,
+                "regular_price": 249.99,
+                "sale_price": 199.99,
+                "is_on_sale": True,
+                "discount_percentage": 20,
                 "stock_quantity": 50,
                 "primary_image_url": "/static/products/1/main.jpg",
                 "category_id": 3,

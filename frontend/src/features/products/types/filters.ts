@@ -12,6 +12,7 @@ export interface ProductFiltersState {
   minPrice: number;
   maxPrice: number;
   inStock: boolean;
+  onSale: boolean;
 }
 
 // Individual filter change handlers for granular control
@@ -21,6 +22,7 @@ export interface ProductFiltersHandlers {
   onMinPriceChange: (price: number) => void;
   onMaxPriceChange: (price: number) => void;
   onInStockChange: (inStock: boolean) => void;
+  onOnSaleChange: (onSale: boolean) => void;
   onClearFilters: () => void;
 }
 
@@ -39,6 +41,7 @@ export const createDefaultFilters = (): ProductFiltersState => ({
   minPrice: 0,
   maxPrice: 1000,
   inStock: false,
+  onSale: false,
 });
 
 export const validatePriceRange = (min: number, max: number): boolean => {

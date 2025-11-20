@@ -44,6 +44,7 @@ export default function ProductsPage() {
     minPrice: 0,
     maxPrice: 100000,
     inStock: false,
+    onSale: false,
   });
 
   // Fetch products on mount
@@ -117,6 +118,11 @@ export default function ProductsPage() {
       filtered = filtered.filter((product) => product.stock_quantity > 0);
     }
 
+    // Apply on sale filter
+    if (currentFilters.onSale) {
+      filtered = filtered.filter((product) => product.is_on_sale);
+    }
+
     // Apply sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
@@ -163,6 +169,7 @@ export default function ProductsPage() {
     if (currentFilters.maxPrice < 100000)
       params.set("maxPrice", String(currentFilters.maxPrice));
     if (currentFilters.inStock) params.set("inStock", "true");
+    if (currentFilters.onSale) params.set("onSale", "true");
     if (sortBy !== "name-asc") params.set("sort", sortBy);
     if (currentPage > 1) params.set("page", String(currentPage));
     if (itemsPerPage !== 10) params.set("perPage", String(itemsPerPage));
@@ -197,6 +204,9 @@ export default function ProductsPage() {
         case "inStock":
           newFilters.inStock = false;
           break;
+        case "onSale":
+          newFilters.onSale = false;
+          break;
       }
 
       setCurrentFilters(newFilters);
@@ -212,6 +222,7 @@ export default function ProductsPage() {
       minPrice: 0,
       maxPrice: 100000,
       inStock: false,
+      onSale: false,
     });
     setCurrentPage(1);
   }, []);

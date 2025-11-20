@@ -56,6 +56,31 @@ export function ProductCard({ product }: ProductCardProps) {
               setShowQuickView(true);
             }}
           />
+          {/* Sale Badge on Image */}
+          {product.is_on_sale && product.discount_percentage && (
+            <div className="absolute top-2 left-2 z-10 pointer-events-none">
+              <div className="relative">
+                {/* Ribbon Style Badge */}
+                <div className="bg-gradient-to-r from-destructive to-destructive/90 text-white px-3 py-1.5 rounded-lg shadow-lg">
+                  <div className="flex items-center gap-1.5">
+                    <svg
+                      className="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <span className="text-sm font-black tracking-wide">
+                      -{product.discount_percentage}%
+                    </span>
+                  </div>
+                </div>
+                {/* Small triangle pointer */}
+                <div className="absolute -bottom-1 left-3 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-destructive/90"></div>
+              </div>
+            </div>
+          )}
+
           {/* Stock Badges */}
           {product.stock_quantity === 0 && (
             <Badge
@@ -65,14 +90,16 @@ export function ProductCard({ product }: ProductCardProps) {
               Out of Stock
             </Badge>
           )}
-          {product.stock_quantity > 0 && product.stock_quantity <= 5 && (
-            <Badge
-              variant="secondary"
-              className="absolute top-2 right-2 z-10 pointer-events-none"
-            >
-              Low Stock
-            </Badge>
-          )}
+          {product.stock_quantity > 0 &&
+            product.stock_quantity <= 5 &&
+            !product.is_on_sale && (
+              <Badge
+                variant="secondary"
+                className="absolute top-2 right-2 z-10 pointer-events-none"
+              >
+                Low Stock
+              </Badge>
+            )}
 
           {/* Quick View Overlay - Appears on Hover */}
           <div
@@ -93,34 +120,72 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Product Details */}
         <div className="p-4 flex-grow flex flex-col">
-          {/* Category Badge */}
-          {product.category_name && (
-            <Badge variant="outline" className="mb-2 w-fit text-xs">
-              {product.category_name}
-            </Badge>
-          )}
+          {/* Category Badge - Only show if not "Uncategorized" */}
+          {product.category_name &&
+            product.category_name !== "Uncategorized" && (
+              <Badge variant="outline" className="mb-2 w-fit text-xs">
+                {product.category_name}
+              </Badge>
+            )}
 
           {/* Product Name */}
           <h3
-            className="font-bold text-lg mb-2 line-clamp-1 group-hover:text-secondary transition-colors"
+            className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-secondary transition-colors"
             title={product.name} // Tooltip for truncated text
           >
             {product.name}
           </h3>
 
-          {/* Product Description */}
+          {/* Product Description - More space */}
           <p
-            className="text-muted-foreground text-sm mb-3 line-clamp-1 flex-grow"
+            className="text-muted-foreground text-sm mb-3 line-clamp-3 flex-grow"
             title={product.description ?? undefined} // Tooltip for truncated text
           >
             {product.description}
           </p>
 
-          {/* Price */}
+          {/* Price - Professional Sale Display */}
           <div className="mb-3">
-            <span className="text-2xl font-extrabold text-primary group-hover:text-secondary transition-colors">
-              ${Number(product.price).toFixed(2)}
-            </span>
+            {product.is_on_sale &&
+            product.sale_price &&
+            product.regular_price ? (
+              <div className="space-y-2">
+                {/* Sale Price with Badge */}
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black text-destructive tracking-tight">
+                    ${Number(product.sale_price).toFixed(2)}
+                  </span>
+                  <span className="text-sm font-medium text-muted-foreground line-through decoration-2">
+                    ${Number(product.regular_price).toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Discount Badge */}
+                <div className="inline-flex items-center gap-1.5 bg-destructive/10 text-destructive px-2.5 py-1 rounded-full">
+                  <svg
+                    className="w-3.5 h-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                    />
+                  </svg>
+                  <span className="text-xs font-bold uppercase tracking-wide">
+                    Save {product.discount_percentage}%
+                  </span>
+                </div>
+              </div>
+            ) : (
+              /* Regular Price */
+              <span className="text-3xl font-black text-primary group-hover:text-secondary transition-colors tracking-tight">
+                ${Number(product.price).toFixed(2)}
+              </span>
+            )}
           </div>
 
           {/* Stock Info */}
