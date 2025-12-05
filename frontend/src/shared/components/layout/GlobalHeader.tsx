@@ -6,7 +6,7 @@ import { useCartSidebar } from "@/features/cart/components";
 import { useAuth } from "@/shared/hooks/use-auth";
 import Link from "next/link";
 import { ShoppingBag, User, Shield, Menu, X, Moon, Sun } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "@/shared/hooks/use-theme";
 import { Monitor } from "lucide-react";
 
@@ -17,8 +17,13 @@ interface GlobalHeaderProps {
 export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
   const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { openSidebar } = useCartSidebar();
   const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleTheme = () => {
     setTheme(
@@ -52,7 +57,9 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
             {/* Desktop Navigation - Hidden on Mobile */}
             <div className="hidden lg:flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={toggleTheme}>
-                {theme === "light" ? (
+                {!mounted ? (
+                  <Sun className="h-4 w-4" />
+                ) : theme === "light" ? (
                   <Sun className="h-4 w-4" />
                 ) : theme === "dark" ? (
                   <Moon className="h-4 w-4" />
@@ -99,7 +106,9 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
             {/* Mobile Navigation - Visible on Mobile Only */}
             <div className="lg:hidden flex items-center gap-2">
               <Button variant="ghost" size="sm" onClick={toggleTheme}>
-                {theme === "light" ? (
+                {!mounted ? (
+                  <Sun className="h-4 w-4" />
+                ) : theme === "light" ? (
                   <Sun className="h-4 w-4" />
                 ) : theme === "dark" ? (
                   <Moon className="h-4 w-4" />

@@ -7,8 +7,5 @@ export { ProductDetailLoading } from "./ProductDetailLoading";
 export { ProductNotFound } from "./ProductNotFound";
 export { ProductsEmptyState } from "./ProductsEmptyState";
 export { ProductsErrorState } from "./ProductsErrorState";
-export { ProductsGrid } from "./ProductsGrid";
-export { ProductsGridLoading } from "./ProductsGridLoading";
 export { ProductsLoading } from "./ProductsLoading";
 export { AddToCartSection } from "./AddToCartSection";
-export { PaginatedProducts } from "./PaginatedProducts";

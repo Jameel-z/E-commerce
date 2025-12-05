@@ -1,4 +1,4 @@
-import { ProductCardSkeleton } from "../ui/ProductCardSkeleton";
+import { Skeleton } from "@/shared/components/ui";
 
 // src/shared/components/sections/ProductsLoading.tsx
 export function ProductsLoading() {
@@ -12,7 +12,12 @@ export function ProductsLoading() {
           <div className="lg:col-span-3">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <ProductCardSkeleton key={i} />
+                <div key={i} className="space-y-4">
+                  <Skeleton className="h-56 w-full rounded-lg" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
               ))}
             </div>
           </div>

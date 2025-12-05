@@ -1,4 +1,5 @@
 import { Badge } from "@/shared/components/ui";
+import { PriceDisplay } from "@/shared/components/products/atoms/PriceDisplay";
 import { type ProductDetail } from "@/lib/api";
 
 interface ProductInfoProps {
@@ -7,6 +8,10 @@ interface ProductInfoProps {
 }
 
 export function ProductInfo({ product, className = "" }: ProductInfoProps) {
+  // For products without sale pricing, use the price field
+  const regularPrice = product.regular_price || product.price;
+  const salePrice = product.sale_price;
+
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Product Name and Price */}
@@ -14,9 +19,13 @@ export function ProductInfo({ product, className = "" }: ProductInfoProps) {
         <h1 className="text-3xl font-bold text-foreground mb-2">
           {product.name}
         </h1>
-        <p className="text-2xl font-bold text-secondary">
-          ${Number(product.price).toFixed(2)}
-        </p>
+        <PriceDisplay
+          regularPrice={regularPrice}
+          salePrice={salePrice}
+          discountPercentage={product.discount_percentage}
+          size="lg"
+          showDiscount={true}
+        />
       </div>
 
       {/* Description */}

@@ -41,9 +41,6 @@ export interface Product {
   is_on_sale: boolean;
   discount_percentage: number | null;
 }
-  is_on_sale: boolean;
-  discount_percentage: number | null;
-}
 
 /**
  * Product Detail interface - matches backend schemas/product.py ProductDetail
