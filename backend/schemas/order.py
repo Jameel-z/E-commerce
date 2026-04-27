@@ -22,6 +22,48 @@ class OrderBase(BaseSchema):
         examples=["Leave with neighbor", "Gift wrapping requested"],
         description="Optional customer instructions"
     )
+    order_method: str = Field(
+        default="online",
+        examples=["online", "whatsapp"],
+        description="Method used to place the order"
+    )
+    payment_method: Optional[str] = Field(
+        None,
+        examples=["cash", "visa", "pickup"],
+        description="Payment method selected"
+    )
+    
+    # Shipping information
+    customer_name: Optional[str] = Field(
+        None,
+        max_length=100,
+        examples=["John Doe"],
+        description="Customer full name"
+    )
+    customer_phone: Optional[str] = Field(
+        None,
+        max_length=20,
+        examples=["+1234567890"],
+        description="Customer phone number"
+    )
+    shipping_address: Optional[str] = Field(
+        None,
+        max_length=500,
+        examples=["123 Main St, Apt 4B"],
+        description="Full shipping address"
+    )
+    shipping_city: Optional[str] = Field(
+        None,
+        max_length=100,
+        examples=["New York"],
+        description="City"
+    )
+    shipping_area: Optional[str] = Field(
+        None,
+        max_length=100,
+        examples=["Manhattan"],
+        description="Area/District"
+    )
 
 class OrderCreate(OrderBase):
     """Schema for order creation requests"""
@@ -46,11 +88,15 @@ class Order(TimestampSchema, OrderBase):
     id: int = Field(..., examples=[1])
     user_id: int = Field(..., examples=[456])
     total_amount: Annotated[Decimal, Field(gt=0, decimal_places=2, examples=[59.98])]
+    order_method: str = Field(default="online", examples=["online", "whatsapp"])
+    payment_method: Optional[str] = Field(None, examples=["cash", "visa"])
+    order_items: List['OrderItem'] = Field(default_factory=list, exclude=False)
     created_at: datetime = Field(..., examples=["2023-01-01T00:00:00"])
-    updated_at: Optional[datetime] = Field(default=None, examples=["2023-01-02T00:00:00"])
+    updated_at: Optional[datetime] = Field(default=None, examples=["2023-01-01T00:00:00"])
     
     # Configuration for OpenAPI examples
     model_config = ConfigDict(
+        from_attributes=True,
         json_schema_extra={
             "examples": [{
                 "id": 1,
@@ -81,8 +127,8 @@ class OrderUpdate(BaseSchema):
     @field_validator('status')
     @classmethod
     def validate_status_transition(cls, v: Optional[str]) -> Optional[str]:
-        if v and v.lower() not in {"shipped", "delivered", "cancelled"}:
-            raise ValueError("Can only update to shipped, delivered, or cancelled")
+        if v and v.lower() not in {"processing", "shipped", "delivered", "cancelled"}:
+            raise ValueError("Can only update to processing, shipped, delivered, or cancelled")
         return v.lower() if v else None
 
 class OrderWithItems(Order):

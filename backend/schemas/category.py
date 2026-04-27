@@ -1,66 +1,53 @@
 from typing import Optional, List, TYPE_CHECKING
 from pydantic import Field, field_validator, ConfigDict
 from .base import BaseSchema
-from datetime import datetime
 
 if TYPE_CHECKING:
     from .product import ProductDetail
 
 class CategoryBase(BaseSchema):
-    """Base fields for category operations"""
     name: str = Field(
         ...,
         min_length=2,
         max_length=50,
         pattern=r"^[a-zA-Z0-9\-_ ]+$",
-        examples=["Electronics", "Home & Garden"],
-        description="Unique category name"
+        examples=["Electronics", "Laptops"],
     )
-    description: Optional[str] = Field(
-        None,
-        max_length=255,
-        examples=["All electronic devices and accessories"],
-        description="Brief category description"
-    )
+    description: Optional[str] = Field(None, max_length=255)
+    parent_id: Optional[int] = Field(None, description="ID of parent category (None = top-level)")
 
 class CategoryCreate(CategoryBase):
-    """Schema for creating new categories"""
     @field_validator('name')
     @classmethod
     def validate_name_format(cls, v: str) -> str:
-        """Ensure consistent naming format"""
         return v.strip().title()
 
 class Category(CategoryBase):
-    """Complete category schema for API responses"""
-    id: int = Field(..., examples=[1])
+    id: int
+    children: List["Category"] = Field(default_factory=list)
 
     model_config = ConfigDict(
+        from_attributes=True,
         json_schema_extra={
             "example": {
                 "id": 1,
-                "name": "Electronics",
-                "description": "Devices and accessories"
+                "name": "Laptops",
+                "description": None,
+                "parent_id": None,
+                "children": [
+                    {"id": 2, "name": "Lenovo", "parent_id": 1, "children": []},
+                    {"id": 3, "name": "Msi", "parent_id": 1, "children": []}
+                ]
             }
         }
     )
 
-class CategoryWithProducts(Category):
-    """Extended category schema including product listings"""
-    products: List["ProductDetail"] = Field(
-        default_factory=list,
-        description="Products belonging to this category"
-    )
+Category.model_rebuild()
 
 class CategoryUpdate(BaseSchema):
-    """Schema for updating existing categories"""
-    name: Optional[str] = Field(
-        None,
-        min_length=2,
-        max_length=50,
-        pattern=r"^[a-zA-Z0-9\-_ ]+$"
-    )
+    name: Optional[str] = Field(None, min_length=2, max_length=50, pattern=r"^[a-zA-Z0-9\-_ ]+$")
     description: Optional[str] = Field(None, max_length=255)
+    parent_id: Optional[int] = None
 
     @field_validator('name')
     @classmethod
@@ -69,6 +56,9 @@ class CategoryUpdate(BaseSchema):
             return v.strip().title()
         return None
 
-# Fix for forward references
-from .product import ProductDetail  # <-- Add this import at runtime
+class CategoryWithProducts(Category):
+    products: List["ProductDetail"] = Field(default_factory=list)
+
+# Fix forward references
+from .product import ProductDetail
 CategoryWithProducts.model_rebuild()

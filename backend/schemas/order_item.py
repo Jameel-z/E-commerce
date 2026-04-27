@@ -33,26 +33,32 @@ class OrderItem(OrderItemBase):
     """Complete order item schema for API responses"""
     id: int = Field(..., examples=[1])
     order_id: int = Field(..., examples=[456])
+    product_name: str = Field(..., examples=["Wireless Mouse"])
+    product_image_url: Optional[str] = Field(None, examples=["/static/products/11/img_abc123.jpg"])
+    total_price: Decimal = Field(
+        ...,
+        description="Calculated as price_at_order * quantity",
+        examples=[59.98]
+    )
     product: Optional[ProductDetail] = Field(
         None,
         description="Full product details",
         exclude=True  # Don't include by default in responses
     )
-    subtotal: Decimal = Field(
-        ...,
-        description="Calculated as price_at_order * quantity",
-        examples=[59.98]
-    )
 
     model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
         json_schema_extra={
             "example": {
                 "id": 1,
                 "order_id": 456,
                 "product_id": 123,
+                "product_name": "Wireless Mouse",
+                "product_image_url": "/static/products/11/img_abc123.jpg",
                 "quantity": 2,
                 "price_at_order": 29.99,
-                "subtotal": 59.98,
+                "total_price": 59.98,
                 "product": {
                     "id": 123,
                     "name": "Wireless Mouse",

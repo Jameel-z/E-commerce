@@ -122,7 +122,7 @@ export default function OrdersPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">
-                        ${order.total_amount.toFixed(2)}
+                        ${Number(order.total_amount).toFixed(2)}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {order.order_items?.length || 0}{" "}

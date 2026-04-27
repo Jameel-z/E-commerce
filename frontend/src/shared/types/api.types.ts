@@ -10,8 +10,8 @@ export interface Category {
   id: number;
   name: string;
   description?: string | null;
-  created_at: string;
-  updated_at: string | null;
+  parent_id: number | null;
+  children: Category[];
 }
 
 /**
@@ -40,6 +40,7 @@ export interface Product {
   sale_price: number | null;
   is_on_sale: boolean;
   discount_percentage: number | null;
+  created_at: string;
 }
 
 /**

@@ -65,10 +65,11 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
                 Product.stock_quantity,
                 Product.regular_price,
                 Product.sale_price,
+                Product.created_at,
                 is_on_sale_expr,
                 discount_percentage_expr
             )
-            .outerjoin(Product.category)  # Change from .join() to .outerjoin() to include products without categories
+            .outerjoin(Product.category)
         )
 
         if category_id:

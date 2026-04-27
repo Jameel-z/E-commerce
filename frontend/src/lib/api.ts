@@ -137,8 +137,19 @@ class ApiClient {
    * Get products list - matches backend /products/ GET endpoint
    * Returns ProductList items (for main page, category listings)
    */
-  async getProducts(): Promise<Product[]> {
-    return this.request<Product[]>("/products/");
+  async getProducts(params?: {
+    page?: number;
+    per_page?: number;
+    category_id?: number;
+    search?: string;
+  }): Promise<Product[]> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", params.page.toString());
+    if (params?.per_page) query.set("per_page", params.per_page.toString());
+    if (params?.category_id) query.set("category_id", params.category_id.toString());
+    if (params?.search) query.set("search", params.search);
+    const qs = query.toString();
+    return this.request<Product[]>(`/products/${qs ? "?" + qs : ""}`);
   }
 
   /**
@@ -320,13 +331,17 @@ class ApiClient {
     return this.request<Category[]>("/categories/");
   }
 
+  async getCategoryTree(): Promise<Category[]> {
+    return this.request<Category[]>("/categories/tree");
+  }
+
   /**
    * Create category - matches backend /categories/ POST endpoint (Admin only)
    */
-  async createCategory(name: string): Promise<Category> {
+  async createCategory(name: string, parentId?: number | null): Promise<Category> {
     return this.request<Category>("/categories/", {
       method: "POST",
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, parent_id: parentId ?? null }),
     });
   }
 
@@ -443,20 +458,39 @@ class ApiClient {
   // ========================================
 
   /**
-   * Create new order - matches backend /orders/ POST endpoint
+   * Create order from cart - matches backend /orders/create POST endpoint
    */
-  async createOrder(orderData: CreateOrderRequest): Promise<Order> {
-    return this.request<Order>("/orders/", {
+  async createOrder(
+    cartId: number,
+    notes?: string,
+    orderMethod: "online" | "whatsapp" = "online",
+    paymentMethod?: string,
+    customerName?: string,
+    customerPhone?: string,
+    shippingAddress?: string,
+    shippingCity?: string,
+    shippingArea?: string
+  ): Promise<Order> {
+    const params = new URLSearchParams({ cart_id: String(cartId) });
+    if (notes) params.set("notes", notes);
+    if (orderMethod) params.set("order_method", orderMethod);
+    if (paymentMethod) params.set("payment_method", paymentMethod);
+    if (customerName) params.set("customer_name", customerName);
+    if (customerPhone) params.set("customer_phone", customerPhone);
+    if (shippingAddress) params.set("shipping_address", shippingAddress);
+    if (shippingCity) params.set("shipping_city", shippingCity);
+    if (shippingArea) params.set("shipping_area", shippingArea);
+
+    return this.request<Order>(`/orders/create?${params.toString()}`, {
       method: "POST",
-      body: JSON.stringify(orderData),
     });
   }
 
   /**
-   * Get user's orders - matches backend /orders/ GET endpoint
+   * Get user's orders - matches backend /orders/my-orders GET endpoint
    */
   async getOrders(): Promise<Order[]> {
-    return this.request<Order[]>("/orders/");
+    return this.request<Order[]>("/orders/my-orders");
   }
 
   /**
@@ -467,20 +501,23 @@ class ApiClient {
   }
 
   /**
-   * Update order status - matches backend /orders/{id} PATCH endpoint (Admin only)
+   * Update order status - matches backend /orders/{id}/status PATCH endpoint (Admin only)
    */
   async updateOrderStatus(id: number, status: string): Promise<Order> {
-    return this.request<Order>(`/orders/${id}`, {
+    return this.request<Order>(`/orders/${id}/status`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
     });
   }
 
   /**
-   * Get all orders - matches backend /admin/orders/ GET endpoint (Admin only)
+   * Get all orders - matches backend /orders/ GET endpoint (Admin only)
    */
-  async getAllOrders(): Promise<Order[]> {
-    return this.request<Order[]>("/admin/orders/");
+  async getAllOrders(statusFilter?: string): Promise<Order[]> {
+    const url = statusFilter
+      ? `/orders/?status_filter=${statusFilter}`
+      : "/orders/";
+    return this.request<Order[]>(url);
   }
 }
 

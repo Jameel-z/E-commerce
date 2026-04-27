@@ -1,13 +1,23 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import users, products, categories, carts
+from routers import users, products, categories, carts, orders
 from database import create_database, create_tables
 from fastapi.staticfiles import StaticFiles
 from core.config import settings
 from core.middleware import cleanup_temp_files
 
 create_database()
-create_tables() 
+create_tables()
+
+# Add parent_id to categories if it doesn't exist yet (safe migration)
+from database import engine
+from sqlalchemy import text
+with engine.connect() as conn:
+    conn.execute(text(
+        "ALTER TABLE categories ADD COLUMN IF NOT EXISTS parent_id INTEGER "
+        "REFERENCES categories(id) ON DELETE SET NULL"
+    ))
+    conn.commit()
 
 app = FastAPI(title="E-commerce Backend API")
 
@@ -33,6 +43,7 @@ app.include_router(users.router, tags=["Users"])
 app.include_router(products.router, tags=["Products"])
 app.include_router(categories.router, tags=["Categories"])
 app.include_router(carts.router, tags=["Carts"])
+app.include_router(orders.router, tags=["Orders"])
 
 
 @app.get("/")

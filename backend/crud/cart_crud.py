@@ -87,15 +87,23 @@ class CartCRUD(CRUDBase[models.Cart, schemas.CartCreate, schemas.CartUpdate]):
         try:
             total = 0.0
             for item in cart.items:
-                if item.product and item.product.price is not None:
+                # Use locked price if available, otherwise fall back to current product price
+                price = item.price_at_addition
+                if price is None and item.product and item.product.price is not None:
                     try:
                         price = float(item.product.price)
+                    except (ValueError, TypeError):
+                        logger.warning(f"Error converting price for product {item.product.id}, skipping")
+                        continue
+                
+                if price is not None:
+                    try:
                         quantity = item.quantity or 0
                         if not isinstance(price, (int, float)) or price < 0:
-                            logger.warning(f"Skipping invalid price {item.product.price} for product {item.product.id}")
+                            logger.warning(f"Skipping invalid price {price} for cart item {item.id}")
                             continue
                         if not isinstance(quantity, int) or quantity < 0:
-                            logger.warning(f"Skipping invalid quantity {quantity} for product {item.product.id}")
+                            logger.warning(f"Skipping invalid quantity {quantity} for cart item {item.id}")
                             continue
                         total += price * quantity
                     except (ValueError, TypeError):
@@ -121,17 +129,29 @@ class CartCRUD(CRUDBase[models.Cart, schemas.CartCreate, schemas.CartUpdate]):
                 models.Product.id == item.product_id
             ).with_for_update().first()
 
-            if not product or product.stock_quantity <= 0:
+            if not product:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Product is unavailable."
+                    detail="Product not found."
                 )
 
-            if item.quantity > product.stock_quantity:
+            # Calculate available stock (total - reserved for pending orders)
+            available_stock = product.stock_quantity - (product.reserved_quantity or 0)
+            
+            if available_stock <= 0:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Only {product.stock_quantity} items available in stock."
+                    detail="Product is currently unavailable."
                 )
+
+            if item.quantity > available_stock:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Only {available_stock} items available in stock."
+                )
+
+            # Determine current selling price (sale_price if on sale, otherwise price)
+            current_price = float(product.sale_price if product.is_on_sale else product.price)
 
             cart_item = db.query(models.CartItem).filter(
                 and_(
@@ -142,17 +162,21 @@ class CartCRUD(CRUDBase[models.Cart, schemas.CartCreate, schemas.CartUpdate]):
 
             if cart_item:
                 new_quantity = cart_item.quantity + item.quantity
-                if new_quantity > product.stock_quantity:
+                if new_quantity > available_stock:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
-                        detail=f"Cannot add {item.quantity} items. Only {product.stock_quantity - cart_item.quantity} more available."
+                        detail=f"Cannot add {item.quantity} items. Only {available_stock - cart_item.quantity} more available."
                     )
                 cart_item.quantity = new_quantity
+                # Update locked price if it was null (legacy data)
+                if cart_item.price_at_addition is None:
+                    cart_item.price_at_addition = current_price
             else:
                 cart_item = models.CartItem(
                     cart_id=cart.id,
                     product_id=item.product_id,
-                    quantity=item.quantity
+                    quantity=item.quantity,
+                    price_at_addition=current_price  # Lock price at time of addition
                 )
                 db.add(cart_item)
                 db.commit()

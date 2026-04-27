@@ -11,7 +11,7 @@ import {
   LayoutDashboard,
   Package,
   FolderOpen,
-  ShoppingCart,
+  ClipboardList,
   ArrowLeft,
   Shield,
 } from "lucide-react";
@@ -54,6 +54,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Products", href: "/admin/products", icon: Package },
     { name: "Categories", href: "/admin/categories", icon: FolderOpen },
+    { name: "Orders", href: "/admin/orders", icon: ClipboardList },
   ];
 
   return (

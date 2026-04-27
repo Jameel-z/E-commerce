@@ -92,6 +92,21 @@ export function useProductFilters({
     total: 0,
   }));
 
+  // Sync from URL when searchParams change externally (e.g. SecondaryNav navigation)
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || "";
+    const urlCategory = searchParams.get("category")?.split(",").filter(Boolean) || [];
+
+    setFilters((prev) => {
+      const sameSearch = prev.search === urlSearch;
+      const sameCategory =
+        JSON.stringify([...(prev.category as string[])].sort()) ===
+        JSON.stringify([...urlCategory].sort());
+      if (sameSearch && sameCategory) return prev;
+      return { ...prev, search: urlSearch, category: urlCategory };
+    });
+  }, [searchParams]);
+
   // Apply filters
   const filteredProducts = useMemo(
     () => filterProducts(products, filters),

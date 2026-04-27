@@ -10,6 +10,7 @@ export interface OrderItem {
   order_id: number;
   product_id: number;
   product_name: string;
+  product_image_url?: string | null;
   quantity: number;
   price_at_order: number;
   total_price: number;
@@ -24,6 +25,13 @@ export interface Order {
   status: string;
   total_amount: number;
   notes: string | null;
+  order_method: "online" | "whatsapp";
+  payment_method: string | null;
+  customer_name?: string | null;
+  customer_phone?: string | null;
+  shipping_address?: string | null;
+  shipping_city?: string | null;
+  shipping_area?: string | null;
   created_at: string;
   updated_at: string | null;
   order_items: OrderItem[];

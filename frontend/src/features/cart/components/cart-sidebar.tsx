@@ -3,11 +3,13 @@
 import { useEffect } from "react";
 import { useCart } from "@/shared/hooks/use-cart";
 import { CartItem } from "@/features/cart/components";
+import { CheckoutButton } from "@/features/cart/components/checkout-button";
 import { CartItemOperations } from "@/features/cart/types/cart.types";
 import { Button } from "@/shared/components/ui/button";
 import { X, ShoppingCart, Trash2, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/shared/hooks/use-toast";
+import { useAuth } from "@/shared/hooks/use-auth";
 import {
   generateWhatsAppOrderMessage,
   openWhatsApp,
@@ -22,6 +24,7 @@ interface CartSidebarProps {
 export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const { cart, loading, clearCart, itemCount, updateQuantity, removeItem } =
     useCart();
+  const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -58,15 +61,18 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
     }
   };
 
-  const handleWhatsAppOrder = () => {
-    if (!cart || cart.items.length === 0) return;
-
-    try {
-      const message = generateWhatsAppOrderMessage(cart);
-      openWhatsApp(message);
-    } catch (error) {
-      console.error("Failed to open WhatsApp:", error);
+  const handleCheckout = () => {
+    if (!cart || cart.items.length === 0) {
+      toast({
+        title: "Cart is empty",
+        description: "Add items to your cart before checkout",
+        variant: "destructive",
+      });
+      return;
     }
+
+    onClose();
+    router.push("/checkout");
   };
 
   // Create cart operations object
@@ -192,7 +198,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                   Clear Cart
                 </Button>
 
-                {/* WhatsApp Order Button */}
+                {/* Checkout Section */}
                 <div className="p-6 border-t bg-card/50">
                   <div className="space-y-4">
                     {/* Order Summary */}
@@ -206,23 +212,35 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                       </span>
                     </div>
 
-                    <Button
-                      onClick={handleWhatsAppOrder}
-                      className="w-full whatsapp-button text-primary-foreground font-medium py-3"
-                      size="lg"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="h-5 w-5 mr-2"
-                        dangerouslySetInnerHTML={{ __html: siWhatsapp.svg }}
-                      />
-                      Order via WhatsApp
-                    </Button>
-
-                    <p className="text-xs text-center text-muted-foreground">
-                      You'll be redirected to WhatsApp to complete your order
-                    </p>
+                    {/* Checkout Section */}
+                    {user ? (
+                      /* Logged-in users - go to checkout */
+                      <Button
+                        onClick={handleCheckout}
+                        className="w-full"
+                        size="lg"
+                      >
+                        <ShoppingCart className="mr-2 h-5 w-5" />
+                        Proceed to Checkout
+                      </Button>
+                    ) : (
+                      /* Guest users - must login first */
+                      <div className="space-y-2">
+                        <Button
+                          onClick={() => {
+                            onClose();
+                            router.push("/login");
+                          }}
+                          className="w-full"
+                          size="lg"
+                        >
+                          Login to Checkout
+                        </Button>
+                        <p className="text-xs text-center text-muted-foreground">
+                          You need to login to place an order
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

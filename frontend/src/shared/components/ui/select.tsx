@@ -103,7 +103,7 @@ export const SelectContent: React.FC<SelectContentProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="absolute top-full left-0 right-0 z-50 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 mt-1">
+    <div className="absolute top-full right-0 z-50 w-max min-w-full overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 mt-1">
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child) && child.type === SelectItem) {
           return React.cloneElement(

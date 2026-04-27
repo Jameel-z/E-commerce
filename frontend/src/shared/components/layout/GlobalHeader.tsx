@@ -5,10 +5,22 @@ import { CartIcon } from "@/features/cart/components/cart-icon";
 import { useCartSidebar } from "@/features/cart/components";
 import { useAuth } from "@/shared/hooks/use-auth";
 import Link from "next/link";
-import { ShoppingBag, User, Shield, Menu, X, Moon, Sun } from "lucide-react";
+import {
+  ShoppingBag,
+  User,
+  Shield,
+  Menu,
+  X,
+  Moon,
+  Sun,
+  Package,
+  Heart,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/shared/hooks/use-theme";
 import { Monitor } from "lucide-react";
+import { SecondaryNav } from "./SecondaryNav";
+import { useWishlist } from "@/shared/hooks/use-wishlist";
 
 interface GlobalHeaderProps {
   className?: string;
@@ -20,6 +32,7 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
   const [mounted, setMounted] = useState(false);
   const { openSidebar } = useCartSidebar();
   const { theme, setTheme } = useTheme();
+  const { count: wishlistCount } = useWishlist();
 
   useEffect(() => {
     setMounted(true);
@@ -33,7 +46,7 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
 
   return (
     <header
-      className={`border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50 ${className}`}
+      className={`border-b bg-background sticky top-0 z-50 shadow-sm ${className}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
@@ -56,7 +69,7 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
           <nav className="flex items-center gap-4">
             {/* Desktop Navigation - Hidden on Mobile */}
             <div className="hidden lg:flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={toggleTheme}>
+              {/* <Button variant="ghost" size="sm" onClick={toggleTheme}>
                 {!mounted ? (
                   <Sun className="h-4 w-4" />
                 ) : theme === "light" ? (
@@ -66,10 +79,26 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
                 ) : (
                   <Monitor className="h-4 w-4" />
                 )}
-              </Button>
+              </Button> */}
+              <Link href="/wishlist" className="relative p-2 hover:text-primary transition-colors">
+                <Heart className="h-5 w-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
               <CartIcon onClick={openSidebar} />
               {user ? (
                 <>
+                  {!user.is_admin && (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href="/orders">
+                        <Package className="h-4 w-4 mr-2" />
+                        My Orders
+                      </Link>
+                    </Button>
+                  )}
                   <span className="text-sm text-muted-foreground hidden sm:block">
                     Welcome, {user.name || user.email}
                   </span>
@@ -105,7 +134,7 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
 
             {/* Mobile Navigation - Visible on Mobile Only */}
             <div className="lg:hidden flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={toggleTheme}>
+              {/* <Button variant="ghost" size="sm" onClick={toggleTheme}>
                 {!mounted ? (
                   <Sun className="h-4 w-4" />
                 ) : theme === "light" ? (
@@ -115,7 +144,7 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
                 ) : (
                   <Monitor className="h-4 w-4" />
                 )}
-              </Button>
+              </Button> */}
               <CartIcon onClick={openSidebar} />
               <Button
                 variant="ghost"
@@ -130,6 +159,9 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
         </div>
       </div>
 
+      {/* Secondary Navigation Bar */}
+      <SecondaryNav />
+
       {/* Mobile Menu Panel - Slides in from right */}
       {isMobileMenuOpen && (
         <>
@@ -140,87 +172,93 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
           />
 
           {/* Menu Panel */}
-          <div className="fixed top-16 right-0 w-80 h-full bg-card border-l shadow-xl z-50 lg:hidden">
-            <div className="p-6 space-y-4">
-              {/* Close Button */}
-              <div className="flex justify-between items-center mb-6">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
+          <div className="fixed top-16 right-0 w-64 bg-card border-l border-b shadow-xl z-50 lg:hidden rounded-bl-xl overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b bg-card">
+              <span className="text-sm font-semibold">Menu</span>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-1.5 rounded-md hover:bg-muted transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
 
-              {/* Mobile Auth Section */}
-              <div className="space-y-3">
-                {user ? (
-                  <>
-                    <div className="text-sm text-muted-foreground border-b pb-3">
-                      Welcome, {user.name || user.email}
-                    </div>
-                    {user.is_admin && (
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start"
-                        asChild
-                      >
-                        <Link
-                          href="/admin"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <Shield className="h-4 w-4 mr-2" />
-                          Admin Panel
-                        </Link>
-                      </Button>
+            {/* Items */}
+            <div className="divide-y">
+              {user ? (
+                <>
+                  <div className="px-4 py-3 bg-muted/30">
+                    <p className="text-xs text-muted-foreground">Signed in as</p>
+                    <p className="text-sm font-medium truncate">{user.name || user.email}</p>
+                  </div>
+                  {user.is_admin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors"
+                    >
+                      <Shield className="h-4 w-4 text-muted-foreground" />
+                      Admin Panel
+                    </Link>
+                  )}
+                  {!user.is_admin && (
+                    <Link
+                      href="/orders"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors"
+                    >
+                      <Package className="h-4 w-4 text-muted-foreground" />
+                      My Orders
+                    </Link>
+                  )}
+                  <Link
+                    href="/wishlist"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors"
+                  >
+                    <Heart className="h-4 w-4 text-muted-foreground" />
+                    Wishlist
+                    {wishlistCount > 0 && (
+                      <span className="ml-auto text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full font-bold">
+                        {wishlistCount}
+                      </span>
                     )}
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      asChild
-                    >
-                      <Link
-                        href="/profile"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <User className="h-4 w-4 mr-2" />
-                        My Profile
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-destructive"
-                      onClick={() => {
-                        logout();
-                        setIsMobileMenuOpen(false);
-                      }}
-                    >
-                      Logout
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button className="w-full" asChild>
-                      <Link
-                        href="/login"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        Sign In
-                      </Link>
-                    </Button>
-                    <Button variant="outline" className="w-full" asChild>
-                      <Link
-                        href="/register"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        Sign Up
-                      </Link>
-                    </Button>
-                  </>
-                )}
-              </div>
+                  </Link>
+                  <Link
+                    href="/profile"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors"
+                  >
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    My Profile
+                  </Link>
+                  <button
+                    onClick={() => { logout(); setIsMobileMenuOpen(false); }}
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-destructive hover:bg-muted transition-colors w-full"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors"
+                  >
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-primary hover:bg-muted transition-colors"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </>

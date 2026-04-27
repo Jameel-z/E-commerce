@@ -1,5 +1,4 @@
-// src/hooks/use-toast.ts
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 type Toast = {
   title: string;
@@ -10,12 +9,12 @@ type Toast = {
 export const useToast = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const toast = (newToast: Toast) => {
+  const toast = useCallback((newToast: Toast) => {
     setToasts((prev) => [...prev, newToast]);
     setTimeout(() => {
       setToasts((prev) => prev.slice(1));
-    }, 3000); // Auto-dismiss after 3 seconds
-  };
+    }, 3000);
+  }, []);
 
   return { toast, toasts };
 };

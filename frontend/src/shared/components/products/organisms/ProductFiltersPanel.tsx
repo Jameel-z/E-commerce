@@ -39,20 +39,13 @@ export function ProductFiltersPanel({
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch categories
+  // Fetch category tree
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const data = await apiClient.getCategories();
-        setCategories(data);
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCategories();
+    apiClient
+      .getCategoryTree()
+      .then(setCategories)
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
   }, []);
 
   const priceRange = getPriceRange(products);
@@ -123,15 +116,15 @@ export function ProductFiltersPanel({
   return (
     <div
       className={cn(
-        "space-y-6 p-6 bg-card rounded-lg border sticky top-4",
+        "space-y-4 p-4 bg-card rounded-lg border sticky top-4 w-fit min-w-[180px]",
         className
       )}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <SlidersHorizontal className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-bold">Filters</h2>
+          <SlidersHorizontal className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-bold">Filters</h2>
         </div>
         {hasFilters && (
           <Button variant="ghost" size="sm" onClick={handleReset}>
@@ -148,13 +141,12 @@ export function ProductFiltersPanel({
 
       {/* Categories */}
       {!isLoading && categories.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-foreground">Categories</h3>
+        <div className="space-y-1.5">
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Categories</h3>
           <CategoryFilter
-            categories={categories}
+            tree={categories}
             selected={selectedCategories}
             onChange={handleCategoryChange}
-            layout="vertical"
           />
         </div>
       )}

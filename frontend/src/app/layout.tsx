@@ -1,9 +1,10 @@
 import type React from "react";
 import type { Metadata } from "next";
 import { Space_Grotesk, DM_Sans } from "next/font/google";
-import { AuthProvider, CartProvider } from "@/shared/components";
+import { AuthProvider, CartProvider, WishlistProvider } from "@/shared/components";
 import { CartSidebarProvider } from "@/features/cart/components";
 import { MainContentWrapper } from "@/shared/components/layout/MainContentWrapper";
+import { ThemeProvider } from "@/shared/components/providers/ThemeProvider";
 import "./globals.css";
 import { CartSidebarRenderer } from "@/shared/components/layout";
 
@@ -38,14 +39,18 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="font-sans overflow-x-hidden">
-        <AuthProvider>
-          <CartSidebarProvider>
-            <CartProvider>
-              <MainContentWrapper>{children}</MainContentWrapper>
-              <CartSidebarRenderer />
-            </CartProvider>
-          </CartSidebarProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <CartSidebarProvider>
+              <CartProvider>
+                <WishlistProvider>
+                  <MainContentWrapper>{children}</MainContentWrapper>
+                  <CartSidebarRenderer />
+                </WishlistProvider>
+              </CartProvider>
+            </CartSidebarProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

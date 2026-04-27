@@ -52,6 +52,7 @@ class ProductList(BaseSchema):
     category_name: Optional[str] = None
     stock_quantity: int = Field(..., ge=0)
     description: Optional[str] = None
+    created_at: datetime
 
     model_config = ConfigDict(
         from_attributes=True,

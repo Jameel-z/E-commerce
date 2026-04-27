@@ -12,9 +12,10 @@ import { ProductImage, ProductBadge, PriceDisplay } from "../atoms";
 import { getProductImageUrl } from "@/shared/utils";
 import { useCart } from "@/shared/hooks/use-cart";
 import { useAuth } from "@/shared/hooks/use-auth";
-import { ShoppingCart, Eye, Maximize2 } from "lucide-react";
+import { ShoppingCart, Eye, Maximize2, Heart } from "lucide-react";
 import { Product } from "@/shared/types/api.types";
 import { cn } from "@/shared/utils";
+import { useWishlist } from "@/shared/hooks/use-wishlist";
 
 interface ProductCardProps {
   product: Product;
@@ -35,6 +36,7 @@ export function ProductCard({
 }: ProductCardProps) {
   const { addToCart } = useCart();
   const { user } = useAuth();
+  const { isWishlisted, toggleWishlist } = useWishlist();
   const [isAdding, setIsAdding] = useState(false);
   const [showQuickViewOverlay, setShowQuickViewOverlay] = useState(false);
 
@@ -58,6 +60,13 @@ export function ProductCard({
 
   const isCompact = variant === "compact";
   const isList = variant === "list";
+
+  const isNew = (() => {
+    if (!product.created_at) return false;
+    const created = new Date(product.created_at);
+    const diffDays = (Date.now() - created.getTime()) / (1000 * 60 * 60 * 24);
+    return diffDays <= 30;
+  })();
 
   return (
     <Card
@@ -91,12 +100,12 @@ export function ProductCard({
             className="w-full h-full"
           />
 
-          {/* Stock Badges */}
+          {/* Stock Badges - positioned below heart button */}
           {product.stock_quantity === 0 && (
             <ProductBadge
               text="Out of Stock"
               variant="sale"
-              className="absolute top-2 right-2 z-10 bg-red-600 text-white"
+              className="absolute top-10 right-2 z-10 bg-red-600 text-white"
             />
           )}
           {product.stock_quantity > 0 &&
@@ -106,9 +115,39 @@ export function ProductCard({
               <ProductBadge
                 text="Low Stock"
                 variant="stock"
-                className="absolute top-2 right-2 z-10"
+                className="absolute top-10 right-2 z-10"
               />
             )}
+
+          {/* New Badge - only when not on sale (sale ribbon occupies top-left) */}
+          {isNew && !isCompact && !product.is_on_sale && product.stock_quantity > 0 && (
+            <ProductBadge
+              text="New"
+              variant="new"
+              className="absolute top-2 left-2 z-10"
+            />
+          )}
+
+          {/* Wishlist Heart Button */}
+          {!isCompact && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleWishlist(product);
+              }}
+              className="absolute top-2 right-2 z-30 p-1.5 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow hover:scale-110 transition-transform"
+              aria-label={isWishlisted(product.id) ? "Remove from wishlist" : "Add to wishlist"}
+            >
+              <Heart
+                className={cn(
+                  "w-4 h-4 transition-colors",
+                  isWishlisted(product.id)
+                    ? "fill-red-500 text-red-500"
+                    : "text-gray-400 hover:text-red-400"
+                )}
+              />
+            </button>
+          )}
 
           {/* Quick View Overlay */}
           {!isCompact && (

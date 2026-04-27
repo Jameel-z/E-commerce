@@ -15,21 +15,17 @@ router = APIRouter(
     }
 )
 
-@router.get(
-    "/",
-    response_model=list[Category],
-    status_code=status.HTTP_200_OK
-)
+@router.get("/", response_model=list[Category], status_code=status.HTTP_200_OK)
 def get_categories(db: Session = Depends(get_db)):
-    """Get all categories - public endpoint"""
+    """Flat list of all categories (public)."""
     return category_crud.get_multi(db)
 
-@router.post(
-    "/",
-    response_model=Category,
-    status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(require_admin)]
-)
+@router.get("/tree", response_model=list[Category], status_code=status.HTTP_200_OK)
+def get_category_tree(db: Session = Depends(get_db)):
+    """Tree of top-level categories with their children (public)."""
+    return category_crud.get_tree(db)
+
+@router.post("/", response_model=Category, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
 def create_category(
     category_in: CategoryCreate,
     db: Session = Depends(get_db),
@@ -38,13 +34,15 @@ def create_category(
     existing = category_crud.get_by_name(db, name=category_in.name)
     if existing:
         raise HTTPException(status_code=400, detail="Category with this name already exists")
+    if category_in.parent_id:
+        parent = category_crud.get(db, id=category_in.parent_id)
+        if not parent:
+            raise HTTPException(status_code=404, detail="Parent category not found")
+        if parent.parent_id is not None:
+            raise HTTPException(status_code=400, detail="Only one level of nesting is allowed")
     return category_crud.create(db, obj_in=category_in)
 
-@router.delete(
-    "/{category_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Depends(require_admin)]
-)
+@router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
 def delete_category(
     category_id: int = Path(..., gt=0),
     db: Session = Depends(get_db),

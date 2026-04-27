@@ -24,6 +24,7 @@ class Product(Base):
     regular_price = Column(Numeric(10, 2), nullable=True)  # Original price (for display when on sale)
     sale_price = Column(Numeric(10, 2), nullable=True)  # Discounted price (optional)
     stock_quantity = Column(Integer, default=0)
+    reserved_quantity = Column(Integer, default=0)  # Stock reserved for pending orders
     category_id = Column(Integer, ForeignKey("categories.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

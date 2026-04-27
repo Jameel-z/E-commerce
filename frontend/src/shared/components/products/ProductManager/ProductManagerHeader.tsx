@@ -53,46 +53,42 @@ export function ProductManagerHeader({
   return (
     <div
       className={cn(
-        "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6",
+        "flex flex-wrap items-center justify-between gap-x-4 gap-y-2 mb-6",
         className
       )}
     >
-      <div className="flex items-center gap-4 flex-1">
+      <span className="text-sm font-semibold text-muted-foreground whitespace-nowrap">
+        {paginatedProducts.length}{" "}
+        {paginatedProducts.length === 1 ? "product" : "products"}
+      </span>
+
+      <div className="flex items-center gap-2 flex-wrap">
         {showSearch && (
           <SearchBar
             value={filters.search}
             onChange={handleSearchChange}
-            className="flex-1 max-w-md"
+            className="w-48"
           />
         )}
-        <h2 className="text-xl font-bold text-foreground whitespace-nowrap">
-          {paginatedProducts.length}{" "}
-          {paginatedProducts.length === 1 ? "Product" : "Products"}
-        </h2>
-      </div>
-
-      <div className="flex items-center gap-2">
         {showSort && (
-          <SortSelect value={sortBy} onChange={setSortBy} className="w-48" />
+          <SortSelect value={sortBy} onChange={setSortBy} className="w-36" />
         )}
-
         {showItemsPerPage && (
           <Select
             value={String(pagination.pageSize)}
             onValueChange={handleItemsPerPageChange}
           >
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Items per page" />
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Per page" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="5">5 per page</SelectItem>
-              <SelectItem value="10">10 per page</SelectItem>
-              <SelectItem value="20">20 per page</SelectItem>
-              <SelectItem value="50">50 per page</SelectItem>
+              <SelectItem value="5">5 / page</SelectItem>
+              <SelectItem value="10">10 / page</SelectItem>
+              <SelectItem value="20">20 / page</SelectItem>
+              <SelectItem value="50">50 / page</SelectItem>
             </SelectContent>
           </Select>
         )}
-
         {actions}
       </div>
     </div>

@@ -27,11 +27,10 @@ export default function ProductsPage() {
     >
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <ProductManager defaultPageSize={10}>
-          <div className="grid lg:grid-cols-4 gap-8">
-            {/* Filters Sidebar */}
+          <div className="lg:flex lg:gap-6 lg:items-start">
             {/* Filters Sidebar */}
             <div
-              className={`lg:col-span-1 ${
+              className={`lg:flex-shrink-0 ${
                 showFilters ? "block" : "hidden lg:block"
               }`}
             >
@@ -39,7 +38,7 @@ export default function ProductsPage() {
             </div>
 
             {/* Main Content */}
-            <div className="lg:col-span-3">
+            <div className="flex-1 min-w-0">
               {/* Mobile Filter Toggle */}
               <div className="flex items-center justify-between mb-6 lg:hidden">
                 <Button
