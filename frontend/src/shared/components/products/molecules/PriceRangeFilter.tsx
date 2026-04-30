@@ -42,11 +42,9 @@ export function PriceRangeFilter({
   };
 
   return (
-    <div className={cn("space-y-3", className)}>
-      <div className="space-y-2">
-        <Label htmlFor="min-price" className="text-sm font-medium">
-          Min Price
-        </Label>
+    <div className={cn("space-y-1.5", className)}>
+      <div className="flex items-center gap-2">
+        <Label htmlFor="min-price" className="text-xs text-muted-foreground w-7 shrink-0">Min</Label>
         <Input
           id="min-price"
           type="number"
@@ -56,13 +54,11 @@ export function PriceRangeFilter({
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             handleMinChange(e.target.value)
           }
-          className="w-full"
+          className="h-7 text-xs"
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="max-price" className="text-sm font-medium">
-          Max Price
-        </Label>
+      <div className="flex items-center gap-2">
+        <Label htmlFor="max-price" className="text-xs text-muted-foreground w-7 shrink-0">Max</Label>
         <Input
           id="max-price"
           type="number"
@@ -72,7 +68,7 @@ export function PriceRangeFilter({
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             handleMaxChange(e.target.value)
           }
-          className="w-full"
+          className="h-7 text-xs"
         />
       </div>
     </div>

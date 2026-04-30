@@ -12,7 +12,8 @@ import { API_BASE_URL } from "@/shared/constants/config";
 export const getImageUrl = (imagePath: string | null): string | null => {
   if (!imagePath) return null;
   if (imagePath.startsWith("http")) return imagePath;
-  return `${API_BASE_URL}${imagePath}`;
+  const normalized = imagePath.startsWith("/static") ? imagePath : `/static${imagePath}`;
+  return `${API_BASE_URL}${normalized}`;
 };
 
 /**

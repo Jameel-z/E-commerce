@@ -38,7 +38,7 @@ export function ProductCard({
   const { user } = useAuth();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const [isAdding, setIsAdding] = useState(false);
-  const [showQuickViewOverlay, setShowQuickViewOverlay] = useState(false);
+  const [, setShowQuickViewOverlay] = useState(false);
 
   const handleAddToCart = async () => {
     setIsAdding(true);
@@ -87,8 +87,8 @@ export function ProductCard({
         <div
           className={cn(
             "relative overflow-hidden bg-gradient-to-b from-transparent to-black/5 cursor-pointer",
-            isList ? "w-48 flex-shrink-0" : "w-full rounded-t-lg",
-            isCompact ? "h-40" : "h-56"
+            isList ? "w-48 flex-shrink-0 self-stretch" : "w-full rounded-t-lg aspect-square",
+            isCompact && "aspect-auto h-40"
           )}
           onClick={handleQuickView}
         >
@@ -100,13 +100,11 @@ export function ProductCard({
             className="w-full h-full"
           />
 
-          {/* Stock Badges - positioned below heart button */}
+          {/* Out of Stock bar - bottom of image, never overlaps No Image placeholder */}
           {product.stock_quantity === 0 && (
-            <ProductBadge
-              text="Out of Stock"
-              variant="sale"
-              className="absolute top-10 right-2 z-10 bg-red-600 text-white"
-            />
+            <div className="absolute bottom-0 left-0 right-0 z-10 bg-red-600/90 text-white text-xs font-semibold text-center py-1.5 backdrop-blur-sm">
+              Out of Stock
+            </div>
           )}
           {product.stock_quantity > 0 &&
             product.stock_quantity <= 5 &&
@@ -164,26 +162,23 @@ export function ProductCard({
         <div
           className={cn(
             "flex-grow flex flex-col",
-            isList ? "p-4" : "p-4",
-            isCompact && "p-3"
+            isList ? "p-4" : "px-2.5 py-2"
           )}
         >
-          {/* Category Badge */}
-          {product.category_name &&
-            product.category_name !== "Uncategorized" &&
-            !isCompact && (
-              <ProductBadge
-                text={product.category_name}
-                variant="category"
-                className="mb-2 w-fit"
-              />
-            )}
+          {/* Category Badge — list only */}
+          {isList && product.category_name && product.category_name !== "Uncategorized" && (
+            <ProductBadge
+              text={product.category_name}
+              variant="category"
+              className="mb-2 w-fit"
+            />
+          )}
 
           {/* Product Name */}
           <h3
             className={cn(
-              "font-bold mb-2 line-clamp-2 group-hover:text-secondary transition-colors",
-              isCompact ? "text-sm" : "text-lg"
+              "font-semibold line-clamp-2 group-hover:text-secondary transition-colors",
+              isList ? "text-base mb-2" : "text-xs mb-0.5"
             )}
             title={product.name}
           >
@@ -191,114 +186,125 @@ export function ProductCard({
           </h3>
 
           {/* Product Description */}
-          {!isCompact && (
+          {isList ? (
             <p
               className="text-muted-foreground text-sm mb-3 line-clamp-3 flex-grow"
               title={product.description ?? undefined}
             >
               {product.description}
             </p>
+          ) : (
+            product.description && (
+              <p
+                className="text-muted-foreground text-xs mb-1 line-clamp-1"
+                title={product.description}
+              >
+                {product.description}
+              </p>
+            )
           )}
 
           {/* Price */}
-          <div className={cn("mb-3", isCompact && "mb-2")}>
+          <div className={cn(isList ? "mb-3" : "mb-0.5")}>
             <PriceDisplay
               regularPrice={product.regular_price || product.price}
               salePrice={product.sale_price}
               discountPercentage={product.discount_percentage}
-              size={isCompact ? "sm" : "lg"}
-              showDiscount={!isCompact}
+              size="sm"
+              showDiscount={isList}
             />
           </div>
 
-          {/* Stock Info */}
-          <div className="mt-auto">
-            {product.stock_quantity > 0 &&
-              product.stock_quantity <= 5 &&
-              !isCompact && (
-                <div className="mb-3">
-                  <div className="flex items-center justify-between text-xs mb-1.5">
+          {/* Stock Info — list only (grid shows inline with button) */}
+          {isList && (
+            <div className="mt-auto">
+              {product.stock_quantity > 0 && product.stock_quantity <= 5 && (
+                <div className="mb-2">
+                  <div className="flex items-center justify-between text-xs mb-1">
                     <span className="text-orange-600 font-semibold">
                       Only {product.stock_quantity} left!
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                     <div
-                      className="bg-gradient-to-r from-orange-500 to-orange-600 h-2 rounded-full transition-all duration-300"
-                      style={{
-                        width: `${(product.stock_quantity / 5) * 100}%`,
-                      }}
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 h-1.5 rounded-full transition-all duration-300"
+                      style={{ width: `${(product.stock_quantity / 5) * 100}%` }}
                     />
                   </div>
                 </div>
               )}
+              {user?.is_admin === true ? (
+                <span className="text-xs text-muted-foreground font-medium">
+                  Stock: {product.stock_quantity}
+                </span>
+              ) : (
+                <div className="flex items-center gap-1">
+                  {product.stock_quantity > 0 ? (
+                    <>
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse flex-shrink-0" />
+                      <span className="text-xs text-green-700 dark:text-green-400 font-medium">In Stock</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0" />
+                      <span className="text-xs text-red-700 dark:text-red-400 font-medium">Out of Stock</span>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
-            {user?.is_admin === true ? (
-              <span className="text-sm text-muted-foreground font-medium">
-                Stock: {product.stock_quantity}
-              </span>
-            ) : (
-              <div className="flex items-center gap-1.5">
-                {product.stock_quantity > 0 ? (
-                  <>
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-green-700 dark:text-green-400 font-medium">
-                      In Stock
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                    <span className="text-sm text-red-700 dark:text-red-400 font-medium">
-                      Out of Stock
-                    </span>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
+          {/* Button + Stock inline — grid only */}
+          {!isList && (
+            <div className="mt-auto pt-1 flex items-center gap-2">
+              {showActions && actions ? actions : (
+                <>
+                  <Button
+                    onClick={handleAddToCart}
+                    disabled={isAdding || product.stock_quantity === 0}
+                    size="sm"
+                    className="flex-1 font-semibold shadow-sm hover:shadow-md transition-shadow text-xs px-2 h-7 whitespace-nowrap"
+                  >
+                    <ShoppingCart className="w-3 h-3 mr-1 flex-shrink-0" />
+                    {isAdding ? "..." : product.stock_quantity === 0 ? "Sold" : "Add"}
+                  </Button>
+                  {product.stock_quantity > 0 && (
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse flex-shrink-0" title="In Stock" />
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       </CardContent>
 
-      {/* Card Footer */}
-      <CardFooter
-        className={cn(
-          "flex flex-col gap-2",
-          isCompact ? "p-3 pt-0" : "p-4 pt-0"
-        )}
-      >
-        {/* Custom Actions (for admin) */}
-        {showActions && actions ? (
-          actions
-        ) : (
-          <>
-            {/* Add to Cart Button */}
-            <Button
-              onClick={handleAddToCart}
-              disabled={isAdding || product.stock_quantity === 0}
-              size={isCompact ? "sm" : "lg"}
-              className="w-full font-semibold shadow-sm hover:shadow-md transition-shadow"
-            >
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              {isAdding
-                ? "Adding..."
-                : product.stock_quantity === 0
-                ? "Notify Me"
-                : "Add to Cart"}
-            </Button>
-
-            {/* View Details Button */}
-            {!isCompact && (
+      {/* Card Footer — list only */}
+      {isList && (
+        <CardFooter className="flex flex-col gap-2 p-4 pt-0">
+          {showActions && actions ? (
+            actions
+          ) : (
+            <>
+              <Button
+                onClick={handleAddToCart}
+                disabled={isAdding || product.stock_quantity === 0}
+                size="sm"
+                className="w-full font-semibold shadow-sm hover:shadow-md transition-shadow"
+              >
+                <ShoppingCart className="w-4 h-4 mr-1.5" />
+                {isAdding ? "Adding..." : product.stock_quantity === 0 ? "Notify Me" : "Add to Cart"}
+              </Button>
               <Button variant="outline" size="sm" asChild className="w-full">
                 <Link href={`/products/${product.id}`}>
                   <Eye className="w-4 h-4 mr-2" />
                   View Details
                 </Link>
               </Button>
-            )}
-          </>
-        )}
-      </CardFooter>
+            </>
+          )}
+        </CardFooter>
+      )}
     </Card>
   );
 }

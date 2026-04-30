@@ -31,10 +31,10 @@ export default function AdminProductsPage() {
 
   const handleEdit = async (product: Product) => {
     try {
-      // Fetch full product details for editing
       const fullProduct = await apiClient.getProduct(product.id);
       setEditingProduct(fullProduct);
       setShowForm(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       console.error("Failed to fetch product details:", error);
     }

@@ -36,17 +36,20 @@ export function ProductGrid({
   className,
 }: ProductGridProps) {
   const columnClasses = {
-    2: "grid-cols-1 md:grid-cols-2",
-    3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
-    4: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
-    5: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5",
+    2: "grid-cols-2",
+    3: "grid-cols-2 sm:grid-cols-3",
+    4: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
+    5: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
   };
+
+  const gapClass = columns >= 4 ? "gap-2" : "gap-3";
 
   if (isLoading) {
     return (
       <div
         className={cn(
-          "grid gap-6",
+          "grid",
+          gapClass,
           cardVariant === "list" ? "grid-cols-1" : columnClasses[columns],
           className
         )}
@@ -78,7 +81,8 @@ export function ProductGrid({
   return (
     <div
       className={cn(
-        "grid gap-6",
+        "grid",
+        gapClass,
         cardVariant === "list" ? "grid-cols-1" : columnClasses[columns],
         className
       )}

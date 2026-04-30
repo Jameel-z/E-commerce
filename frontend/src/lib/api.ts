@@ -338,11 +338,35 @@ class ApiClient {
   /**
    * Create category - matches backend /categories/ POST endpoint (Admin only)
    */
-  async createCategory(name: string, parentId?: number | null): Promise<Category> {
-    return this.request<Category>("/categories/", {
+  async createCategory(name: string, parentId?: number | null, image?: File | null): Promise<Category> {
+    const token = localStorage.getItem("access_token");
+    const formData = new FormData();
+    formData.append("name", name);
+    if (parentId != null) formData.append("parent_id", String(parentId));
+    if (image) formData.append("image", image);
+    const response = await fetch(`${API_BASE_URL}/categories/`, {
       method: "POST",
-      body: JSON.stringify({ name, parent_id: parentId ?? null }),
+      headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+      body: formData,
     });
+    if (!response.ok) throw new Error(await response.text());
+    return response.json();
+  }
+
+  async updateCategory(id: number, data: { name?: string; parentId?: number | null; image?: File | null }): Promise<Category> {
+    const token = localStorage.getItem("access_token");
+    const formData = new FormData();
+    if (data.name) formData.append("name", data.name);
+    if (data.parentId != null) formData.append("parent_id", String(data.parentId));
+    if (data.parentId === null) formData.append("parent_id", "0");
+    if (data.image) formData.append("image", data.image);
+    const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
+      method: "PUT",
+      headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+      body: formData,
+    });
+    if (!response.ok) throw new Error(await response.text());
+    return response.json();
   }
 
   /**

@@ -109,46 +109,44 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
   return (
     <>
-      {/* Backdrop - only on mobile, no backdrop on desktop */}
+      {/* Backdrop - mobile only */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/30 z-40 lg:bg-transparent lg:pointer-events-none"
+          className="fixed inset-0 bg-black/30 z-40 lg:hidden"
           onClick={onClose}
         />
       )}
 
-      {/* Full Height Sidebar */}
+      {/* Sidebar */}
       <div
         className={`
-          fixed top-0 right-0 h-screen w-full sm:w-96 bg-card 
+          fixed top-0 right-0 h-screen w-64 bg-card
           shadow-2xl z-50 transform transition-transform duration-300 ease-out
           flex flex-col
           ${isOpen ? "translate-x-0" : "translate-x-full"}
         `}
       >
         {/* Fixed Header */}
-        <div className="flex items-center justify-between p-4 border-b bg-muted">
-          <div className="flex items-center gap-3">
-            <ShoppingCart className="h-6 w-6 text-primary" />
+        <div className="flex items-center justify-between px-3 py-2.5 border-b bg-muted">
+          <div className="flex items-center gap-2">
+            <ShoppingCart className="h-4 w-4 text-primary" />
             <div>
-              <h2 className="text-lg font-bold text-card-foreground">
+              <h2 className="text-sm font-bold text-card-foreground leading-tight">
                 Shopping Cart
               </h2>
               {itemCount > 0 && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {itemCount} {itemCount === 1 ? "item" : "items"}
                 </p>
               )}
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={onClose}
-            className="hover:bg-muted"
+            className="h-7 w-7 flex items-center justify-center rounded-md border border-muted-foreground/40 hover:bg-destructive hover:text-white hover:border-destructive transition-colors"
           >
-            <X className="h-5 w-5" />
-          </Button>
+            <X className="h-5 w-5" strokeWidth={2.5} />
+          </button>
         </div>
 
         {/* Scrollable Content */}
@@ -163,14 +161,14 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
           ) : !cart || cart.items.length === 0 ? (
             <div className="flex-1 flex items-center justify-center p-6">
               <div className="text-center">
-                <ShoppingCart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-card-foreground mb-2">
+                <ShoppingCart className="h-10 w-10 text-muted-foreground mx-auto mb-3 opacity-40" />
+                <h3 className="text-sm font-medium text-card-foreground mb-1">
                   Your cart is empty
                 </h3>
-                <p className="text-muted-foreground mb-6">
+                <p className="text-xs text-muted-foreground mb-4">
                   Add some products to get started
                 </p>
-                <Button onClick={onClose} className="w-full">
+                <Button onClick={onClose} size="sm" className="w-full">
                   Continue Shopping
                 </Button>
               </div>
@@ -178,71 +176,53 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
           ) : (
             <>
               {/* Cart Items - Scrollable */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="overflow-y-auto max-h-[55vh] px-3 py-2 space-y-0">
                 {cart.items.map((item) => (
-                  <div key={item.id} className="bg-muted rounded-lg p-3">
+                  <div key={item.id} className="px-1">
                     <CartItem item={item} operations={cartItemOperations} />
                   </div>
                 ))}
               </div>
 
               {/* Fixed Footer */}
-              <div className="border-t bg-muted p-4 space-y-4">
+              <div className="border-t bg-muted px-3 py-2.5 space-y-2">
                 {/* Clear Cart */}
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={handleClearCart}
-                  className="w-full text-destructive border-destructive hover:bg-destructive/10"
+                  className="w-full text-destructive border-destructive hover:bg-destructive/10 h-7 text-xs"
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <Trash2 className="h-3 w-3 mr-1.5" />
                   Clear Cart
                 </Button>
 
-                {/* Checkout Section */}
-                <div className="p-6 border-t bg-card/50">
-                  <div className="space-y-4">
-                    {/* Order Summary */}
-                    <div className="flex justify-between items-center text-lg font-semibold text-card-foreground">
-                      <span>Total</span>
-                      <span>
-                        $
-                        {isNaN(cart.total_price)
-                          ? "0.00"
-                          : cart.total_price.toFixed(2)}
-                      </span>
-                    </div>
-
-                    {/* Checkout Section */}
-                    {user ? (
-                      /* Logged-in users - go to checkout */
-                      <Button
-                        onClick={handleCheckout}
-                        className="w-full"
-                        size="lg"
-                      >
-                        <ShoppingCart className="mr-2 h-5 w-5" />
-                        Proceed to Checkout
-                      </Button>
-                    ) : (
-                      /* Guest users - must login first */
-                      <div className="space-y-2">
-                        <Button
-                          onClick={() => {
-                            onClose();
-                            router.push("/login");
-                          }}
-                          className="w-full"
-                          size="lg"
-                        >
-                          Login to Checkout
-                        </Button>
-                        <p className="text-xs text-center text-muted-foreground">
-                          You need to login to place an order
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                {/* Total */}
+                <div className="flex justify-between items-center text-sm font-semibold text-card-foreground px-0.5">
+                  <span>Total</span>
+                  <span>${isNaN(cart.total_price) ? "0.00" : cart.total_price.toFixed(2)}</span>
                 </div>
+
+                {/* Checkout */}
+                {user ? (
+                  <Button onClick={handleCheckout} className="w-full" size="sm">
+                    <ShoppingCart className="mr-2 h-3.5 w-3.5" />
+                    Proceed to Checkout
+                  </Button>
+                ) : (
+                  <div className="space-y-1">
+                    <Button
+                      onClick={() => { onClose(); router.push("/login"); }}
+                      className="w-full"
+                      size="sm"
+                    >
+                      Login to Checkout
+                    </Button>
+                    <p className="text-[10px] text-center text-muted-foreground">
+                      You need to login to place an order
+                    </p>
+                  </div>
+                )}
               </div>
             </>
           )}

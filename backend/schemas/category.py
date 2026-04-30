@@ -15,6 +15,7 @@ class CategoryBase(BaseSchema):
     )
     description: Optional[str] = Field(None, max_length=255)
     parent_id: Optional[int] = Field(None, description="ID of parent category (None = top-level)")
+    image_url: Optional[str] = Field(None, max_length=500)
 
 class CategoryCreate(CategoryBase):
     @field_validator('name')

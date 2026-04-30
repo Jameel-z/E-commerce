@@ -4,8 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2, Minus, Plus } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
-import Input from "@/shared/components/ui/input";
 import { getProductImageUrl } from "@/shared/utils/image";
 import {
   CartItem as CartItemType,
@@ -36,15 +34,6 @@ export function CartItem({ item, operations }: CartItemProps) {
     }
   };
 
-  const handleQuantityInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = parseInt(e.target.value);
-    if (value > 0 && value <= 99) {
-      updateQuantity(value);
-    }
-  };
-
   const removeItem = async () => {
     setIsUpdating(true);
     try {
@@ -60,86 +49,54 @@ export function CartItem({ item, operations }: CartItemProps) {
   const imageUrl = getProductImageUrl(item.product);
 
   return (
-    <div className="py-3 border-b border-border last:border-b-0">
-      {/* Top Row: Product Name */}
-      <div className="mb-2">
-        <Link href={`/products/${item.product.id}`}>
-          <h3 className="font-medium text-sm text-foreground hover:text-primary truncate">
-            {item.product.name}
-          </h3>
-        </Link>
-      </div>
-
-      {/* Bottom Row: Image, Price, and Controls */}
-      <div className="flex items-center gap-3">
-        {/* Product Image */}
-        <Link href={`/products/${item.product.id}`}>
-          <div className="relative w-12 h-12 rounded-md overflow-hidden bg-gray-100 flex-shrink-0 border">
-            <Image
-              src={imageUrl}
-              alt={item.product.name}
-              fill
-              className="object-cover hover:scale-105 transition-transform"
-            />
+    <div className="py-2 border-b border-border last:border-b-0">
+      <div className="flex items-start gap-2">
+        {/* Image */}
+        <Link href={`/products/${item.product.id}`} className="flex-shrink-0">
+          <div className="relative w-9 h-9 rounded border overflow-hidden bg-gray-100">
+            <Image src={imageUrl} alt={item.product.name} fill className="object-cover" />
           </div>
         </Link>
 
-        {/* Unit Price */}
-        <div className="flex-1">
-          <p className="text-sm text-muted-foreground">
-            ${productPrice.toFixed(2)} each
-          </p>
-          <p className="text-sm font-semibold text-foreground">
-            ${(productPrice * quantity).toFixed(2)} total
+        {/* Name + Price */}
+        <div className="flex-1 min-w-0">
+          <Link href={`/products/${item.product.id}`}>
+            <p className="text-xs font-medium text-foreground hover:text-primary truncate leading-tight">
+              {item.product.name}
+            </p>
+          </Link>
+          <p className="text-[10px] text-muted-foreground mt-0.5">
+            ${productPrice.toFixed(2)} × {quantity} = <span className="font-semibold text-foreground">${(productPrice * quantity).toFixed(2)}</span>
           </p>
         </div>
 
-        {/* Right Side: Quantity Controls & Remove */}
-        <div className="flex flex-col gap-2">
-          {/* Quantity Controls */}
-          <div className="flex items-center gap-1">
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 w-7 p-0 hover:bg-accent"
+        {/* Qty controls + Remove stacked */}
+        <div className="flex flex-col items-center gap-1 flex-shrink-0">
+          <div className="flex items-center border rounded overflow-hidden">
+            <button
               onClick={() => updateQuantity(quantity - 1)}
               disabled={isUpdating || quantity <= 1}
+              className="px-1 py-0.5 hover:bg-muted disabled:opacity-40 transition-colors"
             >
-              <Minus className="h-3 w-3" />
-            </Button>
-
-            <Input
-              type="number"
-              value={quantity}
-              onChange={handleQuantityInputChange}
-              className="w-12 h-7 text-center text-xs font-medium"
-              min="1"
-              max="99"
-              disabled={isUpdating}
-            />
-
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 w-7 p-0 hover:bg-accent"
+              <Minus className="h-2.5 w-2.5" />
+            </button>
+            <span className="px-1.5 py-0.5 text-xs border-x min-w-[1.25rem] text-center">{quantity}</span>
+            <button
               onClick={() => updateQuantity(quantity + 1)}
               disabled={isUpdating}
+              className="px-1 py-0.5 hover:bg-muted disabled:opacity-40 transition-colors"
             >
-              <Plus className="h-3 w-3" />
-            </Button>
+              <Plus className="h-2.5 w-2.5" />
+            </button>
           </div>
-
-          {/* Remove Button */}
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={removeItem}
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive h-7 px-2 text-xs"
             disabled={isUpdating}
+            className="text-destructive hover:text-destructive/80 transition-colors disabled:opacity-40"
+            title="Remove"
           >
-            <Trash2 className="h-3 w-3 mr-1" />
-            Remove
-          </Button>
+            <Trash2 className="h-3 w-3" />
+          </button>
         </div>
       </div>
     </div>

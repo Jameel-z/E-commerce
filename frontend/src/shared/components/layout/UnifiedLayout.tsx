@@ -3,7 +3,7 @@
 import { useAuth } from "@/shared/hooks/use-auth";
 import { ReactNode, useEffect } from "react";
 import { GlobalHeader, PageHeader, type PageHeaderProps } from "./";
-import { useRouter, usePathname } from "next/navigation"; // Add usePathname
+import { useRouter, usePathname } from "next/navigation";
 import Footer from "./Footer";
 
 interface UnifiedLayoutProps {
@@ -19,7 +19,7 @@ export function UnifiedLayout({
 }: UnifiedLayoutProps) {
   const { user } = useAuth();
   const router = useRouter();
-  const pathname = usePathname(); // Add this
+  const pathname = usePathname();
 
   useEffect(() => {
     if (user) {
@@ -35,10 +35,12 @@ export function UnifiedLayout({
   }, [user, router, pathname]);
 
   return (
-    <div className={`min-h-screen bg-background ${className}`}>
+    <div className={`min-h-screen bg-background flex flex-col ${className}`}>
       <GlobalHeader />
       {pageHeaderProps && <PageHeader {...pageHeaderProps} />}
-      <main>{children}</main>
+      <main className="bg-muted flex-1">
+        {children}
+      </main>
       <Footer />
     </div>
   );

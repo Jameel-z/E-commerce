@@ -5,9 +5,11 @@
 
 "use client";
 
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { useProducts } from "@/shared/hooks/useProducts";
 import { useProductFilters } from "@/shared/hooks/useProductFilters";
+import { apiClient } from "@/lib/api";
+import { Category } from "@/shared/types/api.types";
 import { ProductManagerProvider } from "./ProductManagerContext";
 import { ProductFiltersState, SortOption } from "@/shared/types/product.types";
 
@@ -31,6 +33,11 @@ export function ProductManagerRoot({
   defaultPageSize,
 }: ProductManagerRootProps) {
   const { products, isLoading, error, refetch } = useProducts();
+  const [categoryTree, setCategoryTree] = useState<Category[]>([]);
+
+  useEffect(() => {
+    apiClient.getCategoryTree().then(setCategoryTree).catch(() => {});
+  }, []);
 
   const {
     filters,
@@ -48,6 +55,7 @@ export function ProductManagerRoot({
     removeFilter,
   } = useProductFilters({
     products,
+    categoryTree,
     defaultFilters,
     defaultSort,
     defaultPageSize,

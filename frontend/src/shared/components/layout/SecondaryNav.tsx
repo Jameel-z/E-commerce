@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Search, ChevronDown, Phone, LayoutGrid } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import type { Category } from "@/shared/types";
+import { CONTACT } from "@/shared/constants/config";
 
 function categoryNames(cat: Category): string[] {
   return [cat.name, ...cat.children.map((c) => c.name)];
@@ -47,7 +48,7 @@ export function SecondaryNav() {
   return (
     <div className="border-b bg-muted/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center h-11 gap-3">
+        <div className="flex items-center h-9 gap-3">
 
           {/* Categories Dropdown */}
           <div className="relative flex-shrink-0" ref={dropdownRef}>
@@ -152,11 +153,11 @@ export function SecondaryNav() {
 
           {/* Phone */}
           <a
-            href="tel:+9611657725"
+            href={`tel:${CONTACT.phone.tel}`}
             className="hidden md:flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary transition-colors flex-shrink-0"
           >
             <Phone className="h-3.5 w-3.5" />
-            <span>+961 1 657 725</span>
+            <span>{CONTACT.phone.display}</span>
           </a>
         </div>
       </div>

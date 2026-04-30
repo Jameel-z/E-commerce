@@ -9,6 +9,7 @@ class Category(Base):
     name = Column(String(50), unique=True, nullable=False)
     description = Column(String(255), nullable=True)
     parent_id = Column(Integer, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True)
+    image_url = Column(String(500), nullable=True)
 
     products = relationship("Product", back_populates="category")
     parent = relationship("Category", remote_side=[id], back_populates="children", foreign_keys=[parent_id])

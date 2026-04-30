@@ -35,8 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${dmSans.variable} antialiased`}
-      suppressHydrationWarning
+      className={`${spaceGrotesk.variable} ${dmSans.variable} antialiased light`}
     >
       <body className="font-sans overflow-x-hidden">
         <ThemeProvider>

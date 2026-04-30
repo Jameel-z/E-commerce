@@ -6,6 +6,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Product } from "@/lib/api";
+import { Category } from "@/shared/types/api.types";
 import {
   ProductFiltersState,
   SortOption,
@@ -22,6 +23,7 @@ import {
 
 interface UseProductFiltersProps {
   products: Product[];
+  categoryTree?: Category[];
   defaultFilters?: Partial<ProductFiltersState>;
   defaultSort?: SortOption;
   defaultPageSize?: number;
@@ -52,6 +54,7 @@ interface UseProductFiltersReturn {
 
 export function useProductFilters({
   products,
+  categoryTree,
   defaultFilters = {},
   defaultSort = "name-asc",
   defaultPageSize = 10,
@@ -109,8 +112,8 @@ export function useProductFilters({
 
   // Apply filters
   const filteredProducts = useMemo(
-    () => filterProducts(products, filters),
-    [products, filters]
+    () => filterProducts(products, filters, categoryTree),
+    [products, filters, categoryTree]
   );
 
   // Apply sorting

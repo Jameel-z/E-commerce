@@ -13,7 +13,7 @@ import {
   getLoadingText,
 } from "../../utils";
 import { AuthInput, PasswordInput, AuthButton } from "../ui";
-import { Save, User } from "lucide-react";
+import { Save, User, KeyRound, ChevronUp } from "lucide-react";
 import { Separator } from "@/shared/components/ui/separator";
 
 interface ProfileFormProps {
@@ -27,6 +27,7 @@ export function ProfileForm({ onSuccess, className = "" }: ProfileFormProps) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showPasswordSection, setShowPasswordSection] = useState(false);
 
   const {
     register,
@@ -147,48 +148,48 @@ export function ProfileForm({ onSuccess, className = "" }: ProfileFormProps) {
           error={errors.email?.message}
           disabled={true} // Backend doesn't support email updates
         />
-        <p className="text-xs text-muted-foreground -mt-2">
-          Contact support to change your email address
-        </p>
       </div>
 
       <Separator />
 
-      {/* Password Change Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2 text-sm font-medium text-muted-foreground">
-            <span>Change Password</span>
-          </div>
-          <span className="text-xs text-muted-foreground">
-            Leave blank to keep current password
-          </span>
+      {/* Password Change Toggle */}
+      <button
+        type="button"
+        onClick={() => setShowPasswordSection((v) => !v)}
+        className="flex items-center justify-between w-full text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <KeyRound className="h-4 w-4" />
+          <span>Change Password</span>
         </div>
+        <ChevronUp className={`h-4 w-4 transition-transform ${showPasswordSection ? "" : "rotate-180"}`} />
+      </button>
 
-        {/* New Password */}
-        <PasswordInput
-          {...register("newPassword", {
-            onChange: () => clearErrors("newPassword"),
-          })}
-          label="New Password"
-          placeholder="Enter your new password"
-          error={errors.newPassword?.message}
-          disabled={isSubmitting}
-          showStrength={isChangingPassword}
-          value={newPassword}
-        />
-
-        {/* Confirm New Password */}
-        <PasswordInput
-          {...register("confirmNewPassword", {
-            onChange: () => clearErrors("confirmNewPassword"),
-          })}
-          label="Confirm New Password"
-          placeholder="Confirm your new password"
-          error={errors.confirmNewPassword?.message}
-          disabled={isSubmitting}
-        />
-      </div>
+      {/* Password Change Section */}
+      {showPasswordSection && (
+        <div className="space-y-4">
+          <PasswordInput
+            {...register("newPassword", {
+              onChange: () => clearErrors("newPassword"),
+            })}
+            label="New Password"
+            placeholder="Enter your new password"
+            error={errors.newPassword?.message}
+            disabled={isSubmitting}
+            showStrength={isChangingPassword}
+            value={newPassword}
+          />
+          <PasswordInput
+            {...register("confirmNewPassword", {
+              onChange: () => clearErrors("confirmNewPassword"),
+            })}
+            label="Confirm New Password"
+            placeholder="Confirm your new password"
+            error={errors.confirmNewPassword?.message}
+            disabled={isSubmitting}
+          />
+        </div>
+      )}
 
       {/* Submit Button */}
       <AuthButton

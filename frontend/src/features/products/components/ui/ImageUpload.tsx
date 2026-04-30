@@ -72,8 +72,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   const totalImagesCount = existingImages.length + files.length;
 
   return (
-    <div className={`space-y-3 ${className}`}>
-      <Label>{label}</Label>
+    <div className={`space-y-1.5 ${className}`}>
+      <Label className="text-xs">{label}</Label>
 
       {/* File Input */}
       <div className="relative">
@@ -87,16 +87,15 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         />
         <label
           htmlFor={`image-upload-${label.replace(/\s+/g, "-").toLowerCase()}`}
-          className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
+          className="flex flex-col items-center justify-center w-full h-16 border-2 border-dashed border-gray-300 rounded-md cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
         >
-          <div className="flex flex-col items-center justify-center pt-3 pb-3">
-            <Upload className="w-6 h-6 mb-2 text-gray-500" />
-            <p className="mb-1 text-xs text-gray-500">
-              <span className="font-semibold">Click to upload</span>
-            </p>
+          <div className="flex items-center gap-2">
+            <Upload className="w-4 h-4 text-gray-500" />
             <p className="text-xs text-gray-500">
-              {accept.includes("image") ? "PNG, JPG or WEBP" : "Files"} (MAX.{" "}
-              {maxSize}MB)
+              <span className="font-semibold">Click to upload</span>
+              <span className="text-gray-400">
+                {" "}· {accept.includes("image") ? "PNG, JPG, WEBP" : "Files"} · max {maxSize}MB
+              </span>
             </p>
           </div>
         </label>
@@ -104,20 +103,19 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
       {/* Image Previews */}
       {totalImagesCount > 0 && (
-        <div className="space-y-2">
-          <p className="text-sm font-medium">
+        <div className="space-y-1.5">
+          <p className="text-xs font-medium text-muted-foreground">
             {multiple ? "Images" : "Image"} ({totalImagesCount})
           </p>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {/* Existing Images */}
             {existingImages.map((imageUrl, index) => (
               <div
                 key={`existing-${index}`}
-                className="relative group border rounded-lg bg-white flex items-center p-3 max-w-md"
+                className="border rounded-md bg-white flex items-center p-2 gap-2"
               >
-                {/* Image Preview */}
-                <div className="w-16 h-16 mr-3 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                <div className="w-10 h-10 rounded overflow-hidden bg-gray-100 flex-shrink-0">
                   <img
                     src={imageUrl}
                     alt={`Existing image ${index + 1}`}
@@ -125,26 +123,22 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                   />
                 </div>
 
-                {/* File Info */}
-                <div className="flex-1 min-w-0 space-y-1">
-                  <p className="text-sm font-medium truncate">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate">
                     Existing Image {index + 1}
                   </p>
-                  <p className="text-xs text-green-600">Currently uploaded</p>
+                  <p className="text-[11px] text-green-600">Currently uploaded</p>
                 </div>
 
-                {/* Remove Button for Existing Images */}
                 <Button
                   type="button"
-                  variant="default"
+                  variant="destructive"
                   size="sm"
-                  className="h-8 w-8 rounded-full p-0 absolute top-2 right-2 shadow-lg"
-                  onClick={() => {
-                    console.log("🔥 Removing existing image:", imageUrl);
-                    removeExistingImage(imageUrl);
-                  }}
+                  className="h-7 px-2 flex items-center gap-1 flex-shrink-0"
+                  onClick={() => removeExistingImage(imageUrl)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3 w-3" />
+                  <span className="text-[11px]">Remove</span>
                 </Button>
               </div>
             ))}
@@ -153,10 +147,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
             {files.map((file, index) => (
               <div
                 key={`new-${index}`}
-                className="relative group border rounded-lg bg-white flex items-center p-3 max-w-md"
+                className="border rounded-md bg-white flex items-center p-2 gap-2"
               >
-                {/* Image Preview */}
-                <div className="w-16 h-16 mr-3 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                <div className="w-10 h-10 rounded overflow-hidden bg-gray-100 flex-shrink-0">
                   <img
                     src={createImagePreview(file)}
                     alt={file.name}
@@ -165,25 +158,24 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                   />
                 </div>
 
-                {/* File Info */}
-                <div className="flex-1 min-w-0 space-y-1">
-                  <p className="text-sm font-medium truncate" title={file.name}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate" title={file.name}>
                     {file.name}
                   </p>
-                  <p className="text-xs text-blue-600">
-                    New upload ({formatFileSize(file.size)})
+                  <p className="text-[11px] text-blue-600">
+                    New · {formatFileSize(file.size)}
                   </p>
                 </div>
 
-                {/* Remove Button for New Files */}
                 <Button
                   type="button"
-                  variant="default"
+                  variant="destructive"
                   size="sm"
-                  className="h-8 w-8 rounded-full p-0 absolute top-2 right-2 shadow-lg"
+                  className="h-7 px-2 flex items-center gap-1 flex-shrink-0"
                   onClick={() => removeFile(index)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3 w-3" />
+                  <span className="text-[11px]">Remove</span>
                 </Button>
               </div>
             ))}

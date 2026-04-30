@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 export default function ProfilePage() {
   return (
     <UnifiedLayout>
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto">
+      <div className="min-h-screen pb-8 px-4 sm:px-6 lg:px-8">
+        <div>
           <AuthCard
             icon={<User />}
             title="Profile Settings"

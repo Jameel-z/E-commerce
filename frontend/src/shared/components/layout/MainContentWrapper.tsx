@@ -13,9 +13,8 @@ export function MainContentWrapper({ children }: MainContentWrapperProps) {
   useEffect(() => {
     const handleResize = () => {
       if (isOpen && window.innerWidth >= 1024) {
-        // Desktop: Push content left by sidebar width
-        const sidebarWidth = window.innerWidth >= 1280 ? "384px" : "320px";
-        document.body.style.marginRight = sidebarWidth;
+        // Desktop: Push content left by sidebar width (matches w-64 = 256px)
+        document.body.style.marginRight = "256px";
         document.body.style.transition = "margin-right 0.3s ease-in-out";
       } else {
         // Mobile or closed: Remove margin

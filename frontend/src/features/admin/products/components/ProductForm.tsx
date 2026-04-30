@@ -244,217 +244,241 @@ export function ProductForm({
 
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle>{product ? "Edit Product" : "Create New Product"}</CardTitle>
+      <CardHeader className="py-3 px-5">
+        <CardTitle className="text-base">
+          {product ? "Edit Product" : "Create New Product"}
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="name">Product Name</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => updateField("name", e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="category">Category</Label>
-              <div className="w-full">
-                <Select
-                  value={formData.category_id || ""}
-                  onValueChange={(value) =>
-                    updateField("category_id", value === "" ? null : value)
-                  }
-                >
-                  <SelectTrigger>
-                    <span className="block truncate text-left">
-                      {formData.category_id ? (
-                        categories.find(
-                          (cat) => cat.id.toString() === formData.category_id
-                        )?.name ||
-                        `Unknown Category (ID: ${formData.category_id})`
-                      ) : (
-                        <span className="text-muted-foreground">
-                          Select category (optional)
-                        </span>
-                      )}
-                    </span>
-                  </SelectTrigger>
-
-                  <SelectContent>
-                    <SelectItem value="">No Category</SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem
-                        key={category.id}
-                        value={category.id.toString()}
-                      >
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+      <CardContent className="px-5 pb-4">
+        <form onSubmit={handleSubmit}>
+          <div className="grid lg:grid-cols-[3fr_2fr] gap-5 items-start">
+            {/* LEFT: Product details */}
+            <div className="space-y-3">
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Product Name</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => updateField("name", e.target.value)}
+                    className="h-8 text-sm"
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Category</Label>
+                  <Select
+                    value={formData.category_id || ""}
+                    onValueChange={(value) =>
+                      updateField("category_id", value === "" ? null : value)
+                    }
+                  >
+                    <SelectTrigger className="h-8 text-sm">
+                      <span className="block truncate text-left">
+                        {formData.category_id ? (
+                          categories.find(
+                            (cat) => cat.id.toString() === formData.category_id
+                          )?.name ||
+                          `Unknown Category (ID: ${formData.category_id})`
+                        ) : (
+                          <span className="text-muted-foreground">
+                            Select category (optional)
+                          </span>
+                        )}
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">No Category</SelectItem>
+                      {categories.map((category) => (
+                        <SelectItem
+                          key={category.id}
+                          value={category.id.toString()}
+                        >
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => updateField("description", e.target.value)}
-              placeholder="Optional product description"
-            />
-          </div>
-
-          <div className="space-y-6">
-            <ImageUpload
-              label="Primary Image"
-              multiple={false}
-              files={formData.primary_image ? [formData.primary_image] : []}
-              existingImages={
-                existingPrimaryImage ? [existingPrimaryImage] : []
-              }
-              onChange={(files) =>
-                updateField("primary_image", files[0] || null)
-              }
-              onRemoveExisting={() => setExistingPrimaryImage(null)}
-              accept="image/*"
-              maxSize={5}
-            />
-
-            <ImageUpload
-              label="Secondary Images"
-              multiple={true}
-              files={formData.secondary_images}
-              existingImages={existingSecondaryImages.map((img) => img.url)}
-              onChange={(files) => updateField("secondary_images", files)}
-              onRemoveExisting={(imageUrl) => {
-                const imageToRemove = existingSecondaryImages.find(
-                  (img) => img.url === imageUrl
-                );
-                if (imageToRemove) {
-                  setKeepSecondaryImageIds((prev) =>
-                    prev.filter((id) => id !== imageToRemove.id)
-                  );
-                  setExistingSecondaryImages((prev) =>
-                    prev.filter((img) => img.id !== imageToRemove.id)
-                  );
-                }
-              }}
-              accept="image/*"
-              maxSize={5}
-            />
-          </div>
-
-          {/* Pricing Section */}
-          <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold">Pricing</h3>
-                <p className="text-sm text-muted-foreground">
-                  Set regular price and optional sale price
-                </p>
+              <div className="space-y-1">
+                <Label className="text-xs">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => updateField("description", e.target.value)}
+                  placeholder="Optional product description"
+                  className="resize-none text-sm"
+                  rows={3}
+                />
               </div>
-              {formData.regular_price &&
-                formData.sale_price &&
-                Number.parseFloat(formData.sale_price) <
-                  Number.parseFloat(formData.regular_price) && (
-                  <span className="text-lg font-bold text-destructive">
-                    -
-                    {Math.round(
-                      (1 -
-                        Number.parseFloat(formData.sale_price) /
-                          Number.parseFloat(formData.regular_price)) *
-                        100
+
+              {/* Pricing */}
+              <div className="border rounded-md p-3 space-y-3 bg-muted/30">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-semibold">Pricing</h3>
+                    <p className="text-[11px] text-muted-foreground">
+                      Regular price and optional sale price
+                    </p>
+                  </div>
+                  {formData.regular_price &&
+                    formData.sale_price &&
+                    Number.parseFloat(formData.sale_price) <
+                      Number.parseFloat(formData.regular_price) && (
+                      <span className="text-xs font-bold text-destructive">
+                        -
+                        {Math.round(
+                          (1 -
+                            Number.parseFloat(formData.sale_price) /
+                              Number.parseFloat(formData.regular_price)) *
+                            100
+                        )}
+                        % OFF
+                      </span>
                     )}
-                    % OFF
-                  </span>
-                )}
-            </div>
+                </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="regular_price">
-                  Regular Price ($) <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="regular_price"
-                  type="number"
-                  step="0.01"
-                  value={formData.regular_price}
-                  onChange={(e) => updateField("regular_price", e.target.value)}
-                  placeholder="0.00"
-                  required
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Original/Display price
-                </p>
-              </div>
-              <div>
-                <Label htmlFor="sale_price">Sale Price ($)</Label>
-                <Input
-                  id="sale_price"
-                  type="number"
-                  step="0.01"
-                  value={formData.sale_price}
-                  onChange={(e) => updateField("sale_price", e.target.value)}
-                  placeholder="Optional"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Discounted price (must be less than regular)
-                </p>
-              </div>
-            </div>
-
-            {/* Sale Preview */}
-            {formData.regular_price &&
-              formData.sale_price &&
-              Number.parseFloat(formData.sale_price) <
-                Number.parseFloat(formData.regular_price) && (
-                <div className="bg-background p-4 rounded-lg border-2 border-destructive/20">
-                  <p className="text-sm font-medium mb-2 text-muted-foreground">
-                    Customer will see:
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl font-bold text-destructive">
-                      ${Number.parseFloat(formData.sale_price).toFixed(2)}
-                    </span>
-                    <span className="text-lg text-muted-foreground line-through">
-                      ${Number.parseFloat(formData.regular_price).toFixed(2)}
-                    </span>
-                    <span className="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs font-bold">
-                      SALE
-                    </span>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">
+                      Regular Price ($){" "}
+                      <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="regular_price"
+                      type="number"
+                      step="0.01"
+                      value={formData.regular_price}
+                      onChange={(e) =>
+                        updateField("regular_price", e.target.value)
+                      }
+                      placeholder="0.00"
+                      className="h-8 text-sm"
+                      required
+                    />
+                    <p className="text-[11px] text-muted-foreground">
+                      Original/Display price
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Sale Price ($)</Label>
+                    <Input
+                      id="sale_price"
+                      type="number"
+                      step="0.01"
+                      value={formData.sale_price}
+                      onChange={(e) =>
+                        updateField("sale_price", e.target.value)
+                      }
+                      placeholder="Optional"
+                      className="h-8 text-sm"
+                    />
+                    <p className="text-[11px] text-muted-foreground">
+                      Must be less than regular price
+                    </p>
                   </div>
                 </div>
-              )}
-          </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="stock_quantity">Stock Quantity</Label>
-              <Input
-                id="stock_quantity"
-                type="number"
-                value={formData.stock_quantity}
-                onChange={(e) => updateField("stock_quantity", e.target.value)}
-                placeholder="0"
+                {formData.regular_price &&
+                  formData.sale_price &&
+                  Number.parseFloat(formData.sale_price) <
+                    Number.parseFloat(formData.regular_price) && (
+                    <div className="bg-background p-2 rounded border-2 border-destructive/20">
+                      <p className="text-[11px] font-medium mb-1 text-muted-foreground">
+                        Customer will see:
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-base font-bold text-destructive">
+                          ${Number.parseFloat(formData.sale_price).toFixed(2)}
+                        </span>
+                        <span className="text-sm text-muted-foreground line-through">
+                          $
+                          {Number.parseFloat(formData.regular_price).toFixed(2)}
+                        </span>
+                        <span className="bg-destructive text-destructive-foreground px-1.5 py-0.5 rounded text-[11px] font-bold">
+                          SALE
+                        </span>
+                      </div>
+                    </div>
+                  )}
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Stock Quantity</Label>
+                  <Input
+                    id="stock_quantity"
+                    type="number"
+                    value={formData.stock_quantity}
+                    onChange={(e) =>
+                      updateField("stock_quantity", e.target.value)
+                    }
+                    placeholder="0"
+                    className="h-8 text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT: Images */}
+            <div className="space-y-3 lg:sticky lg:top-4">
+              <ImageUpload
+                label="Primary Image"
+                multiple={false}
+                files={formData.primary_image ? [formData.primary_image] : []}
+                existingImages={
+                  existingPrimaryImage ? [existingPrimaryImage] : []
+                }
+                onChange={(files) =>
+                  updateField("primary_image", files[0] || null)
+                }
+                onRemoveExisting={() => setExistingPrimaryImage(null)}
+                accept="image/*"
+                maxSize={5}
+              />
+
+              <ImageUpload
+                label="Secondary Images"
+                multiple={true}
+                files={formData.secondary_images}
+                existingImages={existingSecondaryImages.map((img) => img.url)}
+                onChange={(files) => updateField("secondary_images", files)}
+                onRemoveExisting={(imageUrl) => {
+                  const imageToRemove = existingSecondaryImages.find(
+                    (img) => img.url === imageUrl
+                  );
+                  if (imageToRemove) {
+                    setKeepSecondaryImageIds((prev) =>
+                      prev.filter((id) => id !== imageToRemove.id)
+                    );
+                    setExistingSecondaryImages((prev) =>
+                      prev.filter((img) => img.id !== imageToRemove.id)
+                    );
+                  }
+                }}
+                accept="image/*"
+                maxSize={5}
               />
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <Button type="submit" disabled={isSubmitting}>
+          {/* Actions */}
+          <div className="flex gap-2 mt-4 pt-3 border-t">
+            <Button type="submit" size="sm" disabled={isSubmitting}>
               {isSubmitting
                 ? "Saving..."
                 : mode === "edit"
                 ? "Update Product"
                 : "Create Product"}
             </Button>
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onCancel}
+            >
               Cancel
             </Button>
           </div>

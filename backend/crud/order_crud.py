@@ -136,23 +136,18 @@ class OrderCRUD(CRUDBase[Order, OrderCreate, OrderUpdate]):
         
         old_status = order.status
 
-        # pending → processing: commit the reservation into an actual deduction
-        if new_status == "processing" and old_status == "pending":
+        # → delivered: deduct actual stock and release the reservation
+        if new_status == "delivered":
             if order_items:
                 for item in order_items:
                     self.confirm_stock(db, item.product_id, item.quantity)
 
-        # cancelled from pending: release the reservation (stock never deducted)
-        elif new_status == "cancelled" and old_status == "pending":
+        # cancelled at any pre-delivery stage: just release the reservation
+        # (stock was never actually deducted, only reserved)
+        elif new_status == "cancelled" and old_status in ("pending", "processing", "shipped"):
             if order_items:
                 for item in order_items:
                     self.release_stock(db, item.product_id, item.quantity)
-
-        # cancelled from processing: restore the actual stock (reservation already gone)
-        elif new_status == "cancelled" and old_status == "processing":
-            if order_items:
-                for item in order_items:
-                    self.restore_stock(db, item.product_id, item.quantity)
         
         order.status = new_status
         db.commit()

@@ -56,6 +56,24 @@ class ImageService:
             raise HTTPException(status_code=500, detail="Failed to save image")
     
     @staticmethod
+    async def save_category_image(file: UploadFile, category_id: int) -> str:
+        """Save category image and return relative path"""
+        category_dir = Path(settings.STATIC_DIR) / "categories" / str(category_id)
+        category_dir.mkdir(parents=True, exist_ok=True)
+        ext = Path(file.filename).suffix.lower()
+        filename = f"img_{os.urandom(4).hex()}{ext}"
+        save_path = category_dir / filename
+        try:
+            with open(save_path, "wb") as buffer:
+                buffer.write(await file.read())
+            return f"/categories/{category_id}/{filename}"
+        except Exception as e:
+            if save_path.exists():
+                save_path.unlink()
+            logger.error(f"Failed to save category image: {str(e)}")
+            raise HTTPException(status_code=500, detail="Failed to save category image")
+
+    @staticmethod
     def delete_image(relative_path: str) -> bool:
         """Delete image file"""
         full_path = Path(settings.STATIC_DIR) / relative_path.lstrip('/')

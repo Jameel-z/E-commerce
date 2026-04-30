@@ -3,7 +3,7 @@
  * Core business logic for product calculations, filtering, and sorting
  */
 
-import { Product } from "../types/api.types";
+import { Product, Category } from "../types/api.types";
 import { ProductFiltersState, SortOption } from "../types/product.types";
 
 /**
@@ -58,7 +58,8 @@ export function getDiscountPercentage(product: Product): number {
  */
 export function filterProducts(
   products: Product[],
-  filters: ProductFiltersState
+  filters: ProductFiltersState,
+  categoryTree?: Category[]
 ): Product[] {
   let filtered = [...products];
 
@@ -81,10 +82,18 @@ export function filterProducts(
     : [];
 
   if (categories.length > 0) {
-    filtered = filtered.filter((product) => {
-      const productCategory = product.category_name || "Uncategorized";
-      return categories.includes(productCategory);
-    });
+    const matchingNames = new Set<string>(categories);
+    if (categoryTree) {
+      for (const selectedName of categories) {
+        const parent = categoryTree.find((c) => c.name === selectedName);
+        if (parent?.children) {
+          parent.children.forEach((child) => matchingNames.add(child.name));
+        }
+      }
+    }
+    filtered = filtered.filter((product) =>
+      matchingNames.has(product.category_name || "Uncategorized")
+    );
   }
 
   // Price range filter

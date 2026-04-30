@@ -116,44 +116,43 @@ export function ProductFiltersPanel({
   return (
     <div
       className={cn(
-        "space-y-4 p-4 bg-card rounded-lg border sticky top-4 w-fit min-w-[180px]",
+        "space-y-3 p-3 bg-card rounded-lg border sticky top-4 w-[160px]",
         className
       )}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <SlidersHorizontal className="h-4 w-4 text-primary" />
-          <h2 className="text-sm font-bold">Filters</h2>
+        <div className="flex items-center gap-1.5">
+          <SlidersHorizontal className="h-3.5 w-3.5 text-primary" />
+          <h2 className="text-xs font-bold uppercase tracking-wide">Filters</h2>
         </div>
         {hasFilters && (
-          <Button variant="ghost" size="sm" onClick={handleReset}>
-            <X className="h-4 w-4" />
+          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={handleReset}>
+            <X className="h-3.5 w-3.5" />
           </Button>
         )}
       </div>
 
       {/* Search */}
-      <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-foreground">Search</h3>
-        <SearchBar value={filters.search} onChange={handleSearchChange} />
-      </div>
+      <SearchBar value={filters.search} onChange={handleSearchChange} />
 
       {/* Categories */}
       {!isLoading && categories.length > 0 && (
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Categories</h3>
-          <CategoryFilter
-            tree={categories}
-            selected={selectedCategories}
-            onChange={handleCategoryChange}
-          />
+          <div className="max-h-40 overflow-y-auto pr-0.5 scrollbar-thin">
+            <CategoryFilter
+              tree={categories}
+              selected={selectedCategories}
+              onChange={handleCategoryChange}
+            />
+          </div>
         </div>
       )}
 
       {/* Price Range */}
-      <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-foreground">Price Range</h3>
+      <div className="space-y-1">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Price Range</h3>
         <PriceRangeFilter
           min={priceRange.min}
           max={priceRange.max}
@@ -163,23 +162,18 @@ export function ProductFiltersPanel({
         />
       </div>
 
-      {/* Sale Filter */}
-      <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-foreground">Offers</h3>
+      {/* Sale + Stock — merged into one compact row group */}
+      <div className="space-y-1.5">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Quick Filters</h3>
         <SaleFilter checked={filters.onSale} onChange={handleSaleChange} />
-      </div>
-
-      {/* Stock Filter */}
-      <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-foreground">Availability</h3>
         <StockFilter checked={filters.inStock} onChange={handleStockChange} />
       </div>
 
       {/* Reset Button */}
       {hasFilters && (
-        <Button variant="outline" className="w-full" onClick={handleReset}>
-          <X className="h-4 w-4 mr-2" />
-          Clear All Filters
+        <Button variant="outline" size="sm" className="w-full" onClick={handleReset}>
+          <X className="h-3.5 w-3.5 mr-1.5" />
+          Clear Filters
         </Button>
       )}
     </div>

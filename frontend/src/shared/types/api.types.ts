@@ -11,6 +11,7 @@ export interface Category {
   name: string;
   description?: string | null;
   parent_id: number | null;
+  image_url?: string | null;
   children: Category[];
 }
 
