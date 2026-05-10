@@ -214,7 +214,7 @@ export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalPro
                 onClick={handleAddToCart}
                 disabled={isAddingToCart}
                 className="w-full mb-2"
-                size="default"
+                size="md"
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 {isAddingToCart ? "Adding..." : "Add to Cart"}

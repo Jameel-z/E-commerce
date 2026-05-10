@@ -74,7 +74,7 @@ class GuestCart {
             images: [],
             created_at: new Date().toISOString(),
             updated_at: null,
-          } as ProductDetail),
+          } as unknown as ProductDetail),
         added_at: new Date().toISOString(),
         updated_at: null,
       });

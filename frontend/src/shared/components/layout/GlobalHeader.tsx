@@ -11,14 +11,10 @@ import {
   Shield,
   Menu,
   X,
-  Moon,
-  Sun,
   Package,
   Heart,
 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useTheme } from "@/shared/hooks/use-theme";
-import { Monitor } from "lucide-react";
+import { useState } from "react";
 import { SecondaryNav } from "./SecondaryNav";
 import { useWishlist } from "@/shared/hooks/use-wishlist";
 
@@ -29,20 +25,8 @@ interface GlobalHeaderProps {
 export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
   const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const { openSidebar } = useCartSidebar();
-  const { theme, setTheme } = useTheme();
   const { count: wishlistCount } = useWishlist();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const toggleTheme = () => {
-    setTheme(
-      theme === "light" ? "dark" : theme === "dark" ? "system" : "light"
-    );
-  };
 
   return (
     <header

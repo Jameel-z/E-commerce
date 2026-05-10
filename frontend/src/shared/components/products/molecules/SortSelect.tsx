@@ -30,7 +30,7 @@ const sortOptions: { value: SortOption; label: string }[] = [
 
 export function SortSelect({ value, onChange, className }: SortSelectProps) {
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={value} onValueChange={(v) => onChange(v as SortOption)}>
       <SelectTrigger className={className}>
         <SelectValue placeholder="Sort by" />
       </SelectTrigger>

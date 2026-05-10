@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import { UnifiedLayout } from "@/shared/components/layout/UnifiedLayout";
 import { AuthCard } from "@/features/auth/components/ui";
 import { RegisterForm } from "@/features/auth/components/forms";
@@ -19,7 +20,9 @@ export default function RegisterPage() {
             title="Create Account"
             subtitle="Join us today and start your shopping journey"
           >
-            <RegisterForm />
+            <Suspense>
+              <RegisterForm />
+            </Suspense>
           </AuthCard>
         </div>
       </div>

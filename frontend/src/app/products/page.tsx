@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { UnifiedLayout } from "@/shared/components";
 import { ProductManager } from "@/shared/components/products/ProductManager";
 import { Button } from "@/shared/components/ui/button";
@@ -26,6 +26,7 @@ export default function ProductsPage() {
       }}
     >
       <div className="w-full px-3 sm:px-4 lg:px-6 py-4">
+        <Suspense>
         <ProductManager defaultPageSize={10}>
           <div className="lg:flex lg:gap-3 lg:items-start">
             {/* Filters Sidebar */}
@@ -68,6 +69,7 @@ export default function ProductsPage() {
             </div>
           </div>
         </ProductManager>
+        </Suspense>
       </div>
 
       {/* Quick View Modal */}

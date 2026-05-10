@@ -1,13 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import users, products, categories, carts, orders
-from database import create_database, create_tables
+from database import create_database, create_tables, SessionLocal
 from fastapi.staticfiles import StaticFiles
 from core.config import settings
 from core.middleware import cleanup_temp_files
+from core.seed import seed_admin
 
 create_database()
 create_tables()
+
+with SessionLocal() as db:
+    seed_admin(db)
 
 # Add parent_id to categories if it doesn't exist yet (safe migration)
 from database import engine
@@ -24,7 +28,7 @@ app = FastAPI(title="E-commerce Backend API")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

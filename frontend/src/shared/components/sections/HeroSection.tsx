@@ -67,7 +67,7 @@ export function HeroSection() {
           Discover amazing products at unbeatable prices.
         </p>
 
-        <Button size="default" className="px-8" asChild>
+        <Button size="lg" className="px-8" asChild>
           <Link href="/products">
             <Package className="h-4 w-4 mr-2" />
             Start Shopping

@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import { UnifiedLayout } from "@/shared/components/layout/UnifiedLayout";
 import { AuthCard } from "@/features/auth/components/ui";
 import { LoginForm } from "@/features/auth/components/forms";
@@ -19,7 +20,9 @@ export default function LoginPage() {
             title="Welcome Back"
             subtitle="Sign in to your account to continue shopping"
           >
-            <LoginForm />
+            <Suspense>
+              <LoginForm />
+            </Suspense>
           </AuthCard>
         </div>
       </div>

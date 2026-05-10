@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { AdminLayout } from "@/features/admin/components/admin-layout";
 import { Button } from "@/shared/components/ui/button";
 import { Plus, Edit, Trash2 } from "lucide-react";
@@ -109,6 +109,7 @@ export default function AdminProductsPage() {
         )}
 
         {/* Product Manager */}
+        <Suspense>
         <ProductManager defaultPageSize={10}>
           {/* Header with Add Product Button */}
           <ProductManager.Header
@@ -132,6 +133,7 @@ export default function AdminProductsPage() {
             renderActions={renderProductActions}
           />
         </ProductManager>
+        </Suspense>
       </div>
     </AdminLayout>
   );
