@@ -6,7 +6,7 @@ from .product import ProductDetail
 
 class OrderItemBase(BaseSchema):
     """Base fields for order line items"""
-    product_id: int = Field(..., gt=0, examples=[123])
+    product_id: Optional[int] = Field(None, examples=[123])
     quantity: int = Field(..., gt=0, le=1000, examples=[2])
     price_at_order: Decimal = Field(
         ...,

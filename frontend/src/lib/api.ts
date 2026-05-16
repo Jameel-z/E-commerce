@@ -188,6 +188,9 @@ class ApiClient {
     if (productData.description) {
       formData.append("description", productData.description);
     }
+    if (productData.full_description) {
+      formData.append("full_description", productData.full_description);
+    }
 
     // Only append category_id if it exists (following your login pattern)
     if (productData.category_id) {
@@ -255,6 +258,9 @@ class ApiClient {
     }
     if (productData.description) {
       formData.append("description", productData.description);
+    }
+    if (productData.full_description) {
+      formData.append("full_description", productData.full_description);
     }
     if (productData.category_id !== undefined) {
       formData.append("category_id", productData.category_id.toString());
