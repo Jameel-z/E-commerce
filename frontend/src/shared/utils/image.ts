@@ -6,15 +6,20 @@ import { API_BASE_URL } from "@/shared/constants/config";
 
 export const getImageUrl = (imagePath: string | null): string | null => {
   if (!imagePath) return null;
-  // Strip localhost URLs stored in DB with wrong domain — treat as relative path
-  if (imagePath.startsWith("http://localhost") || imagePath.startsWith("https://localhost")) {
+  // Re-base any absolute URL that points to a backend static file
+  // This handles domain changes (localhost ↔ api.961shop.com) without DB migrations
+  if (imagePath.startsWith("http")) {
     try {
-      imagePath = new URL(imagePath).pathname;
+      const url = new URL(imagePath);
+      if (url.pathname.startsWith("/static/")) {
+        imagePath = url.pathname;
+      } else {
+        return imagePath;
+      }
     } catch {
-      // fall through
+      return imagePath;
     }
   }
-  if (imagePath.startsWith("http")) return imagePath;
   const normalized = imagePath.startsWith("/static") ? imagePath : `/static${imagePath}`;
   return `${API_BASE_URL}${normalized}`;
 };
