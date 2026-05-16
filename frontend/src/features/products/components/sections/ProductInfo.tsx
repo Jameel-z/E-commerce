@@ -36,14 +36,17 @@ export function ProductInfo({ product, className = "" }: ProductInfoProps) {
         />
       </div>
 
-      {/* Description */}
+      {/* Short Description — rendered as rich HTML */}
       {product.description && (
-        <div>
-          <h3 className="font-semibold mb-2">Description</h3>
-          <p className="text-muted-foreground leading-relaxed">
-            {product.description}
-          </p>
-        </div>
+        <div
+          className="prose prose-sm max-w-none text-muted-foreground
+            [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold
+            [&_h3]:text-lg [&_h3]:font-semibold
+            [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5
+            [&_strong]:font-semibold [&_em]:italic [&_u]:underline
+            [&_a]:text-blue-600 [&_a]:underline [&_p]:mb-1"
+          dangerouslySetInnerHTML={{ __html: product.description }}
+        />
       )}
 
       {/* Availability Status */}

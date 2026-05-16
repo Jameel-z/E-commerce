@@ -19,7 +19,6 @@ import {
   Button,
   Input,
   Label,
-  Textarea,
   Select,
   SelectContent,
   SelectItem,
@@ -334,14 +333,10 @@ export function ProductForm({
                   Short Description{" "}
                   <span className="text-muted-foreground font-normal">— shown in Quick View</span>
                 </Label>
-                <Textarea
-                  id="description"
+                <RichTextEditor
                   value={formData.description}
-                  onChange={(e) => updateField("description", e.target.value)}
+                  onChange={(val) => updateField("description", val)}
                   placeholder="Brief summary shown in quick view and product cards"
-                  className="resize-none text-sm"
-                  rows={3}
-                  maxLength={5000}
                 />
               </div>
 

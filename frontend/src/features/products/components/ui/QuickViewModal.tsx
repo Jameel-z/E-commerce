@@ -12,6 +12,7 @@ import { useCart } from "@/shared/hooks/use-cart";
 import { useToast } from "@/shared/hooks/use-toast";
 import { Loader2, AlertCircle, ShoppingCart, ExternalLink } from "lucide-react";
 import { Button } from "@/shared/components/ui";
+import { stripHtml } from "@/shared/utils";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -175,17 +176,41 @@ export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalPro
               {/* Description */}
               {product.description && (
                 <p className="text-xs text-muted-foreground line-clamp-3 mb-3 leading-relaxed">
-                  {product.description}
+                  {stripHtml(product.description)}
                 </p>
               )}
 
               {/* Stock */}
-              <div className="flex items-center gap-1.5 mb-4">
+              <div className="flex items-center gap-1.5 mb-2">
                 <div className={`w-2 h-2 rounded-full flex-shrink-0 ${product.stock_quantity > 0 ? "bg-green-500" : "bg-orange-400"}`} />
                 <span className="text-xs text-muted-foreground">
                   {product.stock_quantity > 0 ? "In Stock" : "Out of Stock"}
                 </span>
               </div>
+
+              {/* SKU / Categories / Tag / Brand */}
+              {(() => {
+                const p = product as any;
+                const rows = [
+                  p.sku               ? { label: "SKU",        value: p.sku }               : null,
+                  product.category?.name ? { label: "Categories", value: product.category.name } : null,
+                  p.tags              ? { label: "Tag",        value: p.tags }              : null,
+                  p.brand             ? { label: "Brand",      value: p.brand, bold: true }  : null,
+                ].filter(Boolean) as { label: string; value: string; bold?: boolean }[];
+                if (!rows.length) return null;
+                return (
+                  <div className="border-t mb-3">
+                    {rows.map(({ label, value, bold }) => (
+                      <div key={label} className="flex gap-2 text-xs py-1.5 border-b text-muted-foreground">
+                        <span className="w-20 shrink-0">{label}:</span>
+                        {bold
+                          ? <strong className="text-foreground">{value}</strong>
+                          : <span className="text-foreground">{value}</span>}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
 
               <div className="flex-1" />
 

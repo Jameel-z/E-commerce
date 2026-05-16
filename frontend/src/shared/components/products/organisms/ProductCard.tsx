@@ -9,7 +9,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardFooter, Button } from "@/shared/components";
 import { ProductImage, ProductBadge, PriceDisplay } from "../atoms";
-import { getProductImageUrl } from "@/shared/utils";
+import { getProductImageUrl, stripHtml } from "@/shared/utils";
 import { useCart } from "@/shared/hooks/use-cart";
 import { useAuth } from "@/shared/hooks/use-auth";
 import { ShoppingCart, Eye, Maximize2, Heart } from "lucide-react";
@@ -189,17 +189,17 @@ export function ProductCard({
           {isList ? (
             <p
               className="text-muted-foreground text-sm mb-3 line-clamp-3 flex-grow"
-              title={product.description ?? undefined}
+              title={stripHtml(product.description) || undefined}
             >
-              {product.description}
+              {stripHtml(product.description)}
             </p>
           ) : (
             product.description && (
               <p
                 className="text-muted-foreground text-xs mb-1 line-clamp-1"
-                title={product.description}
+                title={stripHtml(product.description)}
               >
-                {product.description}
+                {stripHtml(product.description)}
               </p>
             )
           )}
