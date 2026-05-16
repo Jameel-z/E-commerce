@@ -20,7 +20,10 @@ class Product(Base):
     name = Column(String, nullable=False)
     description = Column(String)
     full_description = Column(Text, nullable=True)
-    primary_image_url = Column(String) 
+    sku = Column(String(100), nullable=True, unique=True)
+    brand = Column(String(100), nullable=True)
+    tags = Column(String(500), nullable=True)  # Comma-separated tags
+    primary_image_url = Column(String)
     price = Column(Numeric(10, 2), nullable=False)  # Current price (what customer pays)
     regular_price = Column(Numeric(10, 2), nullable=True)  # Original price (for display when on sale)
     sale_price = Column(Numeric(10, 2), nullable=True)  # Discounted price (optional)

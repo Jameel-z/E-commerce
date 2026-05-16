@@ -7,6 +7,7 @@ import { MainContentWrapper } from "@/shared/components/layout/MainContentWrappe
 import { ThemeProvider } from "@/shared/components/providers/ThemeProvider";
 import "./globals.css";
 import { CartSidebarRenderer } from "@/shared/components/layout";
+import { WhatsAppButton } from "@/shared/components/ui/WhatsAppButton";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -45,6 +46,7 @@ export default function RootLayout({
                 <WishlistProvider>
                   <MainContentWrapper>{children}</MainContentWrapper>
                   <CartSidebarRenderer />
+                  <WhatsAppButton />
                 </WishlistProvider>
               </CartProvider>
             </CartSidebarProvider>

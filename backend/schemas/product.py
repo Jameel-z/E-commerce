@@ -53,6 +53,9 @@ class ProductList(BaseSchema):
     stock_quantity: int = Field(..., ge=0)
     description: Optional[str] = None
     full_description: Optional[str] = None
+    sku: Optional[str] = None
+    brand: Optional[str] = None
+    tags: Optional[str] = None
     created_at: datetime
 
     model_config = ConfigDict(
@@ -89,6 +92,9 @@ class ProductBase(BaseSchema):
         default=None,
         description="Rich HTML content for the full product detail page"
     )
+    sku: Optional[str] = Field(default=None, max_length=100, examples=["KI1602SUM"])
+    brand: Optional[str] = Field(default=None, max_length=100, examples=["PITAKA"])
+    tags: Optional[str] = Field(default=None, max_length=500, examples=["PITAKA Iphone 16 Pro Max Edge Case"])
     price: Decimal = Field(..., gt=0, decimal_places=2)
     regular_price: Optional[Decimal] = Field(None, gt=0, decimal_places=2)
     sale_price: Optional[Decimal] = Field(None, gt=0, decimal_places=2)
@@ -127,6 +133,9 @@ class ProductUpdate(BaseSchema):
     name: Optional[str] = Field(None, min_length=2, max_length=255)
     description: Optional[str] = Field(None, max_length=5000)
     full_description: Optional[str] = Field(None)
+    sku: Optional[str] = Field(None, max_length=100)
+    brand: Optional[str] = Field(None, max_length=100)
+    tags: Optional[str] = Field(None, max_length=500)
     price: Optional[Annotated[Decimal, Field(gt=0, decimal_places=2)]] = None
     regular_price: Optional[Annotated[Decimal, Field(gt=0, decimal_places=2)]] = None
     sale_price: Optional[Annotated[Decimal, Field(gt=0, decimal_places=2)]] = None
@@ -159,6 +168,9 @@ class ProductDetail(TimestampSchema, ProductBase):
     sale_price: Optional[Decimal] = None
     is_on_sale: bool = False
     discount_percentage: Optional[int] = None
+    sku: Optional[str] = None
+    brand: Optional[str] = None
+    tags: Optional[str] = None
     category: Optional["Category"] = None
     secondary_images: List[ProductImage] = Field(default_factory=list, alias="images")
     created_at: datetime

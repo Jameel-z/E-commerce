@@ -32,6 +32,9 @@ interface ProductFormData {
   name: string;
   description: string;
   full_description: string;
+  sku: string;
+  brand: string;
+  tags: string;
   stock_quantity: string;
   category_id: string;
   primary_image: File | null;
@@ -52,6 +55,9 @@ const initialFormData: ProductFormData = {
   name: "",
   description: "",
   full_description: "",
+  sku: "",
+  brand: "",
+  tags: "",
   stock_quantity: "",
   category_id: "",
   primary_image: null,
@@ -153,6 +159,9 @@ export function ProductForm({
           name: formData.name,
           description: formData.description || undefined,
           full_description: formData.full_description || undefined,
+          sku: formData.sku || undefined,
+          brand: formData.brand || undefined,
+          tags: formData.tags || undefined,
           price: salePrice || regularPrice,
           stock_quantity: Number.parseInt(formData.stock_quantity) || 0,
           category_id: formData.category_id
@@ -181,6 +190,9 @@ export function ProductForm({
           name: formData.name,
           description: formData.description || undefined,
           full_description: formData.full_description || undefined,
+          sku: formData.sku || undefined,
+          brand: formData.brand || undefined,
+          tags: formData.tags || undefined,
           price: salePrice || regularPrice,
           stock_quantity: Number.parseInt(formData.stock_quantity) || 0,
           category_id: formData.category_id
@@ -222,6 +234,9 @@ export function ProductForm({
         name: product.name || "",
         description: product.description || "",
         full_description: (product as any).full_description || "",
+        sku: (product as any).sku || "",
+        brand: (product as any).brand || "",
+        tags: (product as any).tags || "",
         stock_quantity: product.stock_quantity?.toString() || "",
         category_id: product.category_id?.toString() || "",
         primary_image: null,
@@ -328,6 +343,40 @@ export function ProductForm({
                   rows={3}
                   maxLength={5000}
                 />
+              </div>
+
+              {/* SKU / Brand / Tags */}
+              <div className="grid sm:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">SKU</Label>
+                  <Input
+                    value={formData.sku}
+                    onChange={(e) => updateField("sku", e.target.value)}
+                    placeholder="e.g. KI1602SUM"
+                    className="h-8 text-sm"
+                    maxLength={100}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Brand</Label>
+                  <Input
+                    value={formData.brand}
+                    onChange={(e) => updateField("brand", e.target.value)}
+                    placeholder="e.g. PITAKA"
+                    className="h-8 text-sm"
+                    maxLength={100}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Tag</Label>
+                  <Input
+                    value={formData.tags}
+                    onChange={(e) => updateField("tags", e.target.value)}
+                    placeholder="e.g. iPhone 16 Case"
+                    className="h-8 text-sm"
+                    maxLength={500}
+                  />
+                </div>
               </div>
 
               <div className="space-y-1">

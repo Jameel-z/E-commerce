@@ -34,10 +34,10 @@ export function AddToCartSection({
           <Button
             onClick={onAddToCart}
             disabled={isAddingToCart}
-            className="w-full"
+            className="w-full h-14 text-base font-bold tracking-widest uppercase"
             size="lg"
           >
-            <ShoppingCart className="h-4 w-4 mr-2" />
+            <ShoppingCart className="h-5 w-5 mr-2" />
             {isAddingToCart ? "Adding to Cart..." : "Add to Cart Anyway"}
           </Button>
         </CardContent>
@@ -57,10 +57,10 @@ export function AddToCartSection({
         <Button
           onClick={onAddToCart}
           disabled={isAddingToCart}
-          className="w-full"
+          className="w-full h-14 text-base font-bold tracking-widest uppercase"
           size="lg"
         >
-          <ShoppingCart className="h-4 w-4 mr-2" />
+          <ShoppingCart className="h-5 w-5 mr-2" />
           {isAddingToCart ? "Adding to Cart..." : "Add to Cart"}
         </Button>
       </CardContent>

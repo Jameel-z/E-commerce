@@ -64,6 +64,10 @@ export interface ProductDetail {
   sale_price: string | null;
   is_on_sale: boolean;
   discount_percentage: number | null;
+  sku: string | null;
+  brand: string | null;
+  tags: string | null;
+  full_description: string | null;
 }
 
 // ========================================
@@ -76,9 +80,13 @@ export interface ProductDetail {
 export interface ProductCreateRequest {
   name: string;
   description?: string;
+  full_description?: string;
+  sku?: string;
+  brand?: string;
+  tags?: string;
   price: number;
   stock_quantity: number;
-  category_id?: number; // Make optional
+  category_id?: number;
   primary_image?: File;
   secondary_images?: File[];
   regular_price?: number;

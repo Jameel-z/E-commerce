@@ -24,6 +24,15 @@ with engine.connect() as conn:
     conn.execute(text(
         "ALTER TABLE products ADD COLUMN IF NOT EXISTS full_description TEXT"
     ))
+    conn.execute(text(
+        "ALTER TABLE products ADD COLUMN IF NOT EXISTS sku VARCHAR(100)"
+    ))
+    conn.execute(text(
+        "ALTER TABLE products ADD COLUMN IF NOT EXISTS brand VARCHAR(100)"
+    ))
+    conn.execute(text(
+        "ALTER TABLE products ADD COLUMN IF NOT EXISTS tags VARCHAR(500)"
+    ))
     conn.commit()
 
 app = FastAPI(title="E-commerce Backend API")

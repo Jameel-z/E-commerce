@@ -191,6 +191,15 @@ class ApiClient {
     if (productData.full_description) {
       formData.append("full_description", productData.full_description);
     }
+    if ((productData as any).sku) {
+      formData.append("sku", (productData as any).sku);
+    }
+    if ((productData as any).brand) {
+      formData.append("brand", (productData as any).brand);
+    }
+    if ((productData as any).tags) {
+      formData.append("tags", (productData as any).tags);
+    }
 
     // Only append category_id if it exists (following your login pattern)
     if (productData.category_id) {
@@ -261,6 +270,15 @@ class ApiClient {
     }
     if (productData.full_description) {
       formData.append("full_description", productData.full_description);
+    }
+    if (productData.sku) {
+      formData.append("sku", productData.sku);
+    }
+    if (productData.brand) {
+      formData.append("brand", productData.brand);
+    }
+    if (productData.tags) {
+      formData.append("tags", productData.tags);
     }
     if (productData.category_id !== undefined) {
       formData.append("category_id", productData.category_id.toString());
