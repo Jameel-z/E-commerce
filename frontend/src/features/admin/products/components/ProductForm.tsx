@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { apiClient } from "@/lib/api";
 import { useToast } from "@/shared/hooks/use-toast";
+import { getImageUrl } from "@/shared/utils/image";
 import { ImageUpload } from "@/features/products/components/ui/ImageUpload"; // ✅ Import new component
 import {
   Card,
@@ -219,7 +220,7 @@ export function ProductForm({
       });
 
       // Load primary image
-      setExistingPrimaryImage(product.primary_image_url || null);
+      setExistingPrimaryImage(getImageUrl(product.primary_image_url || null));
 
       // Load secondary images (check both possible field names)
       const secondaryImages =
@@ -227,7 +228,7 @@ export function ProductForm({
       if (secondaryImages && secondaryImages.length > 0) {
         const secondaryImagesWithIds = secondaryImages.map((img: any) => ({
           id: img.id,
-          url: img.url || img.image_url,
+          url: getImageUrl(img.url || img.image_url) || img.url || img.image_url,
         }));
         setExistingSecondaryImages(secondaryImagesWithIds);
         setKeepSecondaryImageIds(
