@@ -4,6 +4,10 @@ from .config import settings
 
 def generate_static_url(path: str) -> str:
     """Generate full URL for static files"""
-    base_url = f"http://{settings.DOMAIN}/static/products"  # Changed to http for development
+    if path.startswith("http"):
+        return path
+    domain = settings.DOMAIN
+    scheme = "http" if "localhost" in domain else "https"
+    base_url = f"{scheme}://{domain}/static/products"
     return urljoin(base_url, path.lstrip('/'))
 

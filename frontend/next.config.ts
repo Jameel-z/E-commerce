@@ -21,6 +21,16 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "api.961shop.com",
+        pathname: "/static/**",
+      },
+      {
+        protocol: "http",
+        hostname: "api.961shop.com",
+        pathname: "/static/**",
+      },
+      {
+        protocol: "https",
         hostname: "hamdancomputers.com",
         pathname: "/static/**",
       },
