@@ -1,9 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { apiClient } from "@/lib/api";
 import { useToast } from "@/shared/hooks/use-toast";
 import { getImageUrl } from "@/shared/utils/image";
+
+const RichTextEditor = dynamic(
+  () => import("@/shared/components/ui/RichTextEditor").then((m) => m.RichTextEditor),
+  { ssr: false, loading: () => <div className="border rounded-md h-40 bg-gray-50 animate-pulse" /> }
+);
 import { ImageUpload } from "@/features/products/components/ui/ImageUpload"; // ✅ Import new component
 import {
   Card,
@@ -25,6 +31,7 @@ import type { ProductDetail, Category } from "@/lib/api";
 interface ProductFormData {
   name: string;
   description: string;
+  full_description: string;
   stock_quantity: string;
   category_id: string;
   primary_image: File | null;
@@ -44,6 +51,7 @@ interface ProductFormProps {
 const initialFormData: ProductFormData = {
   name: "",
   description: "",
+  full_description: "",
   stock_quantity: "",
   category_id: "",
   primary_image: null,
@@ -144,14 +152,15 @@ export function ProductForm({
         const updateData = {
           name: formData.name,
           description: formData.description || undefined,
-          price: salePrice || regularPrice, // Use sale price if available, otherwise regular price
+          full_description: formData.full_description || undefined,
+          price: salePrice || regularPrice,
           stock_quantity: Number.parseInt(formData.stock_quantity) || 0,
           category_id: formData.category_id
             ? Number.parseInt(formData.category_id)
             : undefined,
           primary_image: formData.primary_image || undefined,
-          keep_image_ids: keepSecondaryImageIds.join(","), // 🔑 CSV string for backend
-          new_images: formData.secondary_images, // 🔑 New secondary images only
+          keep_image_ids: keepSecondaryImageIds.join(","),
+          new_images: formData.secondary_images,
           regular_price: regularPrice,
           sale_price: salePrice || undefined,
         };
@@ -171,7 +180,8 @@ export function ProductForm({
         const productData = {
           name: formData.name,
           description: formData.description || undefined,
-          price: salePrice || regularPrice, // Use sale price if available, otherwise regular price
+          full_description: formData.full_description || undefined,
+          price: salePrice || regularPrice,
           stock_quantity: Number.parseInt(formData.stock_quantity) || 0,
           category_id: formData.category_id
             ? Number.parseInt(formData.category_id)
@@ -211,6 +221,7 @@ export function ProductForm({
       setFormData({
         name: product.name || "",
         description: product.description || "",
+        full_description: (product as any).full_description || "",
         stock_quantity: product.stock_quantity?.toString() || "",
         category_id: product.category_id?.toString() || "",
         primary_image: null,
@@ -304,14 +315,30 @@ export function ProductForm({
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs">Description</Label>
+                <Label className="text-xs">
+                  Short Description{" "}
+                  <span className="text-muted-foreground font-normal">— shown in Quick View</span>
+                </Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => updateField("description", e.target.value)}
-                  placeholder="Optional product description"
+                  placeholder="Brief summary shown in quick view and product cards"
                   className="resize-none text-sm"
                   rows={3}
+                  maxLength={5000}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs">
+                  Full Description{" "}
+                  <span className="text-muted-foreground font-normal">— shown on product page</span>
+                </Label>
+                <RichTextEditor
+                  value={formData.full_description}
+                  onChange={(val) => updateField("full_description", val)}
+                  placeholder="Write a detailed product description with formatting, lists, tables..."
                 />
               </div>
 

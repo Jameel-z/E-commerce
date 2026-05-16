@@ -52,6 +52,7 @@ class ProductList(BaseSchema):
     category_name: Optional[str] = None
     stock_quantity: int = Field(..., ge=0)
     description: Optional[str] = None
+    full_description: Optional[str] = None
     created_at: datetime
 
     model_config = ConfigDict(
@@ -74,15 +75,19 @@ class ProductList(BaseSchema):
 class ProductBase(BaseSchema):
     """Base schema containing common product fields"""
     name: str = Field(
-        ..., 
+        ...,
         min_length=2,
-        max_length=100,
+        max_length=255,
         examples=["Premium Wireless Headphones"]
     )
     description: Optional[str] = Field(
         default=None,
-        max_length=500,
+        max_length=5000,
         examples=["Noise-cancelling Bluetooth headphones..."]
+    )
+    full_description: Optional[str] = Field(
+        default=None,
+        description="Rich HTML content for the full product detail page"
     )
     price: Decimal = Field(..., gt=0, decimal_places=2)
     regular_price: Optional[Decimal] = Field(None, gt=0, decimal_places=2)
@@ -115,12 +120,13 @@ class ProductCreate(ProductBase):
     def validate_name(cls, v: str) -> str:
         if len(v.strip()) < 2:
             raise ValueError("Name must be at least 2 characters long")
-        return v.title()
+        return v.strip()
 
 class ProductUpdate(BaseSchema):
     """Schema for updating a product"""
-    name: Optional[str] = Field(None, min_length=2, max_length=100)
-    description: Optional[str] = Field(None, max_length=500)
+    name: Optional[str] = Field(None, min_length=2, max_length=255)
+    description: Optional[str] = Field(None, max_length=5000)
+    full_description: Optional[str] = Field(None)
     price: Optional[Annotated[Decimal, Field(gt=0, decimal_places=2)]] = None
     regular_price: Optional[Annotated[Decimal, Field(gt=0, decimal_places=2)]] = None
     sale_price: Optional[Annotated[Decimal, Field(gt=0, decimal_places=2)]] = None
@@ -132,7 +138,7 @@ class ProductUpdate(BaseSchema):
     def validate_name(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and len(v.strip()) < 2:
             raise ValueError("Name must be at least 2 characters long")
-        return v.title() if v else None
+        return v.strip() if v else None
     
     @field_validator("sale_price")
     def validate_sale_price(cls, v, info):

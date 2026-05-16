@@ -1,5 +1,5 @@
 # backend/models/product.py
-from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, DateTime, func
+from sqlalchemy import Column, Integer, String, Text, Numeric, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
 from .base import Base
 
@@ -19,6 +19,7 @@ class Product(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     description = Column(String)
+    full_description = Column(Text, nullable=True)
     primary_image_url = Column(String) 
     price = Column(Numeric(10, 2), nullable=False)  # Current price (what customer pays)
     regular_price = Column(Numeric(10, 2), nullable=True)  # Original price (for display when on sale)

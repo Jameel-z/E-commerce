@@ -117,11 +117,12 @@ def validate_file_input(v):
     }
 )
 async def create_product(
-    name: Annotated[str, Form(min_length=2, max_length=100, example="Wireless Mouse")],
+    name: Annotated[str, Form(min_length=2, max_length=255, example="Wireless Mouse")],
     price: Annotated[Decimal, Form(gt=0, example=23.99)],
     category_id: Annotated[str, Form()] = "",  # Accept as string to handle empty values
     stock_quantity: Annotated[Optional[int], Form()] = 0,
-    description: Annotated[Optional[str], Form(max_length=500)] = None,
+    description: Annotated[Optional[str], Form(max_length=5000)] = None,
+    full_description: Annotated[Optional[str], Form()] = None,
     regular_price: Annotated[Optional[Decimal], Form(gt=0)] = None,
     sale_price: Annotated[Optional[Decimal], Form(gt=0)] = None,
     primary_image: Union[UploadFile, str, None] = File(None),
@@ -158,6 +159,7 @@ async def create_product(
             category_id=parsed_category_id,
             stock_quantity=stock_quantity,
             description=description,
+            full_description=full_description,
             regular_price=regular_price,
             sale_price=sale_price,
         )
@@ -190,8 +192,9 @@ async def create_product(
 )
 async def update_product(
     product_id: int = Path(..., gt=0, description="Product ID to update"),
-    name: Annotated[Optional[str], Form(min_length=2, max_length=100)] = None,
-    description: Annotated[Optional[str], Form(max_length=500)] = None,
+    name: Annotated[Optional[str], Form(min_length=2, max_length=255)] = None,
+    description: Annotated[Optional[str], Form(max_length=5000)] = None,
+    full_description: Annotated[Optional[str], Form()] = None,
     price: Annotated[Optional[Decimal], Form(gt=0)] = None,
     stock_quantity: Annotated[Optional[int], Form(ge=0)] = None,
     category_id: Annotated[Optional[int], Form()] = None,
@@ -223,6 +226,7 @@ async def update_product(
         product_data = ProductUpdate(
             name=name.strip() if name else None,
             description=description.strip() if description else None,
+            full_description=full_description,
             price=price,
             stock_quantity=stock_quantity,
             category_id=category_id,

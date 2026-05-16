@@ -21,6 +21,9 @@ with engine.connect() as conn:
         "ALTER TABLE categories ADD COLUMN IF NOT EXISTS parent_id INTEGER "
         "REFERENCES categories(id) ON DELETE SET NULL"
     ))
+    conn.execute(text(
+        "ALTER TABLE products ADD COLUMN IF NOT EXISTS full_description TEXT"
+    ))
     conn.commit()
 
 app = FastAPI(title="E-commerce Backend API")
