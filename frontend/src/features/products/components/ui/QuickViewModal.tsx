@@ -87,7 +87,7 @@ export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalPro
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden gap-0">
+      <DialogContent className="max-w-2xl w-[95vw] p-0 overflow-hidden gap-0 max-h-[90vh]">
         <DialogHeader className="sr-only">
           <DialogTitle>{product?.name || "Product Details"}</DialogTitle>
         </DialogHeader>
@@ -110,18 +110,18 @@ export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalPro
         )}
 
         {!loading && !error && product && (
-          <div className="grid grid-cols-2 max-h-[480px]">
+          <div className="flex flex-col sm:grid sm:grid-cols-2 overflow-y-auto sm:overflow-hidden sm:max-h-[480px]">
 
-            {/* Left — Image */}
-            <div className="flex flex-col bg-muted/20 border-r">
+            {/* Top / Left — Image */}
+            <div className="flex flex-col bg-muted/20 sm:border-r border-b sm:border-b-0">
               {/* Main image */}
-              <div className="flex-1 flex items-center justify-center p-4 overflow-hidden min-h-0">
+              <div className="flex items-center justify-center p-4 sm:flex-1 sm:overflow-hidden sm:min-h-0">
                 <Image
                   src={mainImage}
                   alt={product.name}
                   width={300}
                   height={280}
-                  className="max-h-[280px] w-auto object-contain"
+                  className="max-h-[200px] sm:max-h-[280px] w-auto object-contain"
                   priority
                 />
               </div>
@@ -133,7 +133,7 @@ export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalPro
                     <button
                       key={img.id}
                       onClick={() => setSelectedIndex(i)}
-                      className={`w-16 h-16 flex-shrink-0 rounded-md border-2 overflow-hidden transition-all ${
+                      className={`w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 rounded-md border-2 overflow-hidden transition-all ${
                         i === selectedIndex ? "border-primary ring-1 ring-primary/30" : "border-muted hover:border-muted-foreground/40"
                       }`}
                     >
@@ -150,8 +150,8 @@ export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalPro
               )}
             </div>
 
-            {/* Right — Info */}
-            <div className="flex flex-col p-5 overflow-y-auto">
+            {/* Bottom / Right — Info */}
+            <div className="flex flex-col p-4 sm:p-5 sm:overflow-y-auto">
               {/* Name */}
               <h2 className="text-base font-bold text-foreground leading-snug mb-1.5">
                 {product.name}
