@@ -1,13 +1,6 @@
-/**
- * PriceRangeFilter Component
- * Min/Max price input filter
- */
-
 "use client";
 
-import React from "react";
-import Input from "@/shared/components/ui/input";
-import Label from "@/shared/components/ui/label";
+import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/shared/utils";
 
 interface PriceRangeFilterProps {
@@ -19,6 +12,8 @@ interface PriceRangeFilterProps {
   className?: string;
 }
 
+const FALLBACK_MAX = 10000;
+
 export function PriceRangeFilter({
   min,
   max,
@@ -27,48 +22,70 @@ export function PriceRangeFilter({
   onChange,
   className,
 }: PriceRangeFilterProps) {
-  const handleMinChange = (value: string) => {
-    const numValue = value === "" ? min : Number(value);
-    if (numValue >= min && numValue <= currentMax) {
-      onChange(numValue, currentMax);
+  const [localMin, setLocalMin] = useState(String(currentMin));
+  const [localMax, setLocalMax] = useState(String(currentMax));
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => { setLocalMin(String(currentMin)); }, [currentMin]);
+  useEffect(() => { setLocalMax(String(currentMax)); }, [currentMax]);
+
+  const effectiveMax = max > 0 ? max : FALLBACK_MAX;
+
+  const scheduleApply = (rawMin: string, rawMax: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const numMin = rawMin === "" || isNaN(Number(rawMin)) ? 0 : Math.max(0, Number(rawMin));
+      const numMax = rawMax === "" || Number(rawMax) <= 0 || isNaN(Number(rawMax))
+        ? effectiveMax
+        : Number(rawMax);
+      const safeMax = Math.max(numMin + 1, numMax);
+      onChange(numMin, safeMax);
+    }, 600);
+  };
+
+  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalMin(e.target.value);
+    scheduleApply(e.target.value, localMax);
+  };
+
+  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalMax(e.target.value);
+    scheduleApply(localMin, e.target.value);
+  };
+
+  // Restore display value on blur if field was left empty
+  const handleMaxBlur = () => {
+    if (localMax === "" || Number(localMax) <= 0) {
+      setLocalMax(String(effectiveMax));
     }
   };
 
-  const handleMaxChange = (value: string) => {
-    const numValue = value === "" ? max : Number(value);
-    if (numValue >= currentMin && numValue <= max) {
-      onChange(currentMin, numValue);
+  const handleMinBlur = () => {
+    if (localMin === "") {
+      setLocalMin("0");
     }
   };
 
   return (
-    <div className={cn("space-y-1.5", className)}>
+    <div className={cn("space-y-2", className)}>
       <div className="flex items-center gap-2">
-        <Label htmlFor="min-price" className="text-xs text-muted-foreground w-7 shrink-0">Min</Label>
-        <Input
-          id="min-price"
+        <span className="text-xs text-muted-foreground w-7 flex-shrink-0">Min</span>
+        <input
           type="number"
-          min={min}
-          max={currentMax}
-          value={currentMin}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            handleMinChange(e.target.value)
-          }
-          className="h-7 text-xs"
+          value={localMin}
+          onChange={handleMinChange}
+          onBlur={handleMinBlur}
+          className="flex-1 h-7 text-xs border rounded px-2 bg-background w-full focus:outline-none focus:ring-1 focus:ring-ring"
         />
       </div>
       <div className="flex items-center gap-2">
-        <Label htmlFor="max-price" className="text-xs text-muted-foreground w-7 shrink-0">Max</Label>
-        <Input
-          id="max-price"
+        <span className="text-xs text-muted-foreground w-7 flex-shrink-0">Max</span>
+        <input
           type="number"
-          min={currentMin}
-          max={max}
-          value={currentMax}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            handleMaxChange(e.target.value)
-          }
-          className="h-7 text-xs"
+          value={localMax}
+          onChange={handleMaxChange}
+          onBlur={handleMaxBlur}
+          className="flex-1 h-7 text-xs border rounded px-2 bg-background w-full focus:outline-none focus:ring-1 focus:ring-ring"
         />
       </div>
     </div>

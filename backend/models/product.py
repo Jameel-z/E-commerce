@@ -1,5 +1,5 @@
 # backend/models/product.py
-from sqlalchemy import Column, Integer, String, Text, Numeric, ForeignKey, DateTime, func
+from sqlalchemy import Column, Integer, String, Text, Numeric, Boolean, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
 from .base import Base
 
@@ -33,6 +33,8 @@ class Product(Base):
     stock_quantity = Column(Integer, default=0)
     reserved_quantity = Column(Integer, default=0)  # Stock reserved for pending orders
     category_id = Column(Integer, ForeignKey("categories.id"))
+    is_featured = Column(Boolean, default=False, nullable=False)
+    featured_order = Column(Integer, default=0, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     

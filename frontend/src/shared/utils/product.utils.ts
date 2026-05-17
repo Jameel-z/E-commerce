@@ -126,6 +126,8 @@ export function sortProducts(
 
   sorted.sort((a, b) => {
     switch (sortBy) {
+      case "newest":
+        return new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime();
       case "name-asc":
         return a.name.localeCompare(b.name);
       case "name-desc":
@@ -196,7 +198,7 @@ export function hasActiveFilters(filters: ProductFiltersState): boolean {
     (Array.isArray(filters.category) && filters.category.length > 0) ||
     (!Array.isArray(filters.category) && filters.category !== "") ||
     filters.minPrice > 0 ||
-    filters.maxPrice < 100000 ||
+    filters.maxPrice < 10000 ||
     filters.inStock ||
     filters.onSale
   );

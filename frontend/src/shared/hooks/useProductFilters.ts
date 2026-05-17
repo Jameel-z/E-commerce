@@ -56,7 +56,7 @@ export function useProductFilters({
   products,
   categoryTree,
   defaultFilters = {},
-  defaultSort = "name-asc",
+  defaultSort = "newest",
   defaultPageSize = 10,
 }: UseProductFiltersProps): UseProductFiltersReturn {
   const router = useRouter();
@@ -67,8 +67,6 @@ export function useProductFilters({
   const [filters, setFilters] = useState<ProductFiltersState>(() => {
     const search = searchParams.get("search") || "";
     const category = searchParams.get("category")?.split(",") || [];
-    const minPrice = Number(searchParams.get("minPrice")) || 0;
-    const maxPrice = Number(searchParams.get("maxPrice")) || 100000;
     const inStock = searchParams.get("inStock") === "true";
     const onSale = searchParams.get("onSale") === "true";
 
@@ -77,8 +75,8 @@ export function useProductFilters({
       ...defaultFilters,
       search,
       category,
-      minPrice,
-      maxPrice,
+      minPrice: 0,
+      maxPrice: 10000,
       inStock,
       onSale,
     };
@@ -158,12 +156,9 @@ export function useProductFilters({
       : [];
     if (categories.length > 0) params.set("category", categories.join(","));
 
-    if (filters.minPrice > 0) params.set("minPrice", String(filters.minPrice));
-    if (filters.maxPrice < 100000)
-      params.set("maxPrice", String(filters.maxPrice));
     if (filters.inStock) params.set("inStock", "true");
     if (filters.onSale) params.set("onSale", "true");
-    if (sortBy !== "name-asc") params.set("sort", sortBy);
+    if (sortBy !== "newest") params.set("sort", sortBy);
     if (pagination.page > 1) params.set("page", String(pagination.page));
     if (pagination.pageSize !== 10)
       params.set("perPage", String(pagination.pageSize));
@@ -206,7 +201,7 @@ export function useProductFilters({
         case "minPrice":
         case "maxPrice":
           newFilters.minPrice = 0;
-          newFilters.maxPrice = 100000;
+          newFilters.maxPrice = 10000;
           break;
         case "inStock":
           newFilters.inStock = false;

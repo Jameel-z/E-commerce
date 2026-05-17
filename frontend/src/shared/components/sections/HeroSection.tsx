@@ -44,7 +44,16 @@ export function HeroSection() {
   const router = useRouter();
 
   useEffect(() => {
-    apiClient.getCategories().then(setCategories).catch(() => {});
+    apiClient.getFeaturedCategories()
+      .then((featured) => {
+        if (featured.length > 0) {
+          setCategories(featured);
+        } else {
+          // Fallback: show all categories when none are manually selected
+          return apiClient.getCategories().then(setCategories);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleClick = (name: string) =>

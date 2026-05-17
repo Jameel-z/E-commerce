@@ -1,7 +1,7 @@
 # backend/routers/product.py
 from fastapi import (
     APIRouter, Depends, HTTPException, Query, status, Path,
-    UploadFile, File, Form
+    UploadFile, File, Form, Body
 )
 from typing import List, Optional, Annotated, Union
 from decimal import Decimal
@@ -18,7 +18,12 @@ from crud.product_crud import product_crud
 from core.security import get_current_active_user, require_admin
 from schemas.user import User
 from services.image_services import ImageService, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
+from pydantic import BaseModel as PydanticBaseModel
 import logging
+
+class FeaturedToggle(PydanticBaseModel):
+    is_featured: bool
+    featured_order: int = 0
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +61,22 @@ def list_products(
         category_id=category_id,
         search_term=search
     )
+
+@router.get(
+    "/featured",
+    response_model=List[ProductList],
+    summary="Get Featured Products",
+)
+def get_featured_products(db: Session = Depends(get_db)):
+    """Return products marked as featured, ordered by featured_order."""
+    from models.product import Product
+    products = (
+        db.query(Product)
+        .filter(Product.is_featured == True)
+        .order_by(Product.featured_order)
+        .all()
+    )
+    return products
 
 @router.get(
     "/{product_id}",
@@ -300,5 +321,27 @@ async def delete_product(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete product folder: {str(e)}"
         )
-    
+
     return None
+
+@router.patch(
+    "/{product_id}/featured",
+    response_model=ProductDetail,
+    dependencies=[Depends(require_admin)],
+    summary="Toggle product featured status",
+)
+def set_product_featured(
+    product_id: int = Path(..., gt=0),
+    payload: FeaturedToggle = Body(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    from models.product import Product
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    product.is_featured = payload.is_featured
+    product.featured_order = payload.featured_order
+    db.commit()
+    db.refresh(product)
+    return product

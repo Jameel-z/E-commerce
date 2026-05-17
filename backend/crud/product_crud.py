@@ -81,7 +81,9 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
                 Product.description.ilike(f"%{search_term}%")  # Fixed missing %
                 )
 
-        # Convert Row objects to dictionaries for Pydantic
+        # Newest products first
+        query = query.order_by(Product.created_at.desc())
+
         results = query.offset(skip).limit(limit).all()
         return [row._asdict() for row in results]
 

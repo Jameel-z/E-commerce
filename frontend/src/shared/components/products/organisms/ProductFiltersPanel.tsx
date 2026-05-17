@@ -39,7 +39,6 @@ export function ProductFiltersPanel({
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch category tree
   useEffect(() => {
     apiClient
       .getCategoryTree()
@@ -76,7 +75,7 @@ export function ProductFiltersPanel({
       search: "",
       category: [],
       minPrice: 0,
-      maxPrice: 100000,
+      maxPrice: 10000,
       inStock: false,
       onSale: false,
     });
@@ -116,7 +115,7 @@ export function ProductFiltersPanel({
   return (
     <div
       className={cn(
-        "space-y-3 p-3 bg-card rounded-lg border sticky top-4 w-[160px]",
+        "space-y-4 p-3 bg-card rounded-lg border sticky top-4 w-52",
         className
       )}
     >
@@ -138,9 +137,9 @@ export function ProductFiltersPanel({
 
       {/* Categories */}
       {!isLoading && categories.length > 0 && (
-        <div className="space-y-1">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Categories</h3>
-          <div className="max-h-40 overflow-y-auto pr-0.5 scrollbar-thin">
+        <div className="space-y-1.5">
+          <h3 className="text-xs font-bold uppercase tracking-wide">Categories</h3>
+          <div className="max-h-44 overflow-y-auto">
             <CategoryFilter
               tree={categories}
               selected={selectedCategories}
@@ -151,8 +150,8 @@ export function ProductFiltersPanel({
       )}
 
       {/* Price Range */}
-      <div className="space-y-1">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Price Range</h3>
+      <div className="space-y-1.5">
+        <h3 className="text-xs font-bold uppercase tracking-wide">Price Range</h3>
         <PriceRangeFilter
           min={priceRange.min}
           max={priceRange.max}
@@ -162,9 +161,9 @@ export function ProductFiltersPanel({
         />
       </div>
 
-      {/* Sale + Stock — merged into one compact row group */}
-      <div className="space-y-1.5">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Quick Filters</h3>
+      {/* Quick Filters */}
+      <div className="space-y-2">
+        <h3 className="text-xs font-bold uppercase tracking-wide">Quick Filters</h3>
         <SaleFilter checked={filters.onSale} onChange={handleSaleChange} />
         <StockFilter checked={filters.inStock} onChange={handleStockChange} />
       </div>

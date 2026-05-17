@@ -8,7 +8,7 @@ import { Category } from "./api.types";
 /**
  * Sort options for product lists
  */
-export type SortOption = "name-asc" | "name-desc" | "price-asc" | "price-desc";
+export type SortOption = "newest" | "name-asc" | "name-desc" | "price-asc" | "price-desc";
 
 /**
  * Product filter state interface
@@ -52,7 +52,7 @@ export const DEFAULT_FILTERS: ProductFiltersState = {
   search: "",
   category: [],
   minPrice: 0,
-  maxPrice: 100000,
+  maxPrice: 10000,
   inStock: false,
   onSale: false,
 };

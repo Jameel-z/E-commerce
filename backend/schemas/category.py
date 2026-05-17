@@ -17,6 +17,8 @@ class CategoryBase(BaseSchema):
     description: Optional[str] = Field(None, max_length=255)
     parent_id: Optional[int] = Field(None, description="ID of parent category (None = top-level)")
     image_url: Optional[str] = Field(None, max_length=500)
+    show_on_homepage: bool = Field(False)
+    homepage_order: int = Field(0)
 
     @field_validator('image_url', mode='before')
     @classmethod

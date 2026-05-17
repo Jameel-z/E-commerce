@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Path, File, Form, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, status, Path, File, Form, UploadFile, Body
 from typing import Optional, Union
 from sqlalchemy.orm import Session
+from pydantic import BaseModel as PydanticBaseModel
 
 from database import get_db
 from schemas.category import Category, CategoryCreate, CategoryUpdate
@@ -8,6 +9,10 @@ from crud.category_crud import category_crud
 from core.security import get_current_active_user, require_admin
 from schemas.user import User
 from services.image_services import ImageService, FileValidator
+
+class HomepageToggle(PydanticBaseModel):
+    show_on_homepage: bool
+    homepage_order: int = 0
 
 router = APIRouter(
     prefix="/categories",
@@ -21,6 +26,17 @@ router = APIRouter(
 def get_categories(db: Session = Depends(get_db)):
     """Flat list of all categories (public)."""
     return category_crud.get_multi(db)
+
+@router.get("/featured", response_model=list[Category], status_code=status.HTTP_200_OK)
+def get_featured_categories(db: Session = Depends(get_db)):
+    """Categories marked to show on homepage, ordered by homepage_order."""
+    from models.category import Category as CategoryModel
+    return (
+        db.query(CategoryModel)
+        .filter(CategoryModel.show_on_homepage == True)
+        .order_by(CategoryModel.homepage_order)
+        .all()
+    )
 
 @router.get("/tree", response_model=list[Category], status_code=status.HTTP_200_OK)
 def get_category_tree(db: Session = Depends(get_db)):
@@ -111,3 +127,25 @@ def delete_category(
     if category.image_url:
         ImageService.delete_image(category.image_url)
     category_crud.remove(db, id=category_id)
+
+@router.patch(
+    "/{category_id}/featured",
+    response_model=Category,
+    dependencies=[Depends(require_admin)],
+    summary="Toggle category homepage visibility",
+)
+def set_category_featured(
+    category_id: int = Path(..., gt=0),
+    payload: HomepageToggle = Body(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    from models.category import Category as CategoryModel
+    category = db.query(CategoryModel).filter(CategoryModel.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    category.show_on_homepage = payload.show_on_homepage
+    category.homepage_order = payload.homepage_order
+    db.commit()
+    db.refresh(category)
+    return category

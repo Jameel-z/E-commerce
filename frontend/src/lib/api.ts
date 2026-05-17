@@ -585,6 +585,32 @@ class ApiClient {
       : "/orders/";
     return this.request<Order[]>(url);
   }
+
+  // ========================================
+  // HOMEPAGE MANAGEMENT APIS
+  // ========================================
+
+  async getFeaturedProducts(): Promise<Product[]> {
+    return this.request<Product[]>("/products/featured");
+  }
+
+  async setProductFeatured(id: number, is_featured: boolean, featured_order: number): Promise<ProductDetail> {
+    return this.request<ProductDetail>(`/products/${id}/featured`, {
+      method: "PATCH",
+      body: JSON.stringify({ is_featured, featured_order }),
+    });
+  }
+
+  async getFeaturedCategories(): Promise<Category[]> {
+    return this.request<Category[]>("/categories/featured");
+  }
+
+  async setCategoryFeatured(id: number, show_on_homepage: boolean, homepage_order: number): Promise<Category> {
+    return this.request<Category>(`/categories/${id}/featured`, {
+      method: "PATCH",
+      body: JSON.stringify({ show_on_homepage, homepage_order }),
+    });
+  }
 }
 
 // ========================================

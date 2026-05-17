@@ -59,6 +59,8 @@ class ProductList(BaseSchema):
     condition: Optional[str] = None
     shipping: Optional[str] = None
     vat: Optional[str] = None
+    is_featured: bool = False
+    featured_order: int = 0
     created_at: datetime
 
     model_config = ConfigDict(
@@ -183,6 +185,8 @@ class ProductDetail(TimestampSchema, ProductBase):
     condition: Optional[str] = None
     shipping: Optional[str] = None
     vat: Optional[str] = None
+    is_featured: bool = False
+    featured_order: int = 0
     category: Optional["Category"] = None
     secondary_images: List[ProductImage] = Field(default_factory=list, alias="images")
     created_at: datetime

@@ -13,6 +13,8 @@ export interface Category {
   parent_id: number | null;
   image_url?: string | null;
   children: Category[];
+  show_on_homepage?: boolean;
+  homepage_order?: number;
 }
 
 /**
@@ -41,6 +43,8 @@ export interface Product {
   sale_price: number | null;
   is_on_sale: boolean;
   discount_percentage: number | null;
+  is_featured?: boolean;
+  featured_order?: number;
   created_at: string;
 }
 

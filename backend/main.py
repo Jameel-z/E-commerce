@@ -42,6 +42,18 @@ with engine.connect() as conn:
     conn.execute(text(
         "ALTER TABLE products ADD COLUMN IF NOT EXISTS vat VARCHAR(100)"
     ))
+    conn.execute(text(
+        "ALTER TABLE products ADD COLUMN IF NOT EXISTS is_featured BOOLEAN NOT NULL DEFAULT FALSE"
+    ))
+    conn.execute(text(
+        "ALTER TABLE products ADD COLUMN IF NOT EXISTS featured_order INTEGER NOT NULL DEFAULT 0"
+    ))
+    conn.execute(text(
+        "ALTER TABLE categories ADD COLUMN IF NOT EXISTS show_on_homepage BOOLEAN NOT NULL DEFAULT FALSE"
+    ))
+    conn.execute(text(
+        "ALTER TABLE categories ADD COLUMN IF NOT EXISTS homepage_order INTEGER NOT NULL DEFAULT 0"
+    ))
     conn.commit()
 
 app = FastAPI(title="E-commerce Backend API")

@@ -22,6 +22,7 @@ interface SortSelectProps {
 }
 
 const sortOptions: { value: SortOption; label: string }[] = [
+  { value: "newest", label: "Newest First" },
   { value: "name-asc", label: "Name: A-Z" },
   { value: "name-desc", label: "Name: Z-A" },
   { value: "price-asc", label: "Price: Low to High" },

@@ -21,13 +21,10 @@ export default function HomePage() {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        console.log("Fetching products from API...");
-        const products = await apiClient.getProducts();
-        console.log("Successfully fetched products:", products.length);
-        setFeaturedProducts(products.slice(0, 6));
+        const featured = await apiClient.getFeaturedProducts();
+        setFeaturedProducts(featured);
         setError(null);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
+      } catch {
         setError(
           "Unable to load products. Please check if the backend server is running."
         );
