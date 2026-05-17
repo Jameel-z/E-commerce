@@ -67,6 +67,9 @@ export interface ProductDetail {
   sku: string | null;
   brand: string | null;
   tags: string | null;
+  condition: string | null;
+  shipping: string | null;
+  vat: string | null;
   full_description: string | null;
 }
 

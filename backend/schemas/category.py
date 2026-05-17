@@ -1,6 +1,7 @@
 from typing import Optional, List, TYPE_CHECKING
 from pydantic import Field, field_validator, ConfigDict
 from .base import BaseSchema
+from core.utils import generate_static_url
 
 if TYPE_CHECKING:
     from .product import ProductDetail
@@ -16,6 +17,13 @@ class CategoryBase(BaseSchema):
     description: Optional[str] = Field(None, max_length=255)
     parent_id: Optional[int] = Field(None, description="ID of parent category (None = top-level)")
     image_url: Optional[str] = Field(None, max_length=500)
+
+    @field_validator('image_url', mode='before')
+    @classmethod
+    def make_full_image_url(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return None
+        return generate_static_url(v)
 
 class CategoryCreate(CategoryBase):
     @field_validator('name')

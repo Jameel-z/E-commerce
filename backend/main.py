@@ -4,7 +4,7 @@ from routers import users, products, categories, carts, orders
 from database import create_database, create_tables, SessionLocal
 from fastapi.staticfiles import StaticFiles
 from core.config import settings
-from core.middleware import cleanup_temp_files
+from core.middleware import cleanup_temp_files, category_image_fallback
 from core.seed import seed_admin
 
 create_database()
@@ -33,6 +33,15 @@ with engine.connect() as conn:
     conn.execute(text(
         "ALTER TABLE products ADD COLUMN IF NOT EXISTS tags VARCHAR(500)"
     ))
+    conn.execute(text(
+        "ALTER TABLE products ADD COLUMN IF NOT EXISTS condition VARCHAR(100)"
+    ))
+    conn.execute(text(
+        "ALTER TABLE products ADD COLUMN IF NOT EXISTS shipping VARCHAR(200)"
+    ))
+    conn.execute(text(
+        "ALTER TABLE products ADD COLUMN IF NOT EXISTS vat VARCHAR(100)"
+    ))
     conn.commit()
 
 app = FastAPI(title="E-commerce Backend API")
@@ -46,6 +55,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.middleware("http")(cleanup_temp_files)
+app.middleware("http")(category_image_fallback)
 
 # Configure static files
 app.mount(

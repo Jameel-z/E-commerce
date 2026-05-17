@@ -12,7 +12,6 @@ import { useCart } from "@/shared/hooks/use-cart";
 import { useToast } from "@/shared/hooks/use-toast";
 import { Loader2, AlertCircle, ShoppingCart, ExternalLink } from "lucide-react";
 import { Button } from "@/shared/components/ui";
-import { stripHtml } from "@/shared/utils";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -129,20 +128,20 @@ export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalPro
 
               {/* Thumbnail strip */}
               {allImages.length > 1 && (
-                <div className="flex gap-1.5 p-2.5 overflow-x-auto border-t bg-background flex-shrink-0">
+                <div className="flex gap-2 p-2.5 overflow-x-auto border-t bg-background flex-shrink-0">
                   {allImages.map((img, i) => (
                     <button
                       key={img.id}
                       onClick={() => setSelectedIndex(i)}
-                      className={`w-11 h-11 flex-shrink-0 rounded border-2 overflow-hidden transition-all ${
-                        i === selectedIndex ? "border-primary ring-1 ring-primary/30" : "border-transparent hover:border-muted-foreground/30"
+                      className={`w-16 h-16 flex-shrink-0 rounded-md border-2 overflow-hidden transition-all ${
+                        i === selectedIndex ? "border-primary ring-1 ring-primary/30" : "border-muted hover:border-muted-foreground/40"
                       }`}
                     >
                       <Image
                         src={img.url || "/placeholder.svg"}
                         alt={`View ${i + 1}`}
-                        width={44}
-                        height={44}
+                        width={64}
+                        height={64}
                         className="w-full h-full object-cover"
                       />
                     </button>
@@ -175,9 +174,22 @@ export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalPro
 
               {/* Description */}
               {product.description && (
-                <p className="text-xs text-muted-foreground line-clamp-3 mb-3 leading-relaxed">
-                  {stripHtml(product.description)}
-                </p>
+                <div
+                  className="text-xs text-muted-foreground mb-3 leading-relaxed
+                    [&_p]:mb-1.5 [&_p:last-child]:mb-0
+                    [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:mb-1.5
+                    [&_ol]:list-decimal [&_ol]:pl-4 [&_ol]:mb-1.5
+                    [&_li]:mb-0.5
+                    [&_strong]:font-semibold [&_em]:italic [&_u]:underline
+                    [&_h1]:text-sm [&_h1]:font-bold [&_h1]:mb-1
+                    [&_h2]:text-xs [&_h2]:font-bold [&_h2]:mb-1
+                    [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:mb-1
+                    [&_table]:w-full [&_table]:border-collapse [&_table]:mb-2 [&_table]:text-xs
+                    [&_td]:border [&_td]:border-gray-200 [&_td]:p-1
+                    [&_th]:border [&_th]:border-gray-200 [&_th]:p-1 [&_th]:bg-gray-50 [&_th]:font-semibold
+                    [&_blockquote]:border-l-2 [&_blockquote]:border-gray-300 [&_blockquote]:pl-2 [&_blockquote]:text-gray-500"
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
               )}
 
               {/* Stock */}
@@ -187,30 +199,6 @@ export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalPro
                   {product.stock_quantity > 0 ? "In Stock" : "Out of Stock"}
                 </span>
               </div>
-
-              {/* SKU / Categories / Tag / Brand */}
-              {(() => {
-                const p = product as any;
-                const rows = [
-                  p.sku               ? { label: "SKU",        value: p.sku }               : null,
-                  product.category?.name ? { label: "Categories", value: product.category.name } : null,
-                  p.tags              ? { label: "Tag",        value: p.tags }              : null,
-                  p.brand             ? { label: "Brand",      value: p.brand, bold: true }  : null,
-                ].filter(Boolean) as { label: string; value: string; bold?: boolean }[];
-                if (!rows.length) return null;
-                return (
-                  <div className="border-t mb-3">
-                    {rows.map(({ label, value, bold }) => (
-                      <div key={label} className="flex gap-2 text-xs py-1.5 border-b text-muted-foreground">
-                        <span className="w-20 shrink-0">{label}:</span>
-                        {bold
-                          ? <strong className="text-foreground">{value}</strong>
-                          : <span className="text-foreground">{value}</span>}
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
 
               <div className="flex-1" />
 

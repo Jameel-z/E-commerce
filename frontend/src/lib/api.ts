@@ -200,6 +200,15 @@ class ApiClient {
     if ((productData as any).tags) {
       formData.append("tags", (productData as any).tags);
     }
+    if ((productData as any).condition) {
+      formData.append("condition", (productData as any).condition);
+    }
+    if ((productData as any).shipping) {
+      formData.append("shipping", (productData as any).shipping);
+    }
+    if ((productData as any).vat) {
+      formData.append("vat", (productData as any).vat);
+    }
 
     // Only append category_id if it exists (following your login pattern)
     if (productData.category_id) {
@@ -279,6 +288,15 @@ class ApiClient {
     }
     if (productData.tags) {
       formData.append("tags", productData.tags);
+    }
+    if (productData.condition) {
+      formData.append("condition", productData.condition);
+    }
+    if (productData.shipping) {
+      formData.append("shipping", productData.shipping);
+    }
+    if (productData.vat) {
+      formData.append("vat", productData.vat);
     }
     if (productData.category_id !== undefined) {
       formData.append("category_id", productData.category_id.toString());

@@ -23,6 +23,9 @@ class Product(Base):
     sku = Column(String(100), nullable=True, unique=True)
     brand = Column(String(100), nullable=True)
     tags = Column(String(500), nullable=True)  # Comma-separated tags
+    condition = Column(String(100), nullable=True)   # e.g. "New", "Refurbished"
+    shipping = Column(String(200), nullable=True)    # e.g. "Free Shipping"
+    vat = Column(String(100), nullable=True)         # e.g. "Excluding VAT"
     primary_image_url = Column(String)
     price = Column(Numeric(10, 2), nullable=False)  # Current price (what customer pays)
     regular_price = Column(Numeric(10, 2), nullable=True)  # Original price (for display when on sale)

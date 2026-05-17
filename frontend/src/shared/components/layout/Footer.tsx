@@ -14,7 +14,12 @@ const Footer: React.FC = () => {
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <ShoppingBag className="h-5 w-5 text-primary" />
-              <span className="text-base font-bold">Hamdan Computers</span>
+              <span className="text-base font-bold tracking-tight">
+                <span style={{ color: "#4285F4" }}>9</span>
+                <span style={{ color: "#EA4335" }}>6</span>
+                <span style={{ color: "#FBBC05" }}>1</span>
+                <span className="text-foreground">shop</span>
+              </span>
             </div>
             <p className="text-muted-foreground text-sm">
               Your trusted source for computers and tech gadgets. Quality
@@ -50,7 +55,7 @@ const Footer: React.FC = () => {
             <h4 className="font-semibold mb-2">Contact Us</h4>
             <div className="flex space-x-4 mb-2">
               <a
-                href="https://www.instagram.com/hamdancomputers/"
+                href="https://www.instagram.com/961shop/"
                 className="text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Instagram"
               >
@@ -62,7 +67,7 @@ const Footer: React.FC = () => {
                 />
               </a>
               <a
-                href={`https://wa.me/${CONTACT.phone.tel.replace("+", "")}?text=Hi%20Hamdan%20Computers,%20I%20have%20a%20question%20about%20your%20products.`}
+                href={`https://wa.me/${CONTACT.phone.tel.replace("+", "")}?text=Hi%20961shop,%20I%20have%20a%20question%20about%20your%20products.`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground transition-colors"
@@ -86,7 +91,11 @@ const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="border-t border-border mt-5 pt-3 text-center">
           <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} Hamdan Computers. All rights reserved.
+            © {new Date().getFullYear()}{" "}
+            <span style={{ color: "#4285F4" }}>9</span>
+            <span style={{ color: "#EA4335" }}>6</span>
+            <span style={{ color: "#FBBC05" }}>1</span>
+            <span>shop</span>. All rights reserved.
           </p>
         </div>
       </div>

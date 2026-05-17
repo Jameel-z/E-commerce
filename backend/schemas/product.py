@@ -56,6 +56,9 @@ class ProductList(BaseSchema):
     sku: Optional[str] = None
     brand: Optional[str] = None
     tags: Optional[str] = None
+    condition: Optional[str] = None
+    shipping: Optional[str] = None
+    vat: Optional[str] = None
     created_at: datetime
 
     model_config = ConfigDict(
@@ -95,6 +98,9 @@ class ProductBase(BaseSchema):
     sku: Optional[str] = Field(default=None, max_length=100, examples=["KI1602SUM"])
     brand: Optional[str] = Field(default=None, max_length=100, examples=["PITAKA"])
     tags: Optional[str] = Field(default=None, max_length=500, examples=["PITAKA Iphone 16 Pro Max Edge Case"])
+    condition: Optional[str] = Field(default=None, max_length=100, examples=["New"])
+    shipping: Optional[str] = Field(default=None, max_length=200, examples=["Free Shipping"])
+    vat: Optional[str] = Field(default=None, max_length=100, examples=["Excluding VAT"])
     price: Decimal = Field(..., gt=0, decimal_places=2)
     regular_price: Optional[Decimal] = Field(None, gt=0, decimal_places=2)
     sale_price: Optional[Decimal] = Field(None, gt=0, decimal_places=2)
@@ -136,6 +142,9 @@ class ProductUpdate(BaseSchema):
     sku: Optional[str] = Field(None, max_length=100)
     brand: Optional[str] = Field(None, max_length=100)
     tags: Optional[str] = Field(None, max_length=500)
+    condition: Optional[str] = Field(None, max_length=100)
+    shipping: Optional[str] = Field(None, max_length=200)
+    vat: Optional[str] = Field(None, max_length=100)
     price: Optional[Annotated[Decimal, Field(gt=0, decimal_places=2)]] = None
     regular_price: Optional[Annotated[Decimal, Field(gt=0, decimal_places=2)]] = None
     sale_price: Optional[Annotated[Decimal, Field(gt=0, decimal_places=2)]] = None
@@ -171,6 +180,9 @@ class ProductDetail(TimestampSchema, ProductBase):
     sku: Optional[str] = None
     brand: Optional[str] = None
     tags: Optional[str] = None
+    condition: Optional[str] = None
+    shipping: Optional[str] = None
+    vat: Optional[str] = None
     category: Optional["Category"] = None
     secondary_images: List[ProductImage] = Field(default_factory=list, alias="images")
     created_at: datetime

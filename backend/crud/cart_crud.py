@@ -85,6 +85,14 @@ class CartCRUD(CRUDBase[models.Cart, schemas.CartCreate, schemas.CartUpdate]):
     def update_cart_total(self, db: Session, cart: models.Cart):
         """Recalculate and update the total price of the cart efficiently"""
         try:
+            # Remove cart items whose product was deleted (product_id is NULL)
+            orphaned = [item for item in cart.items if item.product_id is None or item.product is None]
+            for item in orphaned:
+                db.delete(item)
+            if orphaned:
+                db.flush()
+                cart.items = [i for i in cart.items if i not in orphaned]
+
             total = 0.0
             for item in cart.items:
                 # Use locked price if available, otherwise fall back to current product price

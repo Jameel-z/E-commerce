@@ -14,5 +14,5 @@ export const CONTACT = {
     display: "+961 03751903",
     tel: "+96103751903",
   },
-  email: "hamdancomputers@gmail.com",
+  email: "961shop@support.com",
 };

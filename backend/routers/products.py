@@ -85,24 +85,14 @@ def get_product(
 # Custom validator function
 def validate_file_input(v):
     """Handle different file input types"""
-    logger.info(f"validate_file_input received: {type(v)} - {v}")
-    
     if v is None:
-        logger.info("validate_file_input: returning None (v is None)")
         return None
     if isinstance(v, str) and v == "":
-        logger.info("validate_file_input: returning None (v is empty string)")
         return None
     if isinstance(v, list):
-        # Filter out empty strings and non-UploadFile objects
-        result = [item for item in v if hasattr(item, 'filename') and item.filename]
-        logger.info(f"validate_file_input: returning list with {len(result)} items: {result}")
-        return result
+        return [item for item in v if hasattr(item, 'filename') and item.filename]
     if hasattr(v, 'filename') and v.filename:
-        logger.info(f"validate_file_input: returning UploadFile: {v.filename}")
         return v
-    
-    logger.info("validate_file_input: returning None (no conditions matched)")
     return None
 
 @router.post(
@@ -126,6 +116,9 @@ async def create_product(
     sku: Annotated[Optional[str], Form(max_length=100)] = None,
     brand: Annotated[Optional[str], Form(max_length=100)] = None,
     tags: Annotated[Optional[str], Form(max_length=500)] = None,
+    condition: Annotated[Optional[str], Form(max_length=100)] = None,
+    shipping: Annotated[Optional[str], Form(max_length=200)] = None,
+    vat: Annotated[Optional[str], Form(max_length=100)] = None,
     regular_price: Annotated[Optional[Decimal], Form(gt=0)] = None,
     sale_price: Annotated[Optional[Decimal], Form(gt=0)] = None,
     primary_image: Union[UploadFile, str, None] = File(None),
@@ -148,13 +141,7 @@ async def create_product(
         # Apply custom validation
         processed_primary_image = validate_file_input(primary_image)
         processed_secondary_images = validate_file_input(secondary_images)
-        
-        # Debug logging
-        logger.info(f"Raw primary_image: {type(primary_image)} - {primary_image}")
-        logger.info(f"Raw secondary_images: {type(secondary_images)} - {secondary_images}")
-        logger.info(f"Processed primary_image: {type(processed_primary_image)} - {processed_primary_image}")
-        logger.info(f"Processed secondary_images: {type(processed_secondary_images)} - {processed_secondary_images}")
-        
+
         # Create product data
         product_data = ProductCreate(
             name=name,
@@ -166,6 +153,9 @@ async def create_product(
             sku=sku or None,
             brand=brand or None,
             tags=tags or None,
+            condition=condition or None,
+            shipping=shipping or None,
+            vat=vat or None,
             regular_price=regular_price,
             sale_price=sale_price,
         )
@@ -204,6 +194,9 @@ async def update_product(
     sku: Annotated[Optional[str], Form(max_length=100)] = None,
     brand: Annotated[Optional[str], Form(max_length=100)] = None,
     tags: Annotated[Optional[str], Form(max_length=500)] = None,
+    condition: Annotated[Optional[str], Form(max_length=100)] = None,
+    shipping: Annotated[Optional[str], Form(max_length=200)] = None,
+    vat: Annotated[Optional[str], Form(max_length=100)] = None,
     price: Annotated[Optional[Decimal], Form(gt=0)] = None,
     stock_quantity: Annotated[Optional[int], Form(ge=0)] = None,
     category_id: Annotated[Optional[int], Form()] = None,
@@ -239,6 +232,9 @@ async def update_product(
             sku=sku or None,
             brand=brand or None,
             tags=tags or None,
+            condition=condition or None,
+            shipping=shipping or None,
+            vat=vat or None,
             price=price,
             stock_quantity=stock_quantity,
             category_id=category_id,

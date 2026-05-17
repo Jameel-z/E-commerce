@@ -34,6 +34,9 @@ interface ProductFormData {
   sku: string;
   brand: string;
   tags: string;
+  condition: string;
+  shipping: string;
+  vat: string;
   stock_quantity: string;
   category_id: string;
   primary_image: File | null;
@@ -57,6 +60,9 @@ const initialFormData: ProductFormData = {
   sku: "",
   brand: "",
   tags: "",
+  condition: "",
+  shipping: "",
+  vat: "",
   stock_quantity: "",
   category_id: "",
   primary_image: null,
@@ -161,6 +167,9 @@ export function ProductForm({
           sku: formData.sku || undefined,
           brand: formData.brand || undefined,
           tags: formData.tags || undefined,
+          condition: formData.condition || undefined,
+          shipping: formData.shipping || undefined,
+          vat: formData.vat || undefined,
           price: salePrice || regularPrice,
           stock_quantity: Number.parseInt(formData.stock_quantity) || 0,
           category_id: formData.category_id
@@ -192,6 +201,9 @@ export function ProductForm({
           sku: formData.sku || undefined,
           brand: formData.brand || undefined,
           tags: formData.tags || undefined,
+          condition: formData.condition || undefined,
+          shipping: formData.shipping || undefined,
+          vat: formData.vat || undefined,
           price: salePrice || regularPrice,
           stock_quantity: Number.parseInt(formData.stock_quantity) || 0,
           category_id: formData.category_id
@@ -236,6 +248,9 @@ export function ProductForm({
         sku: (product as any).sku || "",
         brand: (product as any).brand || "",
         tags: (product as any).tags || "",
+        condition: (product as any).condition || "",
+        shipping: (product as any).shipping || "",
+        vat: (product as any).vat || "",
         stock_quantity: product.stock_quantity?.toString() || "",
         category_id: product.category_id?.toString() || "",
         primary_image: null,
@@ -370,6 +385,40 @@ export function ProductForm({
                     placeholder="e.g. iPhone 16 Case"
                     className="h-8 text-sm"
                     maxLength={500}
+                  />
+                </div>
+              </div>
+
+              {/* Condition / Shipping / VAT */}
+              <div className="grid sm:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Condition</Label>
+                  <Input
+                    value={formData.condition}
+                    onChange={(e) => updateField("condition", e.target.value)}
+                    placeholder="e.g. New"
+                    className="h-8 text-sm"
+                    maxLength={100}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Shipping</Label>
+                  <Input
+                    value={formData.shipping}
+                    onChange={(e) => updateField("shipping", e.target.value)}
+                    placeholder="e.g. Free Shipping"
+                    className="h-8 text-sm"
+                    maxLength={200}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">VAT</Label>
+                  <Input
+                    value={formData.vat}
+                    onChange={(e) => updateField("vat", e.target.value)}
+                    placeholder="e.g. Excluding VAT"
+                    className="h-8 text-sm"
+                    maxLength={100}
                   />
                 </div>
               </div>

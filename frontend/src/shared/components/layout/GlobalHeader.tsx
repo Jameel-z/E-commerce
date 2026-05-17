@@ -40,11 +40,14 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
               href="/"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <div className="bg-card p-1.5 rounded-lg">
-                <ShoppingBag className="h-4 w-4 text-primary" />
+              <div className="bg-card p-2 rounded-lg">
+                <ShoppingBag className="h-5 w-5 text-primary" />
               </div>
-              <h1 className="text-lg font-bold text-primary">
-                Hamdan Computers
+              <h1 className="text-2xl font-bold tracking-tight">
+                <span style={{ color: "#4285F4" }}>9</span>
+                <span style={{ color: "#EA4335" }}>6</span>
+                <span style={{ color: "#FBBC05" }}>1</span>
+                <span className="text-foreground">shop</span>
               </h1>
             </Link>
           </div>

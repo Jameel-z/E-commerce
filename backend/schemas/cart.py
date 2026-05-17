@@ -19,8 +19,8 @@ class CartItemBase(BaseSchema):
     """
     Base schema for cart items with validation
     """
-    product_id: int = Field(
-        ...,
+    product_id: Optional[int] = Field(
+        None,
         description="ID of the product being added to cart"
     )
     quantity: int = Field(
@@ -39,14 +39,14 @@ class CartItemCreate(CartItemBase):
     """
     Schema for creating new cart items
     """
-    pass
+    product_id: int = Field(..., description="ID of the product being added to cart")
 
 class CartItem(CartItemBase):
     """
     Complete cart item schema with product details
     """
     id: int
-    product: ProductDetail
+    product: Optional[ProductDetail] = None
     added_at: datetime = Field(
         default_factory=datetime.utcnow,
         description="When the item was added to cart"
