@@ -26,6 +26,7 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
             skip: int = 0,
             limit: int = 100,
             category_id: Optional[int] = None,
+            parent_category_id: Optional[int] = None,
             search_term: Optional[str] = None
     ):
         """Get products for main page listing with optional category filter"""
@@ -74,6 +75,14 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
 
         if category_id:
             query = query.filter(Product.category_id == category_id)
+
+        if parent_category_id:
+            child_ids = [
+                row[0] for row in
+                db.query(Category.id).filter(Category.parent_id == parent_category_id).all()
+            ]
+            all_ids = [parent_category_id] + child_ids
+            query = query.filter(Product.category_id.in_(all_ids))
 
         if search_term:
             query = query.filter(

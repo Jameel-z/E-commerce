@@ -14,6 +14,13 @@ class HomepageToggle(PydanticBaseModel):
     show_on_homepage: bool
     homepage_order: int = 0
 
+class RowPinsPayload(PydanticBaseModel):
+    product_ids: list[int] = []
+
+class CategoryRowToggle(PydanticBaseModel):
+    show_category_row: bool
+    category_row_order: int = 0
+
 router = APIRouter(
     prefix="/categories",
     responses={
@@ -26,6 +33,17 @@ router = APIRouter(
 def get_categories(db: Session = Depends(get_db)):
     """Flat list of all categories (public)."""
     return category_crud.get_multi(db)
+
+@router.get("/category-rows", response_model=list[Category], status_code=status.HTTP_200_OK)
+def get_category_rows(db: Session = Depends(get_db)):
+    """Parent categories with show_category_row=True, ordered by category_row_order."""
+    from models.category import Category as CategoryModel
+    return (
+        db.query(CategoryModel)
+        .filter(CategoryModel.show_category_row == True, CategoryModel.parent_id == None)
+        .order_by(CategoryModel.category_row_order)
+        .all()
+    )
 
 @router.get("/featured", response_model=list[Category], status_code=status.HTTP_200_OK)
 def get_featured_categories(db: Session = Depends(get_db)):
@@ -127,6 +145,65 @@ def delete_category(
     if category.image_url:
         ImageService.delete_image(category.image_url)
     category_crud.remove(db, id=category_id)
+
+@router.get(
+    "/{category_id}/row-pins",
+    response_model=list[int],
+    summary="Get pinned product IDs for a category row",
+)
+def get_row_pins(
+    category_id: int = Path(..., gt=0),
+    db: Session = Depends(get_db),
+):
+    from models.category_row_pin import CategoryRowPin
+    pins = (
+        db.query(CategoryRowPin.product_id)
+        .filter(CategoryRowPin.category_id == category_id)
+        .order_by(CategoryRowPin.pin_order)
+        .all()
+    )
+    return [p[0] for p in pins]
+
+@router.put(
+    "/{category_id}/row-pins",
+    response_model=list[int],
+    dependencies=[Depends(require_admin)],
+    summary="Set pinned products for a category row",
+)
+def set_row_pins(
+    category_id: int = Path(..., gt=0),
+    payload: RowPinsPayload = Body(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    from models.category_row_pin import CategoryRowPin
+    db.query(CategoryRowPin).filter(CategoryRowPin.category_id == category_id).delete()
+    for order, product_id in enumerate(payload.product_ids):
+        db.add(CategoryRowPin(category_id=category_id, product_id=product_id, pin_order=order))
+    db.commit()
+    return payload.product_ids
+
+@router.patch(
+    "/{category_id}/category-row",
+    response_model=Category,
+    dependencies=[Depends(require_admin)],
+    summary="Toggle category product row on homepage",
+)
+def set_category_row(
+    category_id: int = Path(..., gt=0),
+    payload: CategoryRowToggle = Body(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    from models.category import Category as CategoryModel
+    category = db.query(CategoryModel).filter(CategoryModel.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    category.show_category_row = payload.show_category_row
+    category.category_row_order = payload.category_row_order
+    db.commit()
+    db.refresh(category)
+    return category
 
 @router.patch(
     "/{category_id}/featured",

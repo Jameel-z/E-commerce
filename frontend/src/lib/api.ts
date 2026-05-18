@@ -141,12 +141,14 @@ class ApiClient {
     page?: number;
     per_page?: number;
     category_id?: number;
+    parent_category_id?: number;
     search?: string;
   }): Promise<Product[]> {
     const query = new URLSearchParams();
     if (params?.page) query.set("page", params.page.toString());
     if (params?.per_page) query.set("per_page", params.per_page.toString());
     if (params?.category_id) query.set("category_id", params.category_id.toString());
+    if (params?.parent_category_id) query.set("parent_category_id", params.parent_category_id.toString());
     if (params?.search) query.set("search", params.search);
     const qs = query.toString();
     return this.request<Product[]>(`/products/${qs ? "?" + qs : ""}`);
@@ -609,6 +611,28 @@ class ApiClient {
     return this.request<Category>(`/categories/${id}/featured`, {
       method: "PATCH",
       body: JSON.stringify({ show_on_homepage, homepage_order }),
+    });
+  }
+
+  async getCategoryRows(): Promise<Category[]> {
+    return this.request<Category[]>("/categories/category-rows");
+  }
+
+  async setCategoryRow(id: number, show_category_row: boolean, category_row_order: number): Promise<Category> {
+    return this.request<Category>(`/categories/${id}/category-row`, {
+      method: "PATCH",
+      body: JSON.stringify({ show_category_row, category_row_order }),
+    });
+  }
+
+  async getCategoryRowPins(categoryId: number): Promise<number[]> {
+    return this.request<number[]>(`/categories/${categoryId}/row-pins`);
+  }
+
+  async setCategoryRowPins(categoryId: number, productIds: number[]): Promise<void> {
+    await this.request(`/categories/${categoryId}/row-pins`, {
+      method: "PUT",
+      body: JSON.stringify({ product_ids: productIds }),
     });
   }
 }

@@ -19,6 +19,8 @@ class CategoryBase(BaseSchema):
     image_url: Optional[str] = Field(None, max_length=500)
     show_on_homepage: bool = Field(False)
     homepage_order: int = Field(0)
+    show_category_row: bool = Field(False)
+    category_row_order: int = Field(0)
 
     @field_validator('image_url', mode='before')
     @classmethod

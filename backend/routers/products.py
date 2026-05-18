@@ -51,14 +51,16 @@ def list_products(
     page: int = Query(1, ge=1, description="Page number"),
     per_page: int = Query(DEFAULT_PAGE_SIZE, ge=1, le=MAX_PAGE_SIZE, description="Items per page"),
     category_id: Optional[int] = Query(None, description="Filter by category ID"),
+    parent_category_id: Optional[int] = Query(None, description="Filter by parent category ID (includes child categories)"),
     search: Optional[str] = Query(None, description="Search term")
 ):
     """Get paginated products with optional filters."""
     return product_crud.get_list(
-        db, 
-        skip=(page - 1) * per_page, 
-        limit=per_page, 
+        db,
+        skip=(page - 1) * per_page,
+        limit=per_page,
         category_id=category_id,
+        parent_category_id=parent_category_id,
         search_term=search
     )
 

@@ -12,6 +12,8 @@ class Category(Base):
     image_url = Column(String(500), nullable=True)
     show_on_homepage = Column(Boolean, default=False, nullable=False)
     homepage_order = Column(Integer, default=0, nullable=False)
+    show_category_row = Column(Boolean, default=False, nullable=False)
+    category_row_order = Column(Integer, default=0, nullable=False)
 
     products = relationship("Product", back_populates="category")
     parent = relationship("Category", remote_side=[id], back_populates="children", foreign_keys=[parent_id])

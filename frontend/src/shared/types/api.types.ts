@@ -15,6 +15,8 @@ export interface Category {
   children: Category[];
   show_on_homepage?: boolean;
   homepage_order?: number;
+  show_category_row?: boolean;
+  category_row_order?: number;
 }
 
 /**

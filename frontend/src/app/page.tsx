@@ -10,6 +10,7 @@ import {
   FeaturesSection,
   QuickAccessSection,
   FeaturedProductsSection,
+  CategoryProductRowsSection,
 } from "@/shared/components";
 
 export default function HomePage() {
@@ -53,6 +54,7 @@ export default function HomePage() {
         loading={productsLoading}
         error={error}
       />
+      <CategoryProductRowsSection />
       <FeaturesSection />
       <QuickAccessSection user={user} />
     </UnifiedLayout>
