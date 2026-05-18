@@ -22,10 +22,15 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Ecom - Modern E-Commerce Platform",
-  description:
-    "A sophisticated e-commerce platform with role-based access control",
-  generator: "v0.app",
+  title: "961shop.com",
+  description: "961shop.com - Your online shopping destination",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon.jpg", type: "image/jpeg" },
+    ],
+    apple: "/icon.jpg",
+  },
 };
 
 export default function RootLayout({

@@ -85,10 +85,14 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
             query = query.filter(Product.category_id.in_(all_ids))
 
         if search_term:
-            query = query.filter(
-                Product.name.ilike(f"%{search_term}%") |
-                Product.description.ilike(f"%{search_term}%")  # Fixed missing %
-                )
+            # Normalize: remove hyphens from both search term and DB fields, then AND each word
+            words = search_term.replace("-", " ").split()
+            for word in words:
+                if word:
+                    query = query.filter(
+                        func.replace(Product.name, "-", " ").ilike(f"%{word}%") |
+                        func.replace(Product.description, "-", " ").ilike(f"%{word}%")
+                    )
 
         # Newest products first
         query = query.order_by(Product.created_at.desc())

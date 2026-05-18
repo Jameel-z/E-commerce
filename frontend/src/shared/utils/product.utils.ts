@@ -63,15 +63,15 @@ export function filterProducts(
 ): Product[] {
   let filtered = [...products];
 
-  // Search filter
+  // Search filter — split into words, normalize hyphens, AND all words
   if (filters.search) {
-    const searchLower = filters.search.toLowerCase();
-    filtered = filtered.filter(
-      (product) =>
-        product.name.toLowerCase().includes(searchLower) ||
-        product.category_name?.toLowerCase().includes(searchLower) ||
-        product.description?.toLowerCase().includes(searchLower)
-    );
+    const words = filters.search.toLowerCase().replace(/-/g, " ").split(/\s+/).filter(Boolean);
+    filtered = filtered.filter((product) => {
+      const name = product.name.toLowerCase().replace(/-/g, " ");
+      const desc = (product.description ?? "").toLowerCase().replace(/-/g, " ");
+      const cat  = (product.category_name ?? "").toLowerCase().replace(/-/g, " ");
+      return words.every((word) => name.includes(word) || desc.includes(word) || cat.includes(word));
+    });
   }
 
   // Category filter
