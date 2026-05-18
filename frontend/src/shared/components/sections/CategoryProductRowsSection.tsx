@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronRight, ShoppingCart, Package } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
+import "swiper/css/pagination";
 import { apiClient, type Product, type Category } from "@/lib/api";
 import { getProductImageUrl } from "@/shared/utils/image";
 import { useCart } from "@/shared/hooks/use-cart";
@@ -146,6 +147,7 @@ function CategoryRow({ category }: { category: Category }) {
           <Swiper
             spaceBetween={12}
             slidesPerView={2}
+            loop={products.length > 2}
             breakpoints={{
               640:  { slidesPerView: 3, spaceBetween: 12 },
               1024: { slidesPerView: 4, spaceBetween: 14 },
