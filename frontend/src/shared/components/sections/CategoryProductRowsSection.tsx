@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronRight, ShoppingCart, Package } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -86,15 +86,41 @@ function SkeletonCard() {
   );
 }
 
-interface CategoryRowData {
-  category: Category;
-  products: Product[];
-  loading: boolean;
-}
+function CategoryRow({ category }: { category: Category }) {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [fetched, setFetched] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
 
-function CategoryRow({ category, products, loading }: CategoryRowData) {
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !fetched) {
+          setFetched(true);
+          setLoading(true);
+          Promise.all([
+            apiClient.getCategoryRowPins(category.id).catch(() => [] as number[]),
+            apiClient.getProducts({ parent_category_id: category.id, per_page: 100 }).catch(() => [] as Product[]),
+          ]).then(([pins, all]) => {
+            const pinnedSet = new Set(pins);
+            const pinned = pins.map((id) => all.find((p) => p.id === id)).filter(Boolean) as Product[];
+            const unpinned = all.filter((p) => !pinnedSet.has(p.id));
+            setProducts([...pinned, ...unpinned]);
+          }).finally(() => setLoading(false));
+        }
+      },
+      { rootMargin: "200px" } // start loading 200px before row enters viewport
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [category.id, fetched]);
+
   return (
-    <section className="py-6 bg-background">
+    <section ref={sectionRef} className="py-6 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
@@ -110,12 +136,14 @@ function CategoryRow({ category, products, loading }: CategoryRowData) {
           </Link>
         </div>
 
+        {/* Skeleton while loading */}
         {loading && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         )}
 
+        {/* Products */}
         {!loading && products.length > 0 && (
           <Swiper
             modules={[Pagination]}
@@ -137,7 +165,8 @@ function CategoryRow({ category, products, loading }: CategoryRowData) {
           </Swiper>
         )}
 
-        {!loading && products.length === 0 && (
+        {/* Empty */}
+        {!loading && fetched && products.length === 0 && (
           <div className="flex items-center justify-center py-8 text-muted-foreground">
             <Package className="w-5 h-5 mr-2 opacity-40" />
             <span className="text-sm">No products in this category yet.</span>
@@ -150,39 +179,22 @@ function CategoryRow({ category, products, loading }: CategoryRowData) {
 }
 
 export function CategoryProductRowsSection() {
-  const [rows, setRows] = useState<CategoryRowData[]>([]);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiClient.getCategoryRows().then(async (categories) => {
-      if (categories.length === 0) { setInitialLoading(false); return; }
-
-      setRows(categories.map((cat) => ({ category: cat, products: [], loading: true })));
-      setInitialLoading(false);
-
-      const results = await Promise.all(
-        categories.map(async (cat) => {
-          const [pins, products] = await Promise.all([
-            apiClient.getCategoryRowPins(cat.id).catch(() => [] as number[]),
-            apiClient.getProducts({ parent_category_id: cat.id, per_page: 100 }).catch(() => [] as Product[]),
-          ]);
-          const pinnedSet = new Set(pins);
-          const pinned = pins.map((id) => products.find((p) => p.id === id)).filter(Boolean) as Product[];
-          const unpinned = products.filter((p) => !pinnedSet.has(p.id));
-          return [...pinned, ...unpinned];
-        })
-      );
-
-      setRows(categories.map((cat, i) => ({ category: cat, products: results[i], loading: false })));
-    }).catch(() => setInitialLoading(false));
+    apiClient.getCategoryRows()
+      .then(setCategories)
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  if (initialLoading || rows.length === 0) return null;
+  if (loading || categories.length === 0) return null;
 
   return (
     <>
-      {rows.map((row) => (
-        <CategoryRow key={row.category.id} {...row} />
+      {categories.map((cat) => (
+        <CategoryRow key={cat.id} category={cat} />
       ))}
     </>
   );
