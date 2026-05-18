@@ -4,9 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronRight, ShoppingCart, Package } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination } from "swiper/modules";
 import "swiper/css";
-import "swiper/css/pagination";
 import { apiClient, type Product, type Category } from "@/lib/api";
 import { getProductImageUrl } from "@/shared/utils/image";
 import { useCart } from "@/shared/hooks/use-cart";
@@ -146,7 +144,6 @@ function CategoryRow({ category }: { category: Category }) {
         {/* Products */}
         {!loading && products.length > 0 && (
           <Swiper
-            modules={[Pagination]}
             spaceBetween={12}
             slidesPerView={2}
             breakpoints={{
@@ -154,8 +151,7 @@ function CategoryRow({ category }: { category: Category }) {
               1024: { slidesPerView: 4, spaceBetween: 14 },
               1280: { slidesPerView: 5, spaceBetween: 16 },
             }}
-            pagination={{ clickable: true }}
-            className="!pb-8"
+            className="pb-2"
           >
             {products.map((product) => (
               <SwiperSlide key={product.id}>
