@@ -148,6 +148,16 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /*
+   * Fluid base font-size: scales smoothly from 13px (360px screen)
+   * up to 16px (1024px+ screen). Because Tailwind uses rem, every
+   * text-xl / text-3xl / spacing in rem scales with this automatically.
+   * No changes needed in any component.
+   */
+  html {
+    font-size: clamp(13px, 1vw + 9.4px, 16px);
+  }
 }
 
 /* Custom Swiper navigation button colors */
