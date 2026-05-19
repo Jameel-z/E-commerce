@@ -87,7 +87,7 @@ export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalPro
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl w-[95vw] p-0 overflow-hidden gap-0 max-h-[90vh]">
+      <DialogContent className="max-w-2xl w-[95vw] p-0 overflow-hidden gap-0 max-h-[92vh] sm:max-h-[85vh]">
         <DialogHeader className="sr-only">
           <DialogTitle>{product?.name || "Product Details"}</DialogTitle>
         </DialogHeader>
@@ -110,7 +110,7 @@ export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalPro
         )}
 
         {!loading && !error && product && (
-          <div className="flex flex-col sm:grid sm:grid-cols-2 overflow-y-auto sm:overflow-hidden sm:max-h-[480px]">
+          <div className="flex flex-col sm:grid sm:grid-cols-2 overflow-y-auto sm:overflow-hidden sm:max-h-[75vh]">
 
             {/* Top / Left — Image */}
             <div className="flex flex-col bg-muted/20 sm:border-r border-b sm:border-b-0">

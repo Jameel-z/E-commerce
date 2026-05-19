@@ -63,7 +63,7 @@ export function ProductImageGallery({
       <div className="relative">
         <div
           className={`
-            relative overflow-hidden rounded-lg bg-white border group max-h-[400px]
+            relative overflow-hidden rounded-lg bg-white border group max-h-[260px] sm:max-h-[340px] lg:max-h-[420px]
             ${isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"}
           `}
           onMouseMove={handleMouseMove}
@@ -76,7 +76,7 @@ export function ProductImageGallery({
             width={600}
             height={400}
             className={`
-              w-full h-auto max-h-[400px] object-contain transition-all duration-300
+              w-full h-auto max-h-[260px] sm:max-h-[340px] lg:max-h-[420px] object-contain transition-all duration-300
               ${isZoomed ? "scale-[2.5]" : "group-hover:scale-105"}
             `}
             style={
@@ -198,9 +198,9 @@ export function ProductImageGallery({
         </div>
       )}
 
-      {/* Instructions for zoom */}
+      {/* Zoom instructions — desktop only (mouse-specific) */}
       {allImages.length > 0 && (
-        <div className="text-center">
+        <div className="hidden sm:block text-center">
           <p className="text-xs text-muted-foreground">
             {isZoomed
               ? "Move mouse to pan • Click to zoom out"

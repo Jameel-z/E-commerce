@@ -12,10 +12,10 @@ export function ProductInfo({ product, className = "" }: ProductInfoProps) {
   const salePrice = product.sale_price;
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-4 sm:space-y-6 ${className}`}>
       {/* Product Name and Price */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-2">
           {product.name}
         </h1>
         <PriceDisplay

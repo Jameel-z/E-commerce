@@ -65,11 +65,11 @@ export function filterProducts(
 
   // Search filter — split into words, normalize hyphens, AND all words
   if (filters.search) {
-    const words = filters.search.toLowerCase().replace(/-/g, " ").split(/\s+/).filter(Boolean);
+    const words = filters.search.split(/\s+/).map((w) => w.replace(/-/g, "").toLowerCase()).filter(Boolean);
     filtered = filtered.filter((product) => {
-      const name = product.name.toLowerCase().replace(/-/g, " ");
-      const desc = (product.description ?? "").toLowerCase().replace(/-/g, " ");
-      const cat  = (product.category_name ?? "").toLowerCase().replace(/-/g, " ");
+      const name = product.name.toLowerCase().replace(/-/g, "");
+      const desc = (product.description ?? "").toLowerCase().replace(/-/g, "");
+      const cat  = (product.category_name ?? "").toLowerCase().replace(/-/g, "");
       return words.every((word) => name.includes(word) || desc.includes(word) || cat.includes(word));
     });
   }

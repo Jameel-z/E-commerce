@@ -85,14 +85,13 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
             query = query.filter(Product.category_id.in_(all_ids))
 
         if search_term:
-            # Normalize: remove hyphens from both search term and DB fields, then AND each word
-            words = search_term.replace("-", " ").split()
+            # Remove hyphens from each word so "wifi" matches "Wi-Fi" and vice versa
+            words = [w.replace("-", "") for w in search_term.split() if w.replace("-", "")]
             for word in words:
-                if word:
-                    query = query.filter(
-                        func.replace(Product.name, "-", " ").ilike(f"%{word}%") |
-                        func.replace(Product.description, "-", " ").ilike(f"%{word}%")
-                    )
+                query = query.filter(
+                    func.replace(Product.name, "-", "").ilike(f"%{word}%") |
+                    func.replace(Product.description, "-", "").ilike(f"%{word}%")
+                )
 
         # Newest products first
         query = query.order_by(Product.created_at.desc())

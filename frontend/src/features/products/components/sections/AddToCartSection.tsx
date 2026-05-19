@@ -43,7 +43,7 @@ export function AddToCartSection({
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Quantity + Add to Cart inline */}
-      <div className="flex items-end gap-3">
+      <div className="flex flex-wrap items-end gap-3">
         <QuantitySelector
           quantity={quantity}
           maxQuantity={100}
