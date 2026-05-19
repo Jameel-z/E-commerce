@@ -60,6 +60,23 @@ with engine.connect() as conn:
     conn.execute(text(
         "ALTER TABLE categories ADD COLUMN IF NOT EXISTS category_row_order INTEGER NOT NULL DEFAULT 0"
     ))
+
+    # pg_trgm: enable extension + create GIN indexes for fast ILIKE search
+    # These match the replace() expressions used in product_crud search queries
+    conn.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm"))
+    conn.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_products_name_trgm
+        ON products USING GIN (replace(name, '-', '') gin_trgm_ops)
+    """))
+    conn.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_products_desc_trgm
+        ON products USING GIN (replace(description, '-', '') gin_trgm_ops)
+    """))
+    conn.execute(text("""
+        CREATE INDEX IF NOT EXISTS idx_categories_name_trgm
+        ON categories USING GIN (replace(name, '-', '') gin_trgm_ops)
+    """))
+
     conn.commit()
 
 app = FastAPI(title="E-commerce Backend API")

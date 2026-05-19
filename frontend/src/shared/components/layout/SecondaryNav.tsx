@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Search, ChevronDown, Phone, LayoutGrid } from "lucide-react";
 import { apiClient } from "@/lib/api";
-import type { Category } from "@/shared/types";
+import type { Category, Product } from "@/shared/types";
 import { CONTACT } from "@/shared/constants/config";
+import { getProductImageUrl } from "@/shared/utils/image";
 
 function categoryNames(cat: Category): string[] {
   return [cat.name, ...cat.children.map((c) => c.name)];
@@ -17,8 +18,12 @@ export function SecondaryNav() {
   const [isCatOpen, setIsCatOpen] = useState(false);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     apiClient.getCategoryTree().then(setTree).catch(() => {});
@@ -30,16 +35,48 @@ export function SecondaryNav() {
         setIsCatOpen(false);
         setHoveredId(null);
       }
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Live autocomplete — fires after 3 characters with 300ms debounce
+  useEffect(() => {
+    if (searchQuery.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setLoadingSuggestions(true);
+      try {
+        const results = await apiClient.getProducts({ search: searchQuery, per_page: 6 });
+        setSuggestions(Array.isArray(results) ? results.slice(0, 6) : []);
+        setShowSuggestions(true);
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const q = searchQuery.trim();
+    setShowSuggestions(false);
     router.push(q ? `/products?search=${encodeURIComponent(q)}` : "/products");
     setSearchQuery("");
+  };
+
+  const handleSuggestionClick = (product: Product) => {
+    setShowSuggestions(false);
+    setSearchQuery("");
+    router.push(`/products/${product.id}`);
   };
 
   const buildCategoryUrl = (names: string[]) =>
@@ -133,16 +170,82 @@ export function SecondaryNav() {
 
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="flex items-center gap-2 flex-1">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+            <div className="relative flex-1" ref={searchRef}>
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none z-10" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Escape" && setShowSuggestions(false)}
+                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                 placeholder="Search products…"
                 className="w-full h-8 pl-8 pr-3 text-sm bg-background border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+                autoComplete="off"
               />
+
+              {/* Autocomplete Dropdown */}
+              {showSuggestions && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-lg shadow-xl z-50 overflow-hidden">
+                  {/* Header */}
+                  <div className="px-3 py-2 bg-muted/60 border-b">
+                    <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                      {loadingSuggestions ? "Searching…" : `Products`}
+                    </span>
+                  </div>
+
+                  {/* Results */}
+                  {suggestions.length > 0 ? (
+                    <>
+                      {suggestions.map((product) => (
+                        <button
+                          key={product.id}
+                          type="button"
+                          onClick={() => handleSuggestionClick(product)}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors border-b last:border-b-0 text-left"
+                        >
+                          {/* Thumbnail */}
+                          <div className="w-11 h-11 flex-shrink-0 rounded border bg-white overflow-hidden">
+                            <img
+                              src={getProductImageUrl(product)}
+                              alt={product.name}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground line-clamp-2 leading-tight">
+                              {product.name}
+                            </p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              {product.is_on_sale && product.sale_price ? (
+                                <>
+                                  <span className="text-xs font-bold text-primary">${product.sale_price}</span>
+                                  <span className="text-xs text-muted-foreground line-through">${product.regular_price}</span>
+                                </>
+                              ) : (
+                                <span className="text-xs font-bold text-foreground">${product.price}</span>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                      {/* See all */}
+                      <button
+                        type="submit"
+                        className="w-full px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/5 transition-colors text-center border-t"
+                      >
+                        See all results for &quot;{searchQuery}&quot; →
+                      </button>
+                    </>
+                  ) : !loadingSuggestions ? (
+                    <div className="px-3 py-4 text-sm text-muted-foreground text-center">
+                      No products found
+                    </div>
+                  ) : null}
+                </div>
+              )}
             </div>
+
             <button
               type="submit"
               className="h-8 px-3 text-xs font-semibold bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors flex-shrink-0"

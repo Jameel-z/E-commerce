@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, aliased
 from typing import Optional, List
 from .base_crud import CRUDBase
 from .category_crud import category_crud
@@ -15,7 +15,7 @@ import logging
 from services.image_services import ImageService
 from core.utils import generate_static_url
 # import func
-from sqlalchemy import func, Integer, case
+from sqlalchemy import func, Integer, case, or_
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +55,8 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
             else_=None
         ).label('discount_percentage')
         
+        ParentCategory = aliased(Category)
+
         query = (
             db.query(
                 Product.id,
@@ -71,6 +73,7 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
                 discount_percentage_expr
             )
             .outerjoin(Product.category)
+            .outerjoin(ParentCategory, Category.parent_id == ParentCategory.id)
         )
 
         if category_id:
@@ -85,13 +88,27 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
             query = query.filter(Product.category_id.in_(all_ids))
 
         if search_term:
-            # Remove hyphens from each word so "wifi" matches "Wi-Fi" and vice versa
+            # Remove hyphens so "wifi" matches "Wi-Fi"
             words = [w.replace("-", "") for w in search_term.split() if w.replace("-", "")]
             for word in words:
-                query = query.filter(
-                    func.replace(Product.name, "-", "").ilike(f"%{word}%") |
-                    func.replace(Product.description, "-", "").ilike(f"%{word}%")
+                # Exact substring match (fast via GIN index)
+                exact = or_(
+                    func.replace(Product.name, "-", "").ilike(f"%{word}%"),
+                    func.replace(Product.description, "-", "").ilike(f"%{word}%"),
+                    func.replace(Category.name, "-", "").ilike(f"%{word}%"),
+                    func.replace(ParentCategory.name, "-", "").ilike(f"%{word}%"),
                 )
+                # Fuzzy match via pg_trgm — handles typos like "dahwa" → "dahua"
+                # Only applied for words >= 4 chars to avoid false positives
+                if len(word) >= 4:
+                    fuzzy = or_(
+                        func.word_similarity(word, func.replace(Product.name, "-", "")) >= 0.35,
+                        func.word_similarity(word, func.replace(Category.name, "-", "")) >= 0.4,
+                        func.word_similarity(word, func.replace(ParentCategory.name, "-", "")) >= 0.4,
+                    )
+                    query = query.filter(exact | fuzzy)
+                else:
+                    query = query.filter(exact)
 
         # Newest products first
         query = query.order_by(Product.created_at.desc())
