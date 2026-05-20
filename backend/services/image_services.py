@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 # Constants
 ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/webp", "image/jpg"}
 MAX_FILE_SIZE = 5 * 1024 * 1024 # 5 MB
-DEFAULT_PAGE_SIZE = 20
-MAX_PAGE_SIZE = 100
+DEFAULT_PAGE_SIZE = 1000
+MAX_PAGE_SIZE = 1000
 
 
 

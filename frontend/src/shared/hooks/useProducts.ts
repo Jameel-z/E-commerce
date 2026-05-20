@@ -21,7 +21,7 @@ export function useProducts(): UseProductsReturn {
   const fetchProducts = useCallback(async () => {
     try {
       setIsLoading(true);
-      const data = await apiClient.getProducts();
+      const data = await apiClient.getProducts({ per_page: 1000 });
       setProducts(data);
       setError(null);
     } catch (err) {
