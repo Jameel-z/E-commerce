@@ -107,7 +107,7 @@ export function ProductCard({
             </div>
           )}
           {product.stock_quantity > 0 &&
-            product.stock_quantity <= 5 &&
+            product.stock_quantity <= 2 &&
             !product.is_on_sale &&
             !isCompact && (
               <ProductBadge
@@ -218,7 +218,7 @@ export function ProductCard({
           {/* Stock Info — list only (grid shows inline with button) */}
           {isList && (
             <div className="mt-auto">
-              {product.stock_quantity > 0 && product.stock_quantity <= 5 && (
+              {product.stock_quantity > 0 && product.stock_quantity <= 2 && (
                 <div className="mb-2">
                   <div className="flex items-center justify-between text-xs mb-1">
                     <span className="text-orange-600 font-semibold">
@@ -228,7 +228,7 @@ export function ProductCard({
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                     <div
                       className="bg-gradient-to-r from-orange-500 to-orange-600 h-1.5 rounded-full transition-all duration-300"
-                      style={{ width: `${(product.stock_quantity / 5) * 100}%` }}
+                      style={{ width: `${(product.stock_quantity / 2) * 100}%` }}
                     />
                   </div>
                 </div>
