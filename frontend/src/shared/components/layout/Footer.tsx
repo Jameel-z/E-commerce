@@ -47,6 +47,22 @@ const Footer: React.FC = () => {
                   Products
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Terms &amp; Conditions
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
             </ul>
           </div>
 
