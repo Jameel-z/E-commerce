@@ -34,7 +34,14 @@ create_database()
 # Step 2: Engine & Session
 def get_engine():
     logger.info("Connecting to database")
-    return create_engine(settings.DATABASE_URL)
+    return create_engine(
+        settings.DATABASE_URL,
+        pool_size=20,        # base persistent connections
+        max_overflow=40,     # extra connections allowed under burst traffic
+        pool_timeout=30,     # seconds to wait before raising TimeoutError
+        pool_recycle=1800,   # recycle connections after 30 min to avoid stale TCP
+        pool_pre_ping=True,  # test each connection before use; drops dead ones silently
+    )
 
 engine = get_engine()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
