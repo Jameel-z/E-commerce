@@ -16,6 +16,7 @@ import { ShoppingCart, Eye, Maximize2, Heart } from "lucide-react";
 import { Product } from "@/shared/types/api.types";
 import { cn } from "@/shared/utils";
 import { useWishlist } from "@/shared/hooks/use-wishlist";
+import { useWishlistSidebar } from "@/features/cart/components";
 
 interface ProductCardProps {
   product: Product;
@@ -37,6 +38,7 @@ export function ProductCard({
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { isWishlisted, toggleWishlist } = useWishlist();
+  const { openSidebar: openWishlistSidebar } = useWishlistSidebar();
   const [isAdding, setIsAdding] = useState(false);
   const [, setShowQuickViewOverlay] = useState(false);
 
@@ -132,6 +134,7 @@ export function ProductCard({
               onClick={(e) => {
                 e.stopPropagation();
                 toggleWishlist(product);
+                openWishlistSidebar();
               }}
               className="absolute top-2 right-2 z-30 p-1.5 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow hover:scale-110 transition-transform"
               aria-label={isWishlisted(product.id) ? "Remove from wishlist" : "Add to wishlist"}

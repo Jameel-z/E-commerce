@@ -2,7 +2,7 @@
 
 import { Button } from "@/shared/components/ui/button";
 import { CartIcon } from "@/features/cart/components/cart-icon";
-import { useCartSidebar } from "@/features/cart/components";
+import { useCartSidebar, useWishlistSidebar } from "@/features/cart/components";
 import { useAuth } from "@/shared/hooks/use-auth";
 import Link from "next/link";
 import {
@@ -26,6 +26,7 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
   const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { openSidebar } = useCartSidebar();
+  const { openSidebar: openWishlistSidebar } = useWishlistSidebar();
   const { count: wishlistCount } = useWishlist();
 
   return (
@@ -67,14 +68,14 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
                   <Monitor className="h-4 w-4" />
                 )}
               </Button> */}
-              <Link href="/wishlist" className="relative p-2 hover:text-primary transition-colors">
+              <button onClick={openWishlistSidebar} className="relative p-2 hover:text-primary transition-colors">
                 <Heart className="h-5 w-5" />
                 {wishlistCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                     {wishlistCount}
                   </span>
                 )}
-              </Link>
+              </button>
               <CartIcon onClick={openSidebar} />
               {user ? (
                 <>

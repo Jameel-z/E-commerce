@@ -64,95 +64,106 @@ function BannerSlide({
   const pos = POSITION_MAP[banner.text_position ?? "middle-center"] ?? POSITION_MAP["middle-center"];
   const hasLink = !!banner.cta_link;
 
-  const inner = (
-    <>
-      {/* Background media */}
-      {isVideo ? (
-        <video
-          src={mediaUrl!}
-          autoPlay
-          muted
-          playsInline
-          onEnded={onVideoEnd}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-      ) : hasMedia ? (
-        <img
-          src={mediaUrl!}
-          alt={banner.title ?? "Banner"}
-          className="absolute inset-0 w-full h-full object-cover"
-          draggable={false}
-        />
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-muted/40 to-secondary/15" />
-      )}
+  const hasOverlay = !banner.hide_overlay && (banner.title || banner.subtitle || banner.cta_text);
 
-      {/* Directional scrim — only when overlay text exists */}
-      {hasMedia && !banner.hide_overlay && (banner.title || banner.subtitle || banner.cta_text) && (
+  // Text block — absolutely overlaid on the image
+  const textOverlay = hasOverlay ? (
+    <>
+      {hasMedia && (
         <div className={`absolute inset-0 ${pos.gradient}`} />
       )}
-
-      {/* Content block */}
-      {!banner.hide_overlay && (banner.title || banner.subtitle || banner.cta_text) && (
-        <div
-          className={`relative z-10 max-w-2xl ${pos.content} ${
-            hasMedia ? "text-white" : "text-foreground"
-          }`}
-        >
+      <div className={`absolute inset-0 flex ${pos.container}`}>
+        <div className={`max-w-2xl ${pos.content} ${hasMedia ? "text-white" : "text-foreground"}`}>
           {banner.title && (
-            <h1
-              className={`text-[clamp(1rem,4vw,3.75rem)] font-bold mb-[0.5em] leading-tight tracking-tight drop-shadow-md ${
-                hasMedia ? "text-white" : ""
-              }`}
-            >
+            <h1 className={`text-[clamp(0.85rem,3.5vw,3.75rem)] font-bold mb-[0.4em] leading-tight tracking-tight drop-shadow-md ${hasMedia ? "text-white" : ""}`}>
               {banner.title}
             </h1>
           )}
-
           {banner.subtitle && (
-            <p
-              className={`text-[clamp(0.7rem,1.8vw,1.25rem)] mb-[1em] leading-relaxed drop-shadow-sm ${
-                hasMedia ? "text-white/90" : "text-muted-foreground"
-              }`}
-            >
+            <p className={`text-[clamp(0.6rem,1.5vw,1.25rem)] mb-[0.8em] leading-relaxed drop-shadow-sm ${hasMedia ? "text-white/90" : "text-muted-foreground"}`}>
               {banner.subtitle}
             </p>
           )}
-
           {banner.cta_text && (
-            <span
-              className={`inline-flex items-center gap-2 px-[clamp(0.75rem,3vw,2rem)] py-[clamp(0.4rem,1.2vw,0.75rem)] text-[clamp(0.7rem,1.5vw,1rem)] font-semibold rounded-full shadow-lg pointer-events-none select-none ${
-                hasMedia
-                  ? "bg-white text-foreground"
-                  : "bg-primary text-primary-foreground"
-              }`}
-            >
+            <span className={`inline-flex items-center gap-2 px-[clamp(0.6rem,2.5vw,2rem)] py-[clamp(0.3rem,1vw,0.75rem)] text-[clamp(0.6rem,1.3vw,1rem)] font-semibold rounded-full shadow-lg pointer-events-none select-none ${hasMedia ? "bg-white text-foreground" : "bg-primary text-primary-foreground"}`}>
+              <ShoppingBag className="h-[1em] w-[1em]" />
+              {banner.cta_text}
+            </span>
+          )}
+        </div>
+      </div>
+    </>
+  ) : null;
+
+  // ── With media: image/video sets its own height — zero cropping ──────────────
+  if (hasMedia) {
+    const media = isVideo ? (
+      <video
+        src={mediaUrl!}
+        autoPlay muted playsInline
+        onEnded={onVideoEnd}
+        className="w-full h-auto block"
+      />
+    ) : (
+      <img
+        src={mediaUrl!}
+        alt={banner.title ?? "Banner"}
+        className="w-full h-auto block"
+        draggable={false}
+      />
+    );
+
+    const inner = (
+      <div className="relative w-full overflow-hidden">
+        {media}
+        {textOverlay}
+      </div>
+    );
+
+    if (hasLink) {
+      return (
+        <Link href={banner.cta_link!} className="block group cursor-pointer" aria-label={banner.cta_text ?? banner.title ?? "View offer"}>
+          {inner}
+        </Link>
+      );
+    }
+    return inner;
+  }
+
+  // ── No media: gradient background with flex-positioned text ──────────────────
+  const fallback = (
+    <div className={`relative w-full flex min-h-[180px] sm:min-h-[280px] lg:min-h-[420px] overflow-hidden ${pos.container} bg-gradient-to-br from-background via-muted/40 to-secondary/15`}>
+      {hasOverlay && (
+        <div className={`max-w-2xl ${pos.content} text-foreground`}>
+          {banner.title && (
+            <h1 className="text-[clamp(1.25rem,4vw,3.75rem)] font-bold mb-[0.4em] leading-tight tracking-tight">
+              {banner.title}
+            </h1>
+          )}
+          {banner.subtitle && (
+            <p className="text-[clamp(0.75rem,1.8vw,1.25rem)] mb-[0.8em] leading-relaxed text-muted-foreground">
+              {banner.subtitle}
+            </p>
+          )}
+          {banner.cta_text && (
+            <span className="inline-flex items-center gap-2 px-[clamp(0.75rem,3vw,2rem)] py-[clamp(0.4rem,1.2vw,0.75rem)] text-[clamp(0.75rem,1.5vw,1rem)] font-semibold rounded-full shadow-lg pointer-events-none select-none bg-primary text-primary-foreground">
               <ShoppingBag className="h-[1em] w-[1em]" />
               {banner.cta_text}
             </span>
           )}
         </div>
       )}
-    </>
+    </div>
   );
-
-  const containerClass = `relative w-full flex overflow-hidden ${pos.container} ${
-    hasMedia ? "aspect-[16/9]" : "aspect-[16/9] min-h-[180px]"
-  }`;
 
   if (hasLink) {
     return (
-      <Link
-        href={banner.cta_link!}
-        className={`block ${containerClass} group cursor-pointer`}
-        aria-label={banner.cta_text ?? banner.title ?? "View offer"}
-      >
-        {inner}
+      <Link href={banner.cta_link!} className="block group cursor-pointer" aria-label={banner.cta_text ?? banner.title ?? "View offer"}>
+        {fallback}
       </Link>
     );
   }
-
-  return <div className={containerClass}>{inner}</div>;
+  return fallback;
 }
 
 // ─── Hero section ─────────────────────────────────────────────────────────────

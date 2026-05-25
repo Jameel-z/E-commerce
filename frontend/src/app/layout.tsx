@@ -2,11 +2,11 @@ import type React from "react";
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, DM_Sans, Poppins } from "next/font/google";
 import { AuthProvider, CartProvider, WishlistProvider } from "@/shared/components";
-import { CartSidebarProvider } from "@/features/cart/components";
+import { CartSidebarProvider, WishlistSidebarProvider } from "@/features/cart/components";
 import { MainContentWrapper } from "@/shared/components/layout/MainContentWrapper";
 import { ThemeProvider } from "@/shared/components/providers/ThemeProvider";
 import "./globals.css";
-import { CartSidebarRenderer } from "@/shared/components/layout";
+import { CartSidebarRenderer, WishlistSidebarRenderer } from "@/shared/components/layout";
 import { WhatsAppButton } from "@/shared/components/ui/WhatsAppButton";
 
 const spaceGrotesk = Space_Grotesk({
@@ -59,15 +59,18 @@ export default function RootLayout({
       <body className="font-sans overflow-x-hidden">
         <ThemeProvider>
           <AuthProvider>
-            <CartSidebarProvider>
-              <CartProvider>
-                <WishlistProvider>
-                  <MainContentWrapper>{children}</MainContentWrapper>
-                  <CartSidebarRenderer />
-                  <WhatsAppButton />
-                </WishlistProvider>
-              </CartProvider>
-            </CartSidebarProvider>
+            <WishlistSidebarProvider>
+              <CartSidebarProvider>
+                <CartProvider>
+                  <WishlistProvider>
+                    <MainContentWrapper>{children}</MainContentWrapper>
+                    <CartSidebarRenderer />
+                    <WishlistSidebarRenderer />
+                    <WhatsAppButton />
+                  </WishlistProvider>
+                </CartProvider>
+              </CartSidebarProvider>
+            </WishlistSidebarProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

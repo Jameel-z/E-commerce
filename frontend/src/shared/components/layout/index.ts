@@ -4,3 +4,4 @@ export { UnifiedLayout } from "./UnifiedLayout";
 export type { PageHeaderProps } from "./PageHeader";
 export { MainContentWrapper } from "./MainContentWrapper";
 export { CartSidebarRenderer } from "./CartSidebarRenderer";
+export { WishlistSidebarRenderer } from "./WishlistSidebarRenderer";
