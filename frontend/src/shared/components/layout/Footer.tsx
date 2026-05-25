@@ -71,7 +71,7 @@ const Footer: React.FC = () => {
             <h4 className="font-semibold mb-2">Contact Us</h4>
             <div className="flex space-x-4 mb-2">
               <a
-                href="https://www.instagram.com/961shop/"
+                href="https://www.instagram.com/hamdancomputers/"
                 className="text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Instagram"
               >

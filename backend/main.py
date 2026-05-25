@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import users, products, categories, carts, orders
+from routers import users, products, categories, carts, orders, banners
 from database import create_database, create_tables, SessionLocal
 from fastapi.staticfiles import StaticFiles
 from core.config import settings
@@ -77,6 +77,28 @@ with engine.connect() as conn:
         ON categories USING GIN (replace(name, '-', '') gin_trgm_ops)
     """))
 
+    conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS banners (
+            id SERIAL PRIMARY KEY,
+            title VARCHAR(200),
+            subtitle VARCHAR(500),
+            cta_text VARCHAR(100),
+            cta_link VARCHAR(500),
+            media_url VARCHAR(500) NOT NULL,
+            media_type VARCHAR(10) NOT NULL DEFAULT 'image',
+            text_position VARCHAR(20) NOT NULL DEFAULT 'middle-center',
+            is_active BOOLEAN NOT NULL DEFAULT TRUE,
+            display_order INTEGER NOT NULL DEFAULT 0,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    """))
+    conn.execute(text(
+        "ALTER TABLE banners ADD COLUMN IF NOT EXISTS text_position VARCHAR(20) NOT NULL DEFAULT 'middle-center'"
+    ))
+    conn.execute(text(
+        "ALTER TABLE banners ADD COLUMN IF NOT EXISTS hide_overlay BOOLEAN NOT NULL DEFAULT FALSE"
+    ))
+
     conn.commit()
 
 app = FastAPI(title="E-commerce Backend API")
@@ -105,6 +127,7 @@ app.include_router(products.router, tags=["Products"])
 app.include_router(categories.router, tags=["Categories"])
 app.include_router(carts.router, tags=["Carts"])
 app.include_router(orders.router, tags=["Orders"])
+app.include_router(banners.router, tags=["Banners"])
 
 
 @app.get("/")

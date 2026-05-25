@@ -6,5 +6,6 @@ from .cart import Cart, CartItem
 from .order import Order
 from .order_item import OrderItem
 from .category_row_pin import CategoryRowPin
+from .banner import Banner
 
-__all__ = ["Base", "User", "Category", "Product", "Cart", "CartItem", "Order", "OrderItem", "CategoryRowPin"]
+__all__ = ["Base", "User", "Category", "Product", "Cart", "CartItem", "Order", "OrderItem", "CategoryRowPin", "Banner"]

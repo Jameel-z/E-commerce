@@ -31,6 +31,29 @@ import { getImageUrl, getProductImageUrl } from "@/shared/utils/image";
 import { API_BASE_URL } from "@/shared/constants/config";
 
 // ========================================
+// BANNER TYPE
+// ========================================
+
+export type BannerPosition =
+  | "top-left"    | "top-center"    | "top-right"
+  | "middle-left" | "middle-center" | "middle-right"
+  | "bottom-left" | "bottom-center" | "bottom-right";
+
+export interface Banner {
+  id: number;
+  title: string | null;
+  subtitle: string | null;
+  cta_text: string | null;
+  cta_link: string | null;
+  media_url: string;
+  media_type: string;
+  text_position: BannerPosition;
+  hide_overlay: boolean;
+  is_active: boolean;
+  display_order: number;
+}
+
+// ========================================
 // API CLIENT CLASS
 // ========================================
 
@@ -61,6 +84,10 @@ class ApiClient {
     if (!response.ok) {
       const error = await response.text();
       throw new Error(error || `HTTP error! status: ${response.status}`);
+    }
+
+    if (response.status === 204 || response.headers.get("content-length") === "0") {
+      return undefined as T;
     }
 
     return response.json();
@@ -634,6 +661,47 @@ class ApiClient {
       method: "PUT",
       body: JSON.stringify({ product_ids: productIds }),
     });
+  }
+
+  // ========================================
+  // BANNER APIS
+  // ========================================
+
+  async getBanners(): Promise<Banner[]> {
+    return this.request<Banner[]>("/banners/");
+  }
+
+  async getAdminBanners(): Promise<Banner[]> {
+    return this.request<Banner[]>("/banners/all");
+  }
+
+  async createBanner(formData: FormData): Promise<Banner> {
+    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+    const url = `${API_BASE_URL}/banners/`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error || `HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  }
+
+  async updateBanner(
+    id: number,
+    data: Partial<Pick<Banner, "title" | "subtitle" | "cta_text" | "cta_link" | "text_position" | "hide_overlay" | "is_active" | "display_order">>
+  ): Promise<Banner> {
+    return this.request<Banner>(`/banners/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteBanner(id: number): Promise<void> {
+    await this.request<void>(`/banners/${id}`, { method: "DELETE" });
   }
 }
 

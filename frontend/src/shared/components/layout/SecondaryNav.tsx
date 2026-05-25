@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search, ChevronDown, Phone, LayoutGrid } from "lucide-react";
+import { Search, ChevronDown, Phone, LayoutGrid, ShoppingBag } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import type { Category, Product } from "@/shared/types";
 import { CONTACT } from "@/shared/constants/config";
@@ -164,6 +164,16 @@ export function SecondaryNav() {
               </div>
             )}
           </div>
+
+          {/* Shop Now */}
+          <Link
+            href="/products"
+            className="flex items-center gap-1.5 h-8 px-3 text-sm font-semibold rounded-md flex-shrink-0 text-white transition-opacity hover:opacity-90"
+            style={{ background: "linear-gradient(135deg, #4285F4 0%, #0f5fe8 100%)" }}
+          >
+            <ShoppingBag className="h-3.5 w-3.5" />
+            <span>Shop Now</span>
+          </Link>
 
           {/* Divider */}
           <div className="h-5 w-px bg-border flex-shrink-0" />

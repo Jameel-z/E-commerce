@@ -13,7 +13,9 @@ logger = logging.getLogger(__name__)
 
 # Constants
 ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/webp", "image/jpg"}
-MAX_FILE_SIZE = 5 * 1024 * 1024 # 5 MB
+ALLOWED_VIDEO_MIME_TYPES = {"video/mp4", "video/webm", "video/ogg", "video/quicktime"}
+MAX_FILE_SIZE = 5 * 1024 * 1024       # 5 MB  (images)
+MAX_VIDEO_SIZE = 50 * 1024 * 1024     # 50 MB (videos)
 DEFAULT_PAGE_SIZE = 1000
 MAX_PAGE_SIZE = 1000
 
@@ -97,6 +99,47 @@ class ImageService:
                 raise
         else:
             logger.warning(f"Product folder {product_dir} does not exist, nothing to delete.")
+
+    @staticmethod
+    async def save_banner_media(file: UploadFile) -> tuple[str, str]:
+        """Save banner image or video; returns (relative_path, media_type)."""
+        content_type = file.content_type or ""
+        if content_type in ALLOWED_MIME_TYPES:
+            media_type = "image"
+            max_size = MAX_FILE_SIZE
+        elif content_type in ALLOWED_VIDEO_MIME_TYPES:
+            media_type = "video"
+            max_size = MAX_VIDEO_SIZE
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                detail=f"Unsupported file type '{content_type}'. Allowed: JPEG, PNG, WebP, MP4, WebM.",
+            )
+
+        banner_dir = Path(settings.STATIC_DIR) / "banners"
+        banner_dir.mkdir(parents=True, exist_ok=True)
+
+        ext = Path(file.filename or "file").suffix.lower() or (".mp4" if media_type == "video" else ".jpg")
+        filename = f"banner_{os.urandom(6).hex()}{ext}"
+        save_path = banner_dir / filename
+
+        try:
+            content = await file.read()
+            if len(content) > max_size:
+                raise HTTPException(
+                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                    detail=f"File too large. Max: {max_size // (1024 * 1024)} MB",
+                )
+            with open(save_path, "wb") as buf:
+                buf.write(content)
+            return f"/banners/{filename}", media_type
+        except HTTPException:
+            raise
+        except Exception as e:
+            if save_path.exists():
+                save_path.unlink()
+            logger.error(f"Failed to save banner media: {e}")
+            raise HTTPException(status_code=500, detail="Failed to save banner media")
 
     @staticmethod
     async def validate_image(file: Optional[UploadFile]) -> Optional[UploadFile]:

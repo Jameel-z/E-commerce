@@ -1,113 +1,245 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button } from "@/shared/components/ui/button";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Package, Folder } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay } from "swiper/modules";
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
-import { useRouter } from "next/navigation";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 import { apiClient } from "@/lib/api";
+import type { Banner, BannerPosition } from "@/lib/api";
 import { getImageUrl } from "@/shared/utils/image";
-import type { Category } from "@/shared/types";
 
-const ROTATE_THRESHOLD = 10; // auto-rotate when categories exceed this
+// ─── Position → CSS mapping ───────────────────────────────────────────────────
 
-function CategoryCircle({ cat, onClick }: { cat: Category; onClick: () => void }) {
-  const imgUrl = cat.image_url ? getImageUrl(cat.image_url) : null;
-  return (
-    <button
-      onClick={onClick}
-      className="flex flex-col items-center gap-1.5 group focus:outline-none w-16 sm:w-20"
-    >
-      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-border group-hover:border-secondary group-hover:shadow-md transition-all duration-200 bg-muted flex items-center justify-center flex-shrink-0">
-        {imgUrl ? (
-          <img
-            src={imgUrl}
-            alt={cat.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200"
-          />
-        ) : (
-          <Folder className="w-5 h-5 text-muted-foreground group-hover:text-secondary transition-colors duration-200" />
-        )}
-      </div>
-      <span className="text-[10px] sm:text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors duration-200 text-center leading-tight line-clamp-2 w-full">
-        {cat.name}
-      </span>
-    </button>
+type PosCss = {
+  container: string;
+  content: string;
+  gradient: string;
+};
+
+const POSITION_MAP: Record<BannerPosition, PosCss> = {
+  "top-left":      { container: "items-start  justify-start",  content: "text-left  pt-14 pl-8 sm:pl-14 lg:pl-20",  gradient: "bg-gradient-to-br from-black/70 via-black/30 to-transparent" },
+  "top-center":    { container: "items-start  justify-center", content: "text-center pt-14 px-6",                    gradient: "bg-gradient-to-b  from-black/70 via-black/30 to-transparent" },
+  "top-right":     { container: "items-start  justify-end",    content: "text-right pt-14 pr-8 sm:pr-14 lg:pr-20",  gradient: "bg-gradient-to-bl from-black/70 via-black/30 to-transparent" },
+  "middle-left":   { container: "items-center justify-start",  content: "text-left  pl-8 sm:pl-14 lg:pl-20",        gradient: "bg-gradient-to-r  from-black/70 via-black/30 to-transparent" },
+  "middle-center": { container: "items-center justify-center", content: "text-center px-6",                          gradient: "bg-gradient-to-t  from-black/65 via-black/25 to-black/10"   },
+  "middle-right":  { container: "items-center justify-end",    content: "text-right pr-8 sm:pr-14 lg:pr-20",        gradient: "bg-gradient-to-l  from-black/70 via-black/30 to-transparent" },
+  "bottom-left":   { container: "items-end   justify-start",   content: "text-left  pb-14 pl-8 sm:pl-14 lg:pl-20", gradient: "bg-gradient-to-tr from-black/70 via-black/30 to-transparent" },
+  "bottom-center": { container: "items-end   justify-center",  content: "text-center pb-14 px-6",                   gradient: "bg-gradient-to-t  from-black/70 via-black/30 to-transparent" },
+  "bottom-right":  { container: "items-end   justify-end",     content: "text-right pb-14 pr-8 sm:pr-14 lg:pr-20", gradient: "bg-gradient-to-tl from-black/70 via-black/30 to-transparent" },
+};
+
+// ─── Default fallback ─────────────────────────────────────────────────────────
+
+const DEFAULT_BANNER: Banner = {
+  id: 0,
+  title: "Shop Smart, Live Better",
+  subtitle: "Discover amazing tech products at unbeatable prices.",
+  cta_text: "Start Shopping",
+  cta_link: "/products",
+  media_url: "",
+  media_type: "image",
+  text_position: "middle-center",
+  hide_overlay: false,
+  is_active: true,
+  display_order: 0,
+};
+
+// ─── Single slide ─────────────────────────────────────────────────────────────
+
+function BannerSlide({
+  banner,
+  onVideoEnd,
+}: {
+  banner: Banner;
+  onVideoEnd?: () => void;
+}) {
+  const mediaUrl = banner.media_url ? getImageUrl(banner.media_url) : null;
+  const hasMedia = !!mediaUrl;
+  const isVideo = hasMedia && banner.media_type === "video";
+  const pos = POSITION_MAP[banner.text_position ?? "middle-center"] ?? POSITION_MAP["middle-center"];
+  const hasLink = !!banner.cta_link;
+
+  const inner = (
+    <>
+      {/* Background media */}
+      {isVideo ? (
+        <video
+          src={mediaUrl!}
+          autoPlay
+          muted
+          playsInline
+          onEnded={onVideoEnd}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      ) : hasMedia ? (
+        <img
+          src={mediaUrl!}
+          alt={banner.title ?? "Banner"}
+          className="absolute inset-0 w-full h-full object-cover"
+          draggable={false}
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-muted/40 to-secondary/15" />
+      )}
+
+      {/* Directional scrim — only when overlay text exists */}
+      {hasMedia && !banner.hide_overlay && (banner.title || banner.subtitle || banner.cta_text) && (
+        <div className={`absolute inset-0 ${pos.gradient}`} />
+      )}
+
+      {/* Content block */}
+      {!banner.hide_overlay && (banner.title || banner.subtitle || banner.cta_text) && (
+        <div
+          className={`relative z-10 max-w-2xl py-10 ${pos.content} ${
+            hasMedia ? "text-white" : "text-foreground"
+          }`}
+        >
+          {banner.title && (
+            <h1
+              className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 leading-tight tracking-tight drop-shadow-md ${
+                hasMedia ? "text-white" : ""
+              }`}
+            >
+              {banner.title}
+            </h1>
+          )}
+
+          {banner.subtitle && (
+            <p
+              className={`text-base sm:text-lg md:text-xl mb-8 leading-relaxed drop-shadow-sm ${
+                hasMedia ? "text-white/90" : "text-muted-foreground"
+              }`}
+            >
+              {banner.subtitle}
+            </p>
+          )}
+
+          {banner.cta_text && (
+            <span
+              className={`inline-flex items-center gap-2 px-8 py-3 text-base font-semibold rounded-full shadow-lg pointer-events-none select-none ${
+                hasMedia
+                  ? "bg-white text-foreground"
+                  : "bg-primary text-primary-foreground"
+              }`}
+            >
+              <ShoppingBag className="h-4 w-4" />
+              {banner.cta_text}
+            </span>
+          )}
+        </div>
+      )}
+    </>
   );
+
+  const containerClass = `relative w-full flex overflow-hidden ${pos.container} ${
+    hasMedia ? "h-[600px]" : "min-h-[340px] sm:min-h-[420px]"
+  }`;
+
+  if (hasLink) {
+    return (
+      <Link
+        href={banner.cta_link!}
+        className={`block ${containerClass} group cursor-pointer`}
+        aria-label={banner.cta_text ?? banner.title ?? "View offer"}
+      >
+        {inner}
+      </Link>
+    );
+  }
+
+  return <div className={containerClass}>{inner}</div>;
 }
 
+// ─── Hero section ─────────────────────────────────────────────────────────────
+
 export function HeroSection() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const router = useRouter();
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const prevRef = useRef<HTMLButtonElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
+  const swiperRef = useRef<SwiperType | null>(null);
 
   useEffect(() => {
-    apiClient.getFeaturedCategories()
-      .then((featured) => {
-        if (featured.length > 0) {
-          setCategories(featured);
-        } else {
-          // Fallback: show all categories when none are manually selected
-          return apiClient.getCategories().then(setCategories);
-        }
-      })
-      .catch(() => {});
+    apiClient.getBanners().then(setBanners).catch(() => {});
   }, []);
 
-  const handleClick = (name: string) =>
-    router.push(`/products?category=${encodeURIComponent(name)}`);
+  const slides = banners.length > 0 ? banners : [DEFAULT_BANNER];
+  const multi = slides.length > 1;
 
-  const shouldRotate = categories.length > ROTATE_THRESHOLD;
+  // When slide changes: pause autoplay for video slides, resume for image slides
+  const handleSlideChange = (swiper: SwiperType) => {
+    const active = slides[swiper.realIndex];
+    if (active?.media_type === "video") {
+      swiper.autoplay.stop();
+    } else {
+      swiper.autoplay.start();
+    }
+  };
+
+  // Called when the active video finishes playing → advance to next slide
+  const handleVideoEnd = () => {
+    if (!swiperRef.current) return;
+    swiperRef.current.slideNext();
+    swiperRef.current.autoplay.start();
+  };
 
   return (
-    <section className="relative bg-gradient-to-br from-background via-muted/30 to-secondary/10 overflow-hidden">
+    <section className="relative w-full overflow-hidden group/hero">
+      <Swiper
+        modules={[Autoplay, Navigation, Pagination]}
+        speed={700}
+        autoplay={multi ? { delay: 4000, disableOnInteraction: false, pauseOnMouseEnter: true } : false}
+        loop={multi}
+        navigation={multi ? { prevEl: prevRef.current, nextEl: nextRef.current } : false}
+        pagination={multi ? { clickable: true, dynamicBullets: true } : false}
+        onSlideChange={multi ? handleSlideChange : undefined}
+        onSwiper={(swiper) => {
+          swiperRef.current = swiper;
+          // Pause immediately if first slide is a video
+          if (multi && slides[0]?.media_type === "video") {
+            swiper.autoplay.stop();
+          }
+          if (multi && swiper.params.navigation && typeof swiper.params.navigation === "object") {
+            (swiper.params.navigation as { prevEl: HTMLButtonElement | null; nextEl: HTMLButtonElement | null }).prevEl = prevRef.current;
+            (swiper.params.navigation as { prevEl: HTMLButtonElement | null; nextEl: HTMLButtonElement | null }).nextEl = nextRef.current;
+            swiper.navigation.destroy();
+            swiper.navigation.init();
+            swiper.navigation.update();
+          }
+        }}
+        className="w-full [&_.swiper-pagination-bullet]:bg-white [&_.swiper-pagination-bullet-active]:bg-white [&_.swiper-pagination]:bottom-4"
+      >
+        {slides.map((banner, i) => (
+          <SwiperSlide key={banner.id || i}>
+            <BannerSlide
+              banner={banner}
+              onVideoEnd={multi ? handleVideoEnd : undefined}
+            />
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
-      {/* Hero content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3 leading-snug">
-          Shop <span className="text-secondary">Smart</span>,
-          <br />
-          Live <span className="text-secondary">Better</span>
-        </h1>
-
-        <p className="text-sm text-muted-foreground max-w-md mx-auto mb-5">
-          Discover amazing products at unbeatable prices.
-        </p>
-
-        <Button size="lg" className="px-8" asChild>
-          <Link href="/products">
-            <Package className="h-4 w-4 mr-2" />
-            Start Shopping
-          </Link>
-        </Button>
-      </div>
-
-      {/* ── Category strip ── */}
-      {categories.length > 0 && (
-        <div className="border-t border-border/40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-5">
-            <p className="text-muted-foreground text-[10px] uppercase tracking-[0.18em] text-center mb-4 font-medium">
-              Shop by Category
-            </p>
-
-            <Swiper
-              modules={[Autoplay]}
-              spaceBetween={8}
-              slidesPerView="auto"
-              centerInsufficientSlides={true}
-              autoplay={shouldRotate ? { delay: 2000, disableOnInteraction: false, pauseOnMouseEnter: true } : false}
-              loop={shouldRotate}
-            >
-              {categories.map((cat) => (
-                <SwiperSlide key={cat.id} style={{ width: "auto" }} className="!flex justify-center">
-                  <CategoryCircle cat={cat} onClick={() => handleClick(cat.name)} />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
-        </div>
+      {multi && (
+        <>
+          <button
+            ref={prevRef}
+            aria-label="Previous slide"
+            className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white border border-white/20 shadow-lg opacity-0 group-hover/hero:opacity-100 transition-all duration-300 hover:scale-110"
+          >
+            <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+          </button>
+          <button
+            ref={nextRef}
+            aria-label="Next slide"
+            className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white border border-white/20 shadow-lg opacity-0 group-hover/hero:opacity-100 transition-all duration-300 hover:scale-110"
+          >
+            <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
+          </button>
+        </>
       )}
     </section>
   );

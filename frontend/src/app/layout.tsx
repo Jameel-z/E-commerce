@@ -1,6 +1,6 @@
 import type React from "react";
-import type { Metadata } from "next";
-import { Space_Grotesk, DM_Sans } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Space_Grotesk, DM_Sans, Poppins } from "next/font/google";
 import { AuthProvider, CartProvider, WishlistProvider } from "@/shared/components";
 import { CartSidebarProvider } from "@/features/cart/components";
 import { MainContentWrapper } from "@/shared/components/layout/MainContentWrapper";
@@ -20,6 +20,19 @@ const dmSans = DM_Sans({
   display: "swap",
   variable: "--font-dm-sans",
 });
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-poppins",
+});
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#ffffff",
+};
 
 export const metadata: Metadata = {
   title: "961shop.com",
@@ -41,7 +54,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${dmSans.variable} antialiased light`}
+      className={`${spaceGrotesk.variable} ${dmSans.variable} ${poppins.variable} antialiased light`}
     >
       <body className="font-sans overflow-x-hidden">
         <ThemeProvider>

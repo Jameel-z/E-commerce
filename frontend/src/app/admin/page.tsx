@@ -19,7 +19,9 @@ import {
   Truck,
   XCircle,
   RotateCcw,
+  ImagePlay,
 } from "lucide-react";
+import Link from "next/link";
 
 const STATUS_CONFIG: Record<
   string,
@@ -102,6 +104,24 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Quick Access Cards */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <Link href="/admin/banners">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer border-primary/20 hover:border-primary/50">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Banner Slider</CardTitle>
+              <ImagePlay className="h-4 w-4 text-primary" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground">
+                Manage homepage banner slides — upload images or videos, set headlines and CTAs.
+              </p>
+              <p className="text-xs text-primary font-medium mt-2">Manage Banners →</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">

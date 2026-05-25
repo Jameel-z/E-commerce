@@ -1,72 +1,92 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Folder } from "lucide-react";
+import Link from "next/link";
 import { apiClient } from "@/lib/api";
 import { getImageUrl } from "@/shared/utils/image";
 import type { Category } from "@/shared/types";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { FreeMode } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/free-mode";
+
+const FALLBACK_GRADIENTS = [
+  "from-blue-500 to-blue-700",
+  "from-violet-500 to-purple-700",
+  "from-rose-500 to-pink-700",
+  "from-amber-500 to-orange-600",
+  "from-emerald-500 to-green-700",
+  "from-cyan-500 to-sky-700",
+  "from-indigo-500 to-indigo-700",
+  "from-fuchsia-500 to-pink-600",
+];
+
+function SkeletonCard() {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="rounded-2xl aspect-[3/2] bg-muted animate-pulse w-full" />
+      <div className="h-4 w-3/4 mx-auto bg-muted animate-pulse rounded" />
+    </div>
+  );
+}
 
 export function ShopByCategoriesSection() {
   const [categories, setCategories] = useState<Category[]>([]);
-  const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiClient.getCategories().then(setCategories).catch(() => {});
+    apiClient
+      .getFeaturedCategories()
+      .then((cats) => {
+        if (cats.length >= 2) {
+          setCategories(cats);
+        } else {
+          return apiClient.getCategories().then(setCategories);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  if (categories.length === 0) return null;
-
-  const handleCategoryClick = (name: string) => {
-    router.push(`/products?category=${encodeURIComponent(name)}`);
-  };
+  if (!loading && categories.length === 0) return null;
 
   return (
-    <section className="py-6 bg-background">
+    <section className="pt-5 pb-6 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-center text-xs font-semibold tracking-widest text-muted-foreground uppercase mb-6">
-          Shop by Category
-        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+            : categories.map((cat, i) => {
+                const imgUrl = cat.image_url ? getImageUrl(cat.image_url) : null;
+                const gradient = FALLBACK_GRADIENTS[i % FALLBACK_GRADIENTS.length];
 
-        <Swiper
-          modules={[FreeMode]}
-          slidesPerView="auto"
-          spaceBetween={24}
-          freeMode={true}
-          className="!overflow-hidden"
-        >
-          {categories.map((cat) => {
-            const imgUrl = cat.image_url ? getImageUrl(cat.image_url) : null;
-            return (
-              <SwiperSlide key={cat.id} style={{ width: "auto" }}>
-                <button
-                  onClick={() => handleCategoryClick(cat.name)}
-                  className="flex flex-col items-center gap-2 group"
-                >
-                  <div
-                    className="w-16 h-16 rounded-full bg-muted border-2 border-transparent group-hover:border-primary group-hover:scale-105 transition-all duration-200 flex items-center justify-center"
-                    style={imgUrl ? {
-                      backgroundImage: `url(${imgUrl})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    } : {}}
+                return (
+                  <Link
+                    key={cat.id}
+                    href={`/products?category=${encodeURIComponent(cat.name)}`}
+                    className="group flex flex-col gap-2 block"
                   >
-                    {!imgUrl && (
-                      <Folder className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                    )}
-                  </div>
-                  <span className="text-xs font-medium text-center text-foreground group-hover:text-primary transition-colors w-16 truncate">
-                    {cat.name}
-                  </span>
-                </button>
-              </SwiperSlide>
-            );
-          })}
-        </Swiper>
+                    {/* Image */}
+                    <div className="relative overflow-hidden rounded-2xl aspect-[3/2] w-full">
+                      {imgUrl ? (
+                        <img
+                          src={imgUrl}
+                          alt={cat.name}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          draggable={false}
+                        />
+                      ) : (
+                        <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+                      )}
+                    </div>
+
+                    {/* Name below image */}
+                    <p
+                      className="text-center font-semibold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1 px-1"
+                      style={{ fontFamily: "var(--font-poppins)" }}
+                    >
+                      {cat.name}
+                    </p>
+                  </Link>
+                );
+              })}
+        </div>
       </div>
     </section>
   );
