@@ -72,18 +72,10 @@ export default function AdminDashboard() {
     {}
   );
 
-  if (loading) {
-    return (
-      <AdminLayout title="Dashboard">
-        <div className="text-center py-8">Loading dashboard...</div>
-      </AdminLayout>
-    );
-  }
-
   const statCards = [
-    { title: "Total Products", value: productStats.total,           icon: Package,      color: "text-blue-600" },
-    { title: "Low Stock",      value: productStats.lowStock,        icon: TrendingUp,   color: "text-red-600" },
-    { title: "Total Orders",   value: orders.length,                icon: ShoppingCart, color: "text-purple-600" },
+    { title: "Total Products", value: productStats.total,            icon: Package,      color: "text-blue-600" },
+    { title: "Low Stock",      value: productStats.lowStock,         icon: TrendingUp,   color: "text-red-600" },
+    { title: "Total Orders",   value: orders.length,                 icon: ShoppingCart, color: "text-purple-600" },
     { title: "Revenue",        value: `$${totalRevenue.toFixed(2)}`, icon: DollarSign,   color: "text-green-600" },
   ];
 
@@ -100,7 +92,11 @@ export default function AdminDashboard() {
               <stat.icon className={`h-4 w-4 ${stat.color}`} />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
+              {loading ? (
+                <div className="h-8 w-20 bg-muted animate-pulse rounded" />
+              ) : (
+                <div className="text-2xl font-bold">{stat.value}</div>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -131,29 +127,41 @@ export default function AdminDashboard() {
             <CardTitle className="text-base">Orders by Status</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {Object.entries(STATUS_CONFIG).map(([key, cfg]) => {
-              const count = statusCounts[key] ?? 0;
-              const pct = orders.length > 0 ? (count / orders.length) * 100 : 0;
-              return (
-                <div key={key} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <cfg.Icon className={`h-3.5 w-3.5 ${cfg.color}`} />
-                      <span className="font-medium">{cfg.label}</span>
-                    </div>
-                    <span className="text-muted-foreground tabular-nums">
-                      {count} <span className="text-xs">({pct.toFixed(0)}%)</span>
-                    </span>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+                    <div className="h-4 w-12 bg-muted animate-pulse rounded" />
                   </div>
-                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${cfg.bg}`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
+                  <div className="h-2 w-full bg-muted animate-pulse rounded-full" />
                 </div>
-              );
-            })}
+              ))
+            ) : (
+              Object.entries(STATUS_CONFIG).map(([key, cfg]) => {
+                const count = statusCounts[key] ?? 0;
+                const pct = orders.length > 0 ? (count / orders.length) * 100 : 0;
+                return (
+                  <div key={key} className="space-y-1.5">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <cfg.Icon className={`h-3.5 w-3.5 ${cfg.color}`} />
+                        <span className="font-medium">{cfg.label}</span>
+                      </div>
+                      <span className="text-muted-foreground tabular-nums">
+                        {count} <span className="text-xs">({pct.toFixed(0)}%)</span>
+                      </span>
+                    </div>
+                    <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${cfg.bg}`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </CardContent>
         </Card>
 
@@ -163,7 +171,22 @@ export default function AdminDashboard() {
             <CardTitle className="text-base">Recent Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            {recentOrders.length === 0 ? (
+            {loading ? (
+              <div className="divide-y">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between py-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-10 bg-muted animate-pulse rounded" />
+                      <div className="h-5 w-20 bg-muted animate-pulse rounded-full" />
+                    </div>
+                    <div className="space-y-1 items-end flex flex-col">
+                      <div className="h-4 w-16 bg-muted animate-pulse rounded" />
+                      <div className="h-3 w-20 bg-muted animate-pulse rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : recentOrders.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">
                 No orders yet
               </p>
