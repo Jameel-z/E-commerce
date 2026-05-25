@@ -22,15 +22,15 @@ type PosCss = {
 };
 
 const POSITION_MAP: Record<BannerPosition, PosCss> = {
-  "top-left":      { container: "items-start  justify-start",  content: "text-left  pt-14 pl-8 sm:pl-14 lg:pl-20",  gradient: "bg-gradient-to-br from-black/70 via-black/30 to-transparent" },
-  "top-center":    { container: "items-start  justify-center", content: "text-center pt-14 px-6",                    gradient: "bg-gradient-to-b  from-black/70 via-black/30 to-transparent" },
-  "top-right":     { container: "items-start  justify-end",    content: "text-right pt-14 pr-8 sm:pr-14 lg:pr-20",  gradient: "bg-gradient-to-bl from-black/70 via-black/30 to-transparent" },
-  "middle-left":   { container: "items-center justify-start",  content: "text-left  pl-8 sm:pl-14 lg:pl-20",        gradient: "bg-gradient-to-r  from-black/70 via-black/30 to-transparent" },
-  "middle-center": { container: "items-center justify-center", content: "text-center px-6",                          gradient: "bg-gradient-to-t  from-black/65 via-black/25 to-black/10"   },
-  "middle-right":  { container: "items-center justify-end",    content: "text-right pr-8 sm:pr-14 lg:pr-20",        gradient: "bg-gradient-to-l  from-black/70 via-black/30 to-transparent" },
-  "bottom-left":   { container: "items-end   justify-start",   content: "text-left  pb-14 pl-8 sm:pl-14 lg:pl-20", gradient: "bg-gradient-to-tr from-black/70 via-black/30 to-transparent" },
-  "bottom-center": { container: "items-end   justify-center",  content: "text-center pb-14 px-6",                   gradient: "bg-gradient-to-t  from-black/70 via-black/30 to-transparent" },
-  "bottom-right":  { container: "items-end   justify-end",     content: "text-right pb-14 pr-8 sm:pr-14 lg:pr-20", gradient: "bg-gradient-to-tl from-black/70 via-black/30 to-transparent" },
+  "top-left":      { container: "items-start  justify-start",  content: "text-left  pt-[8%] pl-[4%] sm:pl-[6%] lg:pl-[8%]",  gradient: "bg-gradient-to-br from-black/70 via-black/30 to-transparent" },
+  "top-center":    { container: "items-start  justify-center", content: "text-center pt-[8%] px-4",                            gradient: "bg-gradient-to-b  from-black/70 via-black/30 to-transparent" },
+  "top-right":     { container: "items-start  justify-end",    content: "text-right  pt-[8%] pr-[4%] sm:pr-[6%] lg:pr-[8%]", gradient: "bg-gradient-to-bl from-black/70 via-black/30 to-transparent" },
+  "middle-left":   { container: "items-center justify-start",  content: "text-left  pl-[4%] sm:pl-[6%] lg:pl-[8%]",          gradient: "bg-gradient-to-r  from-black/70 via-black/30 to-transparent" },
+  "middle-center": { container: "items-center justify-center", content: "text-center px-4",                                    gradient: "bg-gradient-to-t  from-black/65 via-black/25 to-black/10"   },
+  "middle-right":  { container: "items-center justify-end",    content: "text-right pr-[4%] sm:pr-[6%] lg:pr-[8%]",          gradient: "bg-gradient-to-l  from-black/70 via-black/30 to-transparent" },
+  "bottom-left":   { container: "items-end   justify-start",   content: "text-left  pb-[8%] pl-[4%] sm:pl-[6%] lg:pl-[8%]", gradient: "bg-gradient-to-tr from-black/70 via-black/30 to-transparent" },
+  "bottom-center": { container: "items-end   justify-center",  content: "text-center pb-[8%] px-4",                           gradient: "bg-gradient-to-t  from-black/70 via-black/30 to-transparent" },
+  "bottom-right":  { container: "items-end   justify-end",     content: "text-right  pb-[8%] pr-[4%] sm:pr-[6%] lg:pr-[8%]",gradient: "bg-gradient-to-tl from-black/70 via-black/30 to-transparent" },
 };
 
 // ─── Default fallback ─────────────────────────────────────────────────────────
@@ -95,13 +95,13 @@ function BannerSlide({
       {/* Content block */}
       {!banner.hide_overlay && (banner.title || banner.subtitle || banner.cta_text) && (
         <div
-          className={`relative z-10 max-w-2xl py-10 ${pos.content} ${
+          className={`relative z-10 max-w-2xl ${pos.content} ${
             hasMedia ? "text-white" : "text-foreground"
           }`}
         >
           {banner.title && (
             <h1
-              className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 leading-tight tracking-tight drop-shadow-md ${
+              className={`text-[clamp(1rem,4vw,3.75rem)] font-bold mb-[0.5em] leading-tight tracking-tight drop-shadow-md ${
                 hasMedia ? "text-white" : ""
               }`}
             >
@@ -111,7 +111,7 @@ function BannerSlide({
 
           {banner.subtitle && (
             <p
-              className={`text-base sm:text-lg md:text-xl mb-8 leading-relaxed drop-shadow-sm ${
+              className={`text-[clamp(0.7rem,1.8vw,1.25rem)] mb-[1em] leading-relaxed drop-shadow-sm ${
                 hasMedia ? "text-white/90" : "text-muted-foreground"
               }`}
             >
@@ -121,13 +121,13 @@ function BannerSlide({
 
           {banner.cta_text && (
             <span
-              className={`inline-flex items-center gap-2 px-8 py-3 text-base font-semibold rounded-full shadow-lg pointer-events-none select-none ${
+              className={`inline-flex items-center gap-2 px-[clamp(0.75rem,3vw,2rem)] py-[clamp(0.4rem,1.2vw,0.75rem)] text-[clamp(0.7rem,1.5vw,1rem)] font-semibold rounded-full shadow-lg pointer-events-none select-none ${
                 hasMedia
                   ? "bg-white text-foreground"
                   : "bg-primary text-primary-foreground"
               }`}
             >
-              <ShoppingBag className="h-4 w-4" />
+              <ShoppingBag className="h-[1em] w-[1em]" />
               {banner.cta_text}
             </span>
           )}
@@ -137,7 +137,7 @@ function BannerSlide({
   );
 
   const containerClass = `relative w-full flex overflow-hidden ${pos.container} ${
-    hasMedia ? "h-[600px]" : "min-h-[340px] sm:min-h-[420px]"
+    hasMedia ? "aspect-[16/9]" : "aspect-[16/9] min-h-[180px]"
   }`;
 
   if (hasLink) {
