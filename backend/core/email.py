@@ -46,6 +46,10 @@ def send_verification_email(to_email: str, token: str) -> bool:
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
             return resp.status in (200, 201)
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode()
+        logger.error("Resend API error %s for %s: %s", exc.code, to_email, body)
+        return False
     except Exception as exc:
         logger.error("Failed to send verification email to %s: %s", to_email, exc)
         return False
