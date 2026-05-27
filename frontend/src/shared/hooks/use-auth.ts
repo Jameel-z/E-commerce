@@ -69,14 +69,7 @@ export function useAuthProvider() {
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const registrationData = {
-      name,
-      email,
-      password,
-    };
-    await apiClient.register(registrationData);
-    // Auto-login after registration
-    await login(email, password);
+    await apiClient.register({ name, email, password });
   };
 
   const updateProfile = async (data: { name: string; email?: string }) => {

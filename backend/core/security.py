@@ -43,6 +43,27 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
+def create_verification_token(email: str) -> str:
+    """Generate a 24-hour JWT used only for email verification."""
+    expire = datetime.now(timezone.utc) + timedelta(hours=24)
+    return jwt.encode(
+        {"sub": email, "type": "email_verification", "exp": expire},
+        settings.SECRET_KEY,
+        algorithm=settings.ALGORITHM,
+    )
+
+
+def decode_verification_token(token: str) -> Optional[str]:
+    """Return the email from a valid verification token, or None."""
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        if payload.get("type") != "email_verification":
+            return None
+        return payload.get("sub")
+    except JWTError:
+        return None
+
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Generate JWT token with timezone-aware datetime"""
     to_encode = data.copy()

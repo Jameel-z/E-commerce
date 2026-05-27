@@ -14,10 +14,13 @@ from crud.user_crud import user_crud
 from core.security import (
     authenticate_user,
     create_access_token,
+    create_verification_token,
+    decode_verification_token,
     get_current_active_user,
     Token
 )
 from core.config import settings
+from core.email import send_verification_email
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -33,6 +36,11 @@ async def login_for_access_token(
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Please verify your email before logging in. Check your inbox for a verification link.",
+        )
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
@@ -44,7 +52,7 @@ async def login_for_access_token(
         "expires_in": access_token_expires.seconds
     }
 
-@router.post("/", response_model=User, status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def create_user(
     user: UserCreate,
     db: Session = Depends(get_db)
@@ -60,7 +68,28 @@ def create_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
-    return user_crud.create(db=db, obj_in=user)
+    user_data = user.model_copy(update={"is_active": False})
+    new_user = user_crud.create(db=db, obj_in=user_data)
+    token = create_verification_token(new_user.email)
+    send_verification_email(new_user.email, token)
+    return {"message": "Account created. Please check your email to verify your account."}
+
+
+@router.get("/verify-email")
+def verify_email(token: str, db: Session = Depends(get_db)):
+    email = decode_verification_token(token)
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired verification link."
+        )
+    user = user_crud.get_by_email(db, email=email)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+    if user.is_active:
+        return {"message": "Email already verified. You can log in."}
+    user_crud.update(db, db_obj=user, obj_in={"is_active": True})
+    return {"message": "Email verified successfully. You can now log in."}
 
 @router.get("/me", response_model=User)
 async def read_current_user(

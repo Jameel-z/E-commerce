@@ -9,11 +9,10 @@ import { useToast } from "@/shared/hooks/use-toast";
 import {
   registerSchema,
   type RegisterFormData,
-  handleAuthSuccess,
   getRedirectUrl,
 } from "../../utils";
 import { AuthInput, PasswordInput, GoogleSignInButton } from "../ui";
-import { ArrowRight, AlertCircle } from "lucide-react";
+import { ArrowRight, AlertCircle, Mail } from "lucide-react";
 import Link from "next/link";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 
@@ -35,6 +34,7 @@ export function RegisterForm({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
 
   const {
     register,
@@ -65,10 +65,7 @@ export function RegisterForm({
 
     try {
       await registerUser(data.name, data.email, data.password);
-      handleAuthSuccess("register", toast);
-      const redirect = redirectTo || getRedirectUrl(searchParams, "/");
-      if (onSuccess) onSuccess();
-      else router.push(redirect);
+      setRegisteredEmail(data.email);
     } catch (error) {
       const msg = error instanceof Error ? error.message : "";
       const lower = msg.toLowerCase();
@@ -90,6 +87,27 @@ export function RegisterForm({
       setIsSubmitting(false);
     }
   };
+
+  if (registeredEmail) {
+    return (
+      <div className="text-center space-y-4 py-6">
+        <div className="flex justify-center">
+          <div className="rounded-full bg-blue-50 p-4">
+            <Mail className="h-10 w-10 text-blue-600" />
+          </div>
+        </div>
+        <h2 className="text-xl font-semibold">Check your email</h2>
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          We sent a verification link to <span className="font-medium text-foreground">{registeredEmail}</span>.
+          Click the link to activate your account.
+        </p>
+        <p className="text-xs text-muted-foreground">Didn&apos;t receive it? Check your spam folder.</p>
+        <Link href="/login" className="block text-sm text-blue-600 underline hover:text-blue-500">
+          Back to sign in
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <form

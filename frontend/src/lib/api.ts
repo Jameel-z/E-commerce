@@ -122,11 +122,15 @@ class ApiClient {
   /**
    * Register new user - matches backend /users/ POST endpoint
    */
-  async register(userData: UserRegistrationRequest): Promise<User> {
-    return this.request<User>("/users/", {
+  async register(userData: UserRegistrationRequest): Promise<{ message: string }> {
+    return this.request<{ message: string }>("/users/", {
       method: "POST",
       body: JSON.stringify(userData),
     });
+  }
+
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    return this.request<{ message: string }>(`/users/verify-email?token=${encodeURIComponent(token)}`);
   }
 
   /**

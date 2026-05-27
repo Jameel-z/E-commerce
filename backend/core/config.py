@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     # Google OAuth
     GOOGLE_CLIENT_ID: str = ""
 
+    # Email verification (Resend)
+    RESEND_API_KEY: str = ""
+    RESEND_FROM_EMAIL: str = "noreply@yourdomain.com"
+    FRONTEND_URL: str = "http://localhost:3000"
+
     # Static files settings
     STATIC_DIR: str = str(Path(__file__).parent.parent / "static")
     DOMAIN: str = "localhost:8000"
