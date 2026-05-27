@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import Optional
 from pydantic import EmailStr, Field, field_validator
 from pydantic_core import PydanticCustomError
+import dns.resolver
+import dns.exception
 from .base import BaseSchema, TimestampSchema
 
 # Disposable / temporary email domains to block
@@ -31,6 +33,19 @@ def _validate_email_domain(email: str) -> str:
             "Please use a real email address."
         )
     return email
+
+
+def check_email_mx(email: str) -> bool:
+    """Return True if the email domain has valid MX records, False otherwise.
+    Falls back to True on unexpected DNS errors to avoid blocking legitimate users."""
+    try:
+        domain = email.split("@")[-1]
+        dns.resolver.resolve(domain, "MX")
+        return True
+    except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
+        return False
+    except dns.exception.DNSException:
+        return True
 
 
 class UserBase(BaseSchema):

@@ -9,7 +9,7 @@ from typing import Annotated
 from datetime import timedelta
 
 from database import get_db
-from schemas.user import User, UserCreate, UserUpdate, GoogleAuthRequest
+from schemas.user import User, UserCreate, UserUpdate, GoogleAuthRequest, check_email_mx
 from crud.user_crud import user_crud
 from core.security import (
     authenticate_user,
@@ -49,6 +49,11 @@ def create_user(
     user: UserCreate,
     db: Session = Depends(get_db)
 ):
+    if not check_email_mx(user.email):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Email address does not appear to be valid. Please use a real email address."
+        )
     existing_user = user_crud.get_by_email(db, email=user.email)
     if existing_user:
         raise HTTPException(
