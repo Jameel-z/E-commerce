@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 import { RegisterForm } from "@/features/auth/components/forms";
-import { ShoppingBag, Truck, BadgePercent, HeadphonesIcon, Lock } from "lucide-react";
+import { ShoppingBag, Tag, Truck, Headphones, Lock, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -9,125 +9,122 @@ export const metadata: Metadata = {
   description: "Create your account to start shopping with us",
 };
 
+const perks = [
+  { icon: Tag, label: "Exclusive member discounts" },
+  { icon: Truck, label: "Free & fast delivery" },
+  { icon: Headphones, label: "Priority customer support" },
+  { icon: Lock, label: "100% secure & private" },
+];
+
 export default function RegisterPage() {
+  const year = new Date().getFullYear();
+
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden"
-      style={{ background: "linear-gradient(135deg, #0b1f3a 0%, #1a4a8a 55%, #2d6bcf 100%)" }}
+      className="min-h-screen flex relative overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(135deg, #071729 0%, #0f2d56 30%, #1a4a8a 65%, #1d4ed8 100%)",
+      }}
     >
-      {/* Background decorations */}
-      <div className="absolute -top-48 -right-48 w-[500px] h-[500px] rounded-full bg-blue-400/10 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-48 -left-48 w-[500px] h-[500px] rounded-full bg-blue-300/10 blur-3xl pointer-events-none" />
+      {/* Global decorative blobs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-40 -left-40 w-[32rem] h-[32rem] rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="absolute top-1/3 left-1/2 w-80 h-80 rounded-full bg-blue-400/5 blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 w-[28rem] h-[28rem] rounded-full bg-blue-300/10 blur-3xl" />
+      </div>
 
-      {/* Card */}
-      <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl">
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row-reverse">
-
-          {/* ── Brand Panel ─────────────────────────────────── */}
-          <div
-            className="relative overflow-hidden flex-shrink-0 lg:w-[42%] xl:w-[44%]"
-            style={{ background: "linear-gradient(150deg, #0b1f3a 0%, #1a3a6e 50%, #1a4a8a 100%)" }}
-          >
-            <div className="absolute -top-16 -left-16 w-64 h-64 rounded-full bg-white/[0.04]" />
-            <div className="absolute bottom-0 -right-16 w-64 h-64 rounded-full bg-white/[0.04]" />
-
-            {/* Mobile: compact header */}
-            <div className="lg:hidden relative z-10 flex items-center justify-between px-6 py-5">
-              <Link href="/" className="flex items-center gap-2.5">
-                <div className="bg-white/20 p-2 rounded-lg">
-                  <ShoppingBag className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-xl font-bold tracking-tight">
-                  <span style={{ color: "#93c5fd" }}>9</span>
-                  <span style={{ color: "#fca5a5" }}>6</span>
-                  <span style={{ color: "#fde68a" }}>1</span>
-                  <span className="text-white">shop</span>
-                </span>
-              </Link>
-              <Link href="/" className="text-xs text-blue-300 hover:text-white transition-colors">
-                ← Store
-              </Link>
-            </div>
-
-            {/* Desktop: full brand content */}
-            <div className="hidden lg:flex relative z-10 flex-col h-full px-10 xl:px-12 py-10 xl:py-12">
-              <Link href="/" className="flex items-center gap-3 w-fit">
-                <div className="bg-white/20 backdrop-blur-sm p-2.5 rounded-xl">
-                  <ShoppingBag className="h-6 w-6 text-white" />
-                </div>
-                <span className="text-2xl font-bold tracking-tight">
-                  <span style={{ color: "#93c5fd" }}>9</span>
-                  <span style={{ color: "#fca5a5" }}>6</span>
-                  <span style={{ color: "#fde68a" }}>1</span>
-                  <span className="text-white">shop</span>
-                </span>
-              </Link>
-
-              <div className="my-auto py-10">
-                <h2 className="text-3xl xl:text-4xl font-bold text-white leading-tight mb-4">
-                  Join our<br />
-                  <span className="text-blue-300">community today.</span>
-                </h2>
-                <p className="text-blue-200 text-sm leading-relaxed mb-8">
-                  Create your free account and unlock<br />
-                  exclusive deals, fast shipping & more.
-                </p>
-
-                <div className="space-y-3">
-                  {[
-                    { Icon: BadgePercent,   label: "Exclusive member discounts" },
-                    { Icon: Truck,          label: "Free & fast delivery" },
-                    { Icon: HeadphonesIcon, label: "Priority customer support" },
-                    { Icon: Lock,           label: "100% secure & private" },
-                  ].map(({ Icon, label }) => (
-                    <div key={label} className="flex items-center gap-3">
-                      <div className="bg-white/15 p-2 rounded-lg flex-shrink-0">
-                        <Icon className="h-4 w-4 text-white" />
-                      </div>
-                      <span className="text-blue-100 text-sm font-medium">{label}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-8 pt-6 border-t border-white/10">
-                  <div className="inline-flex items-center gap-2 bg-white/10 rounded-xl px-4 py-3">
-                    <Lock className="h-4 w-4 text-green-300 flex-shrink-0" />
-                    <span className="text-blue-100 text-xs leading-snug">
-                      Your data is <span className="text-white font-semibold">encrypted</span> and never shared.
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <Link href="/" className="text-blue-400/60 text-xs hover:text-blue-300 transition-colors">
-                ← Back to store
-              </Link>
-            </div>
+      {/* ── Left: Brand panel (desktop only) ─────────── */}
+      <div className="hidden lg:flex w-[52%] relative flex-col justify-between p-12 xl:p-16 z-10">
+        {/* Logo */}
+        <Link href="/" className="inline-flex items-center gap-3 group w-fit">
+          <div className="bg-white/15 backdrop-blur-sm p-2.5 rounded-2xl group-hover:bg-white/20 transition-colors">
+            <ShoppingBag className="h-6 w-6 text-white" />
           </div>
+          <span className="text-3xl font-bold tracking-tight">
+            <span className="text-blue-300">9</span>
+            <span className="text-rose-300">6</span>
+            <span className="text-amber-300">1</span>
+            <span className="text-white">shop</span>
+          </span>
+        </Link>
 
-          {/* ── Form Panel ──────────────────────────────────── */}
-          <div className="flex-1 flex flex-col justify-center px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 xl:px-14">
-            <div className="w-full max-w-sm mx-auto lg:max-w-none">
-              <div className="mb-6">
-                <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight mb-1.5">
-                  Create your account
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  Join 961shop and start exploring
-                </p>
-              </div>
+        {/* Headline + perks */}
+        <div className="max-w-sm">
+          <h2 className="text-4xl xl:text-[2.6rem] font-bold text-white leading-tight mb-5">
+            Join our community today.
+          </h2>
+          <p className="text-blue-200/80 text-[0.95rem] leading-relaxed mb-10">
+            Create your free account and unlock exclusive deals, fast shipping &amp; more.
+          </p>
 
-              <Suspense>
-                <RegisterForm />
-              </Suspense>
-            </div>
+          <ul className="space-y-4">
+            {perks.map(({ icon: Icon, label }) => (
+              <li key={label} className="flex items-center gap-4">
+                <span className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                  <Icon className="h-4 w-4 text-blue-200" />
+                </span>
+                <span className="text-blue-100 text-sm font-medium">{label}</span>
+              </li>
+            ))}
+          </ul>
+
+          {/* Privacy note */}
+          <div className="flex items-start gap-2.5 mt-8 pt-7 border-t border-white/10">
+            <Lock className="h-3.5 w-3.5 text-blue-300/60 mt-0.5 flex-shrink-0" />
+            <p className="text-blue-300/60 text-xs leading-relaxed">
+              Your data is encrypted and never shared.
+            </p>
           </div>
-
         </div>
 
-        <p className="text-center text-blue-300/50 text-xs mt-5">
-          © {new Date().getFullYear()} 961shop · All rights reserved
-        </p>
+        {/* Back to store */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-blue-300/50 hover:text-blue-300 text-xs transition-colors group w-fit"
+        >
+          <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+          Back to store
+        </Link>
+      </div>
+
+      {/* ── Right: Form panel ─────────────────────────── */}
+      <div className="flex-1 grid place-items-center min-h-screen px-6 sm:px-10 py-12 z-10">
+        <div className="w-full max-w-[420px]">
+          {/* Mobile logo */}
+          <div className="lg:hidden flex items-center justify-center gap-2.5 mb-8">
+            <div className="bg-white/15 backdrop-blur-sm p-2 rounded-xl">
+              <ShoppingBag className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-2xl font-bold tracking-tight">
+              <span className="text-blue-300">9</span>
+              <span className="text-rose-300">6</span>
+              <span className="text-amber-300">1</span>
+              <span className="text-white">shop</span>
+            </span>
+          </div>
+
+          {/* Form card */}
+          <div className="bg-white rounded-2xl shadow-2xl px-7 py-6">
+            <div className="mb-5">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight mb-1">
+                Create your account
+              </h1>
+              <p className="text-gray-500 text-sm">
+                Start your 961shop journey — it&apos;s completely free.
+              </p>
+            </div>
+
+            <Suspense>
+              <RegisterForm />
+            </Suspense>
+          </div>
+
+          {/* Mobile footer */}
+          <p className="lg:hidden text-center text-blue-400/40 text-xs mt-6">
+            © {year} 961shop · All rights reserved
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -112,7 +112,7 @@ export function RegisterForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className={`space-y-3 sm:space-y-4 ${className}`}
+      className={`space-y-2 ${className}`}
     >
       {/* Inline error banner */}
       {formError && (
@@ -131,7 +131,7 @@ export function RegisterForm({
         error={errors.name?.message}
         required
         disabled={isSubmitting}
-        className="!h-10 sm:!h-11 text-sm sm:text-base"
+        className="!h-9"
       />
 
       {/* Email Field */}
@@ -144,7 +144,7 @@ export function RegisterForm({
         required
         disabled={isSubmitting}
         autoComplete="off"
-        className="!h-10 sm:!h-11 text-sm sm:text-base"
+        className="!h-9"
       />
 
       {/* Password Field */}
@@ -158,7 +158,7 @@ export function RegisterForm({
         showStrength={true}
         value={password}
         autoComplete="new-password"
-        className="!h-10 sm:!h-11 text-sm sm:text-base"
+        className="!h-9"
       />
 
       {/* Confirm Password Field */}
@@ -169,11 +169,11 @@ export function RegisterForm({
         error={errors.confirmPassword?.message}
         required
         disabled={isSubmitting}
-        className="!h-10 sm:!h-11 text-sm sm:text-base"
+        className="!h-9"
       />
 
       {/* Terms Checkbox */}
-      <div className="flex items-start space-x-2.5 pt-1">
+      <div className="flex items-start space-x-2.5">
         <Checkbox
           id="terms"
           checked={watch("terms") || false}
@@ -202,7 +202,7 @@ export function RegisterForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-2 w-full h-12 text-base font-semibold text-white rounded-md transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full h-10 text-sm font-semibold text-white rounded-md transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         style={{ background: "linear-gradient(135deg, #1a4a8a 0%, #4285F4 100%)" }}
       >
         {isSubmitting ? (
@@ -219,7 +219,7 @@ export function RegisterForm({
       </button>
 
       {/* OR divider */}
-      <div className="relative my-1">
+      <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-border" />
         </div>
@@ -235,7 +235,7 @@ export function RegisterForm({
       />
 
       {/* Footer */}
-      <p className="text-center text-sm text-muted-foreground pt-1">
+      <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
         <Link href="/login" className="text-blue-600 underline font-medium hover:text-blue-500 transition-colors">
           Sign in here

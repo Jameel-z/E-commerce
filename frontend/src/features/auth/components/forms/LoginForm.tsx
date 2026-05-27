@@ -84,7 +84,7 @@ export function LoginForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className={`space-y-5 ${className}`}
+      className={`space-y-4 ${className}`}
     >
       {/* Inline error banner */}
       {formError && (
@@ -105,7 +105,7 @@ export function LoginForm({
         error={errors.email?.message}
         required
         disabled={isSubmitting}
-        className="!h-12 text-base"
+        className="!h-10"
       />
 
       {/* Password Field */}
@@ -118,14 +118,14 @@ export function LoginForm({
         error={errors.password?.message}
         required
         disabled={isSubmitting}
-        className="!h-12 text-base"
+        className="!h-10"
       />
 
       {/* Submit Button */}
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-2 w-full h-12 text-base font-semibold text-white rounded-md transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="mt-1 w-full h-11 text-sm font-semibold text-white rounded-md transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         style={{ background: "linear-gradient(135deg, #1a4a8a 0%, #4285F4 100%)" }}
       >
         {isSubmitting ? (
