@@ -116,14 +116,14 @@ export default function LoginPage() {
         </div>
 
         {/* Centered content */}
-        <div className="flex-1 flex items-center justify-center px-5 py-10 sm:px-8">
+        <div className="flex-1 flex items-center justify-center px-4 py-6 sm:px-8 sm:py-10">
           <div className="w-full max-w-[420px]">
 
             {/* Card */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 px-8 py-9 sm:px-10">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 px-5 py-6 sm:px-8 sm:py-9">
               {/* Header */}
-              <div className="mb-7">
-                <h1 className="text-2xl font-bold text-foreground tracking-tight mb-1">
+              <div className="mb-5 sm:mb-7">
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight mb-1">
                   Sign in to your account
                 </h1>
                 <p className="text-sm text-muted-foreground">

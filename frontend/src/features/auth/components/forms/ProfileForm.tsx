@@ -138,7 +138,7 @@ export function ProfileForm({ onSuccess, className = "" }: ProfileFormProps) {
   return (
     <div className={className}>
       {/* ── Avatar / User card ────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 mb-5">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6 mb-4 sm:mb-5">
         <div className="flex items-center gap-4">
           {/* Avatar */}
           <div
@@ -167,7 +167,7 @@ export function ProfileForm({ onSuccess, className = "" }: ProfileFormProps) {
 
           {/* Feedback banners */}
           {(formError || formSuccess) && (
-            <div className={`flex items-start gap-2.5 px-6 py-4 border-b ${
+            <div className={`flex items-start gap-2.5 px-4 sm:px-6 py-3 sm:py-4 border-b ${
               formError
                 ? "bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400"
                 : "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-400"
@@ -181,7 +181,7 @@ export function ProfileForm({ onSuccess, className = "" }: ProfileFormProps) {
           )}
 
           {/* ── Section: Profile info ────────────────────── */}
-          <div className="px-6 py-5">
+          <div className="px-4 sm:px-6 py-4 sm:py-5">
             <div className="flex items-center gap-2 mb-5">
               <User className="h-4 w-4 text-muted-foreground" />
               <h3 className="text-sm font-semibold text-foreground">Profile Information</h3>
@@ -221,7 +221,7 @@ export function ProfileForm({ onSuccess, className = "" }: ProfileFormProps) {
           <div className="border-t border-border" />
 
           {/* ── Section: Password ────────────────────────── */}
-          <div className="px-6 py-5">
+          <div className="px-4 sm:px-6 py-4 sm:py-5">
             <button
               type="button"
               onClick={() => setShowPasswordSection((v) => !v)}
@@ -265,7 +265,7 @@ export function ProfileForm({ onSuccess, className = "" }: ProfileFormProps) {
           </div>
 
           {/* ── Submit ────────────────────────────────────── */}
-          <div className="px-6 pb-6 pt-1">
+          <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-1">
             <button
               type="submit"
               disabled={isSubmitting || !hasChanges}

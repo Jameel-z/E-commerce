@@ -56,7 +56,7 @@ export function GoogleSignInButton({
           shape="rectangular"
           theme="outline"
           size="large"
-          width="380"
+          width="320"
           useOneTap={false}
         />
       </div>

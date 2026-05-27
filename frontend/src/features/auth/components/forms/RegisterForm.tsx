@@ -112,7 +112,7 @@ export function RegisterForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className={`space-y-4 ${className}`}
+      className={`space-y-3 sm:space-y-4 ${className}`}
     >
       {/* Inline error banner */}
       {formError && (
@@ -131,7 +131,7 @@ export function RegisterForm({
         error={errors.name?.message}
         required
         disabled={isSubmitting}
-        className="!h-11 text-base"
+        className="!h-10 sm:!h-11 text-sm sm:text-base"
       />
 
       {/* Email Field */}
@@ -144,7 +144,7 @@ export function RegisterForm({
         required
         disabled={isSubmitting}
         autoComplete="off"
-        className="!h-11 text-base"
+        className="!h-10 sm:!h-11 text-sm sm:text-base"
       />
 
       {/* Password Field */}
@@ -158,7 +158,7 @@ export function RegisterForm({
         showStrength={true}
         value={password}
         autoComplete="new-password"
-        className="!h-11 text-base"
+        className="!h-10 sm:!h-11 text-sm sm:text-base"
       />
 
       {/* Confirm Password Field */}
@@ -169,7 +169,7 @@ export function RegisterForm({
         error={errors.confirmPassword?.message}
         required
         disabled={isSubmitting}
-        className="!h-11 text-base"
+        className="!h-10 sm:!h-11 text-sm sm:text-base"
       />
 
       {/* Terms Checkbox */}

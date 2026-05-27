@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function ProfilePage() {
   return (
     <UnifiedLayout>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-5 sm:py-10 px-3 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
           <ProfileForm />
         </div>
