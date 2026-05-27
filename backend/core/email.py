@@ -1,7 +1,5 @@
-import urllib.request
-import urllib.error
-import json
 import logging
+import resend
 
 from .config import settings
 
@@ -13,6 +11,7 @@ def send_verification_email(to_email: str, token: str) -> bool:
         logger.warning("RESEND_API_KEY not configured — skipping verification email")
         return False
 
+    resend.api_key = settings.RESEND_API_KEY
     verify_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
     html = f"""
     <div style="font-family:sans-serif;max-width:480px;margin:auto">
@@ -28,28 +27,15 @@ def send_verification_email(to_email: str, token: str) -> bool:
     </div>
     """
 
-    payload = json.dumps({
-        "from": settings.RESEND_FROM_EMAIL,
-        "to": [to_email],
-        "subject": "Verify your email address",
-        "html": html,
-    }).encode()
-
-    req = urllib.request.Request(
-        "https://api.resend.com/emails",
-        data=payload,
-        headers={
-            "Authorization": f"Bearer {settings.RESEND_API_KEY}",
-            "Content-Type": "application/json",
-        },
-    )
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            return resp.status in (200, 201)
-    except urllib.error.HTTPError as exc:
-        body = exc.read().decode()
-        logger.error("Resend API error %s for %s: %s", exc.code, to_email, body)
-        return False
+        result = resend.Emails.send({
+            "from": settings.RESEND_FROM_EMAIL,
+            "to": [to_email],
+            "subject": "Verify your email address",
+            "html": html,
+        })
+        logger.info("Verification email sent to %s — Resend ID: %s", to_email, result)
+        return True
     except Exception as exc:
         logger.error("Failed to send verification email to %s: %s", to_email, exc)
         return False
