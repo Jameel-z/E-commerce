@@ -5,10 +5,17 @@ WORKDIR /app
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
+
 COPY package*.json ./
 RUN npm ci
 
-COPY . .
+COPY src ./src
+COPY public ./public
+COPY next.config.* ./
+COPY tsconfig.json ./
+COPY postcss.config.* ./
 RUN npm run build
 
 FROM node:20-alpine AS runner
