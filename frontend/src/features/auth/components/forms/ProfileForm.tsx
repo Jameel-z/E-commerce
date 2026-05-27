@@ -138,7 +138,7 @@ export function ProfileForm({ onSuccess, className = "" }: ProfileFormProps) {
   return (
     <div className={className}>
       {/* ── Avatar / User card ────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6 mb-4 sm:mb-5">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 mb-4 sm:mb-5">
         <div className="flex items-center gap-4">
           {/* Avatar */}
           <div
@@ -152,7 +152,7 @@ export function ProfileForm({ onSuccess, className = "" }: ProfileFormProps) {
             <h2 className="text-lg font-bold text-foreground truncate">{displayName}</h2>
             <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
             {user?.is_admin && (
-              <span className="inline-flex items-center gap-1 mt-1 text-xs font-medium text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 mt-1 text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
                 <ShieldCheck className="h-3 w-3" />
                 Administrator
               </span>
@@ -162,15 +162,15 @@ export function ProfileForm({ onSuccess, className = "" }: ProfileFormProps) {
       </div>
 
       {/* ── Form card ─────────────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <form onSubmit={handleSubmit(onSubmit)}>
 
           {/* Feedback banners */}
           {(formError || formSuccess) && (
             <div className={`flex items-start gap-2.5 px-4 sm:px-6 py-3 sm:py-4 border-b ${
               formError
-                ? "bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400"
-                : "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-400"
+                ? "bg-red-50 border-red-200 text-red-700"
+                : "bg-emerald-50 border-emerald-200 text-emerald-700"
             }`}>
               {formError
                 ? <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
