@@ -11,7 +11,7 @@ export default function ProfilePage() {
   return (
     <UnifiedLayout>
       <div
-        className="min-h-screen relative"
+        className="min-h-screen relative overflow-hidden w-full"
         style={{ background: "linear-gradient(135deg, #0b1f3a 0%, #1a4a8a 55%, #2d6bcf 100%)" }}
       >
         {/* Background decorations */}

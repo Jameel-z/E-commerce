@@ -38,7 +38,7 @@ export function UnifiedLayout({
     <div className={`min-h-screen bg-background flex flex-col ${className}`}>
       <GlobalHeader />
       {pageHeaderProps && <PageHeader {...pageHeaderProps} />}
-      <main className="bg-muted flex-1">
+      <main className="flex-1 w-full">
         {children}
       </main>
       <Footer />
