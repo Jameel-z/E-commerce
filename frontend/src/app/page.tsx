@@ -8,10 +8,8 @@ import {
   HeroSection,
   ErrorBanner,
   FeaturesSection,
-  QuickAccessSection,
   FeaturedProductsSection,
   CategoryProductRowsSection,
-  ShopByCategoriesSection,
 } from "@/shared/components";
 
 export default function HomePage() {
@@ -49,7 +47,6 @@ export default function HomePage() {
   return (
     <UnifiedLayout>
       <HeroSection />
-      <ShopByCategoriesSection />
       {error && <ErrorBanner error={error} />}
       <FeaturedProductsSection
         products={featuredProducts}
@@ -58,7 +55,6 @@ export default function HomePage() {
       />
       <CategoryProductRowsSection />
       <FeaturesSection />
-      <QuickAccessSection user={user} />
     </UnifiedLayout>
   );
 }

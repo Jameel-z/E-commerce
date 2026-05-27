@@ -130,6 +130,24 @@ class ApiClient {
   }
 
   /**
+   * Google OAuth - verify Google ID token and get local JWT
+   */
+  async googleAuth(credential: string): Promise<AuthResponse> {
+    const response = await fetch(`${API_BASE_URL}/users/google-auth`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ credential }),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.detail || "Google sign-in failed");
+    }
+    const data: AuthResponse = await response.json();
+    localStorage.setItem("access_token", data.access_token);
+    return data;
+  }
+
+  /**
    * Get current user info - matches backend /users/me endpoint
    */
   async getCurrentUser(): Promise<User> {

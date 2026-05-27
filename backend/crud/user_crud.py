@@ -1,3 +1,4 @@
+import secrets
 from sqlalchemy.orm import Session
 from typing import Optional, Any
 from .base_crud import CRUDBase
@@ -7,7 +8,7 @@ from core.security import get_password_hash
 
 class UserCRUD(CRUDBase[User, UserCreate, UserUpdate]):
     """User-specific CRUD with authentication support"""
-    
+
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
         return db.query(self.model).filter(self.model.email == email).first()
 
@@ -41,4 +42,28 @@ class UserCRUD(CRUDBase[User, UserCreate, UserUpdate]):
             
         return super().update(db, db_obj=db_obj, obj_in=update_data)
     
+    def get_or_create_google_user(
+        self,
+        db: Session,
+        *,
+        email: str,
+        name: Optional[str] = None,
+    ) -> User:
+        """Find an existing user by email or create one for Google OAuth."""
+        existing = self.get_by_email(db, email=email)
+        if existing:
+            return existing
+        # Create a new user with a random un-guessable password placeholder
+        db_user = User(
+            email=email,
+            name=name or email.split("@")[0],
+            hashed_password=f"google_oauth_{secrets.token_hex(32)}",
+            is_active=True,
+        )
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+
+
 user_crud = UserCRUD(User)

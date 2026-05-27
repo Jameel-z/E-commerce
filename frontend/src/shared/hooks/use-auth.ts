@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   isAdmin: boolean;
@@ -42,6 +43,13 @@ export function useAuthProvider() {
       setLoading(false);
     }
   }, []);
+
+  const loginWithGoogle = async (credential: string) => {
+    await apiClient.googleAuth(credential);
+    const userData = await apiClient.getCurrentUser();
+    try { await apiClient.mergeCart(); } catch { /* ignore */ }
+    setUser(userData);
+  };
 
   const login = async (username: string, password: string) => {
     await apiClient.login(username, password);
@@ -91,6 +99,7 @@ export function useAuthProvider() {
     user,
     loading,
     login,
+    loginWithGoogle,
     register,
     logout,
     updateProfile,

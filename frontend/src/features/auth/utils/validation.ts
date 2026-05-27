@@ -1,6 +1,28 @@
 import { z } from "zod";
 
 // ========================================
+// DISPOSABLE EMAIL BLOCKLIST
+// ========================================
+const DISPOSABLE_DOMAINS = new Set([
+  "mailinator.com", "guerrillamail.com", "guerrillamail.net", "guerrillamail.org",
+  "guerrillamail.de", "guerrillamail.biz", "guerrillamail.info",
+  "temp-mail.org", "tempmail.com", "throwam.com", "throwaway.email",
+  "fakeinbox.com", "sharklasers.com", "spam4.me", "yopmail.com", "yopmail.fr",
+  "trashmail.com", "trashmail.me", "trashmail.at", "trashmail.io",
+  "dispostable.com", "mailnull.com", "maildrop.cc", "discard.email",
+  "spamex.com", "jetable.fr.nf", "nomail.xl.cx", "superrito.com",
+  "spamfree24.org", "mail-temporaire.fr", "wegwerfmail.de", "wegwerfmail.net",
+  "10minutemail.com", "10minutemail.net", "10minutemail.org",
+  "20minutemail.com", "mytemp.email", "tempr.email", "mailtemp.info",
+  "tempail.com", "mohmal.com", "mailnesia.com", "binkmail.com", "bob.email",
+]);
+
+function isDisposableEmail(email: string): boolean {
+  const domain = email.toLowerCase().split("@")[1] ?? "";
+  return DISPOSABLE_DOMAINS.has(domain);
+}
+
+// ========================================
 // VALIDATION SCHEMAS
 // ========================================
 
@@ -32,7 +54,10 @@ export const registerSchema = z
     email: z
       .string()
       .min(1, "Email is required")
-      .email("Please enter a valid email address"),
+      .email("Please enter a valid email address")
+      .refine((v) => !isDisposableEmail(v), {
+        message: "Disposable email addresses are not allowed. Please use a real email.",
+      }),
     password: z
       .string()
       .min(1, "Password is required")

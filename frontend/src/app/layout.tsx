@@ -5,6 +5,9 @@ import { AuthProvider, CartProvider, WishlistProvider } from "@/shared/component
 import { CartSidebarProvider, WishlistSidebarProvider } from "@/features/cart/components";
 import { MainContentWrapper } from "@/shared/components/layout/MainContentWrapper";
 import { ThemeProvider } from "@/shared/components/providers/ThemeProvider";
+import { ToastProvider } from "@/shared/components/providers/ToastProvider";
+import { Toaster } from "@/shared/components/ui/Toaster";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import "./globals.css";
 import { CartSidebarRenderer, WishlistSidebarRenderer } from "@/shared/components/layout";
 import { WhatsAppButton } from "@/shared/components/ui/WhatsAppButton";
@@ -58,20 +61,25 @@ export default function RootLayout({
     >
       <body className="font-sans overflow-x-hidden">
         <ThemeProvider>
-          <AuthProvider>
-            <WishlistSidebarProvider>
-              <CartSidebarProvider>
-                <CartProvider>
-                  <WishlistProvider>
-                    <MainContentWrapper>{children}</MainContentWrapper>
-                    <CartSidebarRenderer />
-                    <WishlistSidebarRenderer />
-                    <WhatsAppButton />
-                  </WishlistProvider>
-                </CartProvider>
-              </CartSidebarProvider>
-            </WishlistSidebarProvider>
-          </AuthProvider>
+          <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+          <ToastProvider>
+            <AuthProvider>
+              <WishlistSidebarProvider>
+                <CartSidebarProvider>
+                  <CartProvider>
+                    <WishlistProvider>
+                      <MainContentWrapper>{children}</MainContentWrapper>
+                      <CartSidebarRenderer />
+                      <WishlistSidebarRenderer />
+                      <WhatsAppButton />
+                    </WishlistProvider>
+                  </CartProvider>
+                </CartSidebarProvider>
+              </WishlistSidebarProvider>
+            </AuthProvider>
+            <Toaster />
+          </ToastProvider>
+          </GoogleOAuthProvider>
         </ThemeProvider>
       </body>
     </html>

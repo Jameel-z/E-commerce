@@ -1,20 +1,30 @@
-import { useState, useCallback } from "react";
+"use client";
 
-type Toast = {
+import { createContext, useContext } from "react";
+
+export type ToastVariant = "default" | "destructive" | "success";
+
+export type Toast = {
+  id: string;
   title: string;
-  description: string;
-  variant?: "default" | "destructive" | "success";
+  description?: string;
+  variant?: ToastVariant;
 };
 
-export const useToast = () => {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+export type ToastInput = Omit<Toast, "id">;
 
-  const toast = useCallback((newToast: Toast) => {
-    setToasts((prev) => [...prev, newToast]);
-    setTimeout(() => {
-      setToasts((prev) => prev.slice(1));
-    }, 3000);
-  }, []);
-
-  return { toast, toasts };
+export type ToastContextValue = {
+  toasts: Toast[];
+  toast: (t: ToastInput) => void;
+  dismiss: (id: string) => void;
 };
+
+export const ToastContext = createContext<ToastContextValue>({
+  toasts: [],
+  toast: () => {},
+  dismiss: () => {},
+});
+
+export function useToast() {
+  return useContext(ToastContext);
+}

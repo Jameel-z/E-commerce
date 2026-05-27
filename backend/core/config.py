@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str = ""
     ADMIN_PASSWORD: str = ""
 
+    # Google OAuth
+    GOOGLE_CLIENT_ID: str = ""
+
     # Static files settings
     STATIC_DIR: str = str(Path(__file__).parent.parent / "static")
     DOMAIN: str = "localhost:8000"

@@ -9,7 +9,6 @@ import {
   ShoppingBag,
   User,
   Shield,
-  Menu,
   X,
   Package,
   Heart,
@@ -109,14 +108,9 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
                   </Button>
                 </>
               ) : (
-                <>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href="/login">Sign In</Link>
-                  </Button>
-                  <Button size="sm" asChild>
-                    <Link href="/register">Sign Up</Link>
-                  </Button>
-                </>
+                <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" asChild>
+                  <Link href="/login">Sign In</Link>
+                </Button>
               )}
             </div>
 
@@ -140,7 +134,7 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="p-2"
               >
-                <Menu className="h-5 w-5" />
+                <User className="h-5 w-5" />
               </Button>
             </div>
           </nav>
@@ -229,23 +223,14 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
                   </button>
                 </>
               ) : (
-                <>
-                  <Link
-                    href="/login"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors"
-                  >
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/register"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-primary hover:bg-muted transition-colors"
-                  >
-                    Sign Up
-                  </Link>
-                </>
+                <Link
+                  href="/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 transition-colors"
+                >
+                  <User className="h-4 w-4" />
+                  Sign In
+                </Link>
               )}
             </div>
           </div>

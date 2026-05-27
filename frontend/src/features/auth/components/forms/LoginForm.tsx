@@ -9,13 +9,11 @@ import { useToast } from "@/shared/hooks/use-toast";
 import {
   loginSchema,
   type LoginFormData,
-  handleAuthError,
   handleAuthSuccess,
   getRedirectUrl,
-  getLoadingText,
 } from "../../utils";
-import { AuthInput, PasswordInput, AuthButton } from "../ui";
-import { ArrowRight } from "lucide-react";
+import { AuthInput, PasswordInput, GoogleSignInButton } from "../ui";
+import { ArrowRight, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
 interface LoginFormProps {
@@ -35,6 +33,7 @@ export function LoginForm({
   const searchParams = useSearchParams();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const {
     register,
@@ -50,28 +49,32 @@ export function LoginForm({
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
     clearErrors();
+    setFormError(null);
 
     try {
       await login(data.email, data.password);
-
       handleAuthSuccess("login", toast);
-
-      // Handle redirect
       const redirect = redirectTo || getRedirectUrl(searchParams, "/");
-
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        router.push(redirect);
-      }
+      if (onSuccess) onSuccess();
+      else router.push(redirect);
     } catch (error) {
-      const errorType = handleAuthError(error, toast);
+      const msg = error instanceof Error ? error.message : "";
 
-      // Set specific field errors based on error type
-      if (errorType === "email") {
-        setError("email", { message: "Invalid email address" });
-      } else if (errorType === "password" || errorType === "credentials") {
-        setError("password", { message: "Invalid email or password" });
+      if (msg.toLowerCase().includes("fetch") || msg.toLowerCase().includes("network")) {
+        setFormError("Unable to connect to the server. Please check your internet connection.");
+      } else if (
+        msg.toLowerCase().includes("credentials") ||
+        msg.toLowerCase().includes("invalid") ||
+        msg.toLowerCase().includes("unauthorized") ||
+        msg.toLowerCase().includes("401")
+      ) {
+        setFormError("Incorrect email or password. Please try again.");
+        setError("password", { message: " " });
+      } else if (msg.toLowerCase().includes("email")) {
+        setFormError("No account found with that email address.");
+        setError("email", { message: " " });
+      } else {
+        setFormError(msg || "Something went wrong. Please try again.");
       }
     } finally {
       setIsSubmitting(false);
@@ -81,12 +84,20 @@ export function LoginForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className={`space-y-4 ${className}`}
+      className={`space-y-5 ${className}`}
     >
+      {/* Inline error banner */}
+      {formError && (
+        <div className="flex items-start gap-2.5 px-3.5 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700">
+          <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+          <span className="text-sm leading-snug">{formError}</span>
+        </div>
+      )}
+
       {/* Email Field */}
       <AuthInput
         {...register("email", {
-          onChange: () => clearErrors("email"),
+          onChange: () => { clearErrors("email"); setFormError(null); },
         })}
         label="Email Address"
         type="email"
@@ -94,55 +105,68 @@ export function LoginForm({
         error={errors.email?.message}
         required
         disabled={isSubmitting}
+        className="!h-12 text-base"
       />
 
       {/* Password Field */}
       <PasswordInput
         {...register("password", {
-          onChange: () => clearErrors("password"),
+          onChange: () => { clearErrors("password"); setFormError(null); },
         })}
         label="Password"
         placeholder="Enter your password"
         error={errors.password?.message}
         required
         disabled={isSubmitting}
+        className="!h-12 text-base"
       />
 
       {/* Submit Button */}
-      <AuthButton
+      <button
         type="submit"
-        loading={isSubmitting}
-        loadingText={getLoadingText("login")}
-        fullWidth
-        className="mt-6"
+        disabled={isSubmitting}
+        className="mt-2 w-full h-12 text-base font-semibold text-white rounded-md transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        style={{ background: "linear-gradient(135deg, #1a4a8a 0%, #4285F4 100%)" }}
       >
-        <div className="flex items-center">
-          Sign In
-          <ArrowRight className="ml-2 h-4 w-4" />
+        {isSubmitting ? (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+            Signing in…
+          </>
+        ) : (
+          <>
+            Sign In
+            <ArrowRight className="h-4 w-4" />
+          </>
+        )}
+      </button>
+
+      {/* OR divider */}
+      <div className="relative my-1">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-border" />
         </div>
-      </AuthButton>
-
-      {/* Footer Links */}
-      <div className="mt-6 text-center space-y-2">
-        <p className="text-sm text-muted-foreground">
-          Don't have an account?{" "}
-          <Link
-            href="/register"
-            className="text-primary hover:underline font-medium"
-          >
-            Create one here
-          </Link>
-        </p>
-
-        <div className="pt-4 border-t">
-          <Link
-            href="/"
-            className="text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            ← Back to shopping
-          </Link>
+        <div className="relative flex justify-center text-xs">
+          <span className="bg-white dark:bg-slate-800 px-3 text-muted-foreground">or</span>
         </div>
       </div>
+
+      {/* Google Sign-In */}
+      <GoogleSignInButton
+        text="signin_with"
+        onSuccess={() => router.push(redirectTo || "/")}
+      />
+
+      {/* Footer */}
+      <p className="text-center text-sm text-muted-foreground pt-1">
+        Don't have an account?{" "}
+        <Link
+          href="/register"
+          className="text-blue-600 underline font-medium hover:text-blue-500 transition-colors"
+        >
+          Create one here
+        </Link>
+      </p>
     </form>
   );
 }

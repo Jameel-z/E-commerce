@@ -1,7 +1,7 @@
 from .base import BaseSchema, TimestampSchema
 
 # Import order matters - base schemas first, then independent ones, then relationships
-from .user import UserBase, UserCreate, UserUpdate, User, UserInDB
+from .user import UserBase, UserCreate, UserUpdate, User, UserInDB, GoogleAuthRequest
 from .category import CategoryBase, CategoryCreate, Category, CategoryUpdate  # Import Category first
 from .product import ProductBase, ProductCreate, ProductUpdate  # Then Product
 from .cart import CartBase, CartItemCreate, CartItem, CartItemUpdate, Cart, CartCreate, CartUpdate, OfflineCheckout, ShippingOption, GuestCartMergeRequest, GuestCartItemRequest
@@ -25,6 +25,7 @@ __all__ = [
     'UserUpdate',
     'User',
     'UserInDB',
+    'GoogleAuthRequest',
 
     # Category schemas
     'CategoryBase',

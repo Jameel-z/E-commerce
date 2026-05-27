@@ -1,8 +1,8 @@
 // filepath: d:\Projects\WORK\ecommerce\frontend\src\shared\components\layout\Footer.tsx
 import React from "react";
 import Link from "next/link";
-import { ShoppingBag, MessageCircle } from "lucide-react";
-import { siFacebook, siX, siInstagram, siWhatsapp } from "simple-icons";
+import { ShoppingBag } from "lucide-react";
+import { siInstagram, siWhatsapp } from "simple-icons";
 import { CONTACT } from "@/shared/constants/config";
 
 const Footer: React.FC = () => {
@@ -71,7 +71,9 @@ const Footer: React.FC = () => {
             <h4 className="font-semibold mb-2">Contact Us</h4>
             <div className="flex space-x-4 mb-2">
               <a
-                href="https://www.instagram.com/hamdancomputers/"
+                href="https://www.instagram.com/961shop_lb"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Instagram"
               >
