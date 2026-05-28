@@ -158,10 +158,10 @@ export function ProfileForm({ onSuccess, className = "" }: ProfileFormProps) {
         </div>
       </div>
 
-      {/* White card */}
-      <div className="bg-white rounded-3xl shadow-2xl -mt-12 relative z-10">
+      {/* Glass card */}
+      <div className="bg-white/85 backdrop-blur-2xl border border-white/40 rounded-3xl shadow-2xl -mt-12 relative z-10">
 
-        {/* Back to store */}
+        {/* Back to store — top-left arrow only */}
         <div className="px-5 pt-4">
           <Link
             href="/"
@@ -316,7 +316,7 @@ export function ProfileForm({ onSuccess, className = "" }: ProfileFormProps) {
         </form>
       </div>
 
-      <p className="text-center text-white/30 text-xs mt-6">
+      <p className="text-center text-white/40 text-xs mt-6">
         © {new Date().getFullYear()} 961shop · All rights reserved
       </p>
     </div>

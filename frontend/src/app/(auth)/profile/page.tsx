@@ -11,10 +11,10 @@ export default function ProfilePage() {
   return (
     <UnifiedLayout>
       <div
-        className="min-h-screen relative"
+        className="min-h-screen relative overflow-hidden"
         style={{
           background:
-            "linear-gradient(135deg, #071729 0%, #0f2d56 30%, #1a4a8a 65%, #1d4ed8 100%)",
+            "radial-gradient(ellipse at 0% 30%, #3B5BE8 0%, transparent 55%), radial-gradient(ellipse at 100% 70%, #9B6BF5 0%, transparent 55%), radial-gradient(ellipse at 55% 100%, #7B60F0 0%, transparent 50%), #5560EE",
         }}
       >
         {/* Decorative blobs */}
@@ -25,7 +25,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Centered content */}
-        <div className="relative z-10 min-h-screen flex items-center justify-center py-14 px-4">
+        <div className="relative z-10 min-h-screen flex flex-col items-center justify-center py-14 px-4">
           <div className="w-full max-w-sm">
             <ProfileForm />
           </div>
