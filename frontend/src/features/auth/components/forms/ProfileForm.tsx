@@ -16,6 +16,7 @@ import {
   Mail,
   ShieldCheck,
   ArrowLeft,
+  ShoppingBag,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -148,27 +149,27 @@ export function ProfileForm({ onSuccess, className = "" }: ProfileFormProps) {
   return (
     <div className={`w-full ${className}`}>
 
-      {/* Avatar — floats above card */}
-      <div className="flex flex-col items-center mb-0">
-        <div
-          className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-2xl ring-4 ring-white/30 relative z-20"
-          style={{ background: "linear-gradient(135deg, #1e40af 0%, #60a5fa 100%)" }}
-        >
-          {initials}
-        </div>
-      </div>
+      {/* Card */}
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.08),0_1px_4px_rgba(0,0,0,0.04)]">
 
-      {/* Glass card */}
-      <div className="bg-white/85 backdrop-blur-2xl border border-white/40 rounded-3xl shadow-2xl -mt-12 relative z-10">
-
-        {/* Back to store — top-left arrow only */}
-        <div className="px-5 pt-4">
+        {/* Logo — centered, arrow top-left */}
+        <div className="relative flex justify-center w-full px-5 pt-5 pb-2">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-gray-400 hover:text-gray-600 text-xs transition-colors group"
+            className="absolute left-5 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors group"
           >
-            <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
-            Back to store
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+          </Link>
+          <Link href="/" className="inline-flex items-center gap-2 group">
+            <span className="bg-blue-50 group-hover:bg-blue-100 transition-colors p-2 rounded-xl inline-flex">
+              <ShoppingBag className="h-5 w-5 text-blue-600" />
+            </span>
+            <span className="text-xl font-bold tracking-tight">
+              <span className="text-blue-500">9</span>
+              <span className="text-rose-400">6</span>
+              <span className="text-amber-500">1</span>
+              <span className="text-gray-800">shop</span>
+            </span>
           </Link>
         </div>
 

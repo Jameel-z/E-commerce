@@ -14,7 +14,7 @@ export default function ProfilePage() {
         className="min-h-screen relative overflow-hidden"
         style={{
           background:
-            "radial-gradient(ellipse at 0% 30%, #3B5BE8 0%, transparent 55%), radial-gradient(ellipse at 100% 70%, #9B6BF5 0%, transparent 55%), radial-gradient(ellipse at 55% 100%, #7B60F0 0%, transparent 50%), #5560EE",
+            "linear-gradient(135deg, #0a1628 0%, #1e3a8a 35%, #1d4ed8 70%, #2563eb 100%)",
         }}
       >
         {/* Decorative blobs */}

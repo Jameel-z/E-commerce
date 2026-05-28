@@ -17,7 +17,7 @@ export default function LoginPage() {
       className="min-h-screen flex items-center justify-center relative overflow-hidden px-4 py-12"
       style={{
         background:
-          "radial-gradient(ellipse at 0% 30%, #3B5BE8 0%, transparent 55%), radial-gradient(ellipse at 100% 70%, #9B6BF5 0%, transparent 55%), radial-gradient(ellipse at 55% 100%, #7B60F0 0%, transparent 50%), #5560EE",
+          "linear-gradient(135deg, #0a1628 0%, #1e3a8a 35%, #1d4ed8 70%, #2563eb 100%)",
       }}
     >
       {/* Decorative blobs */}
@@ -29,7 +29,7 @@ export default function LoginPage() {
 
       <div className="relative z-10 w-full max-w-[420px]">
         {/* Glass card */}
-        <div className="relative w-full bg-white/85 backdrop-blur-2xl border border-white/40 rounded-3xl shadow-2xl px-8 py-8">
+        <div className="relative w-full bg-white rounded-3xl border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.08),0_1px_4px_rgba(0,0,0,0.04)] px-8 py-8">
           {/* X — top-right corner of card */}
           <Link
             href="/"

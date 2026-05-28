@@ -17,7 +17,7 @@ export default function RegisterPage() {
       className="min-h-screen flex items-center justify-center relative overflow-hidden px-4 py-12"
       style={{
         background:
-          "radial-gradient(ellipse at 0% 30%, #3B5BE8 0%, transparent 55%), radial-gradient(ellipse at 100% 70%, #9B6BF5 0%, transparent 55%), radial-gradient(ellipse at 55% 100%, #7B60F0 0%, transparent 50%), #5560EE",
+          "linear-gradient(135deg, #0a1628 0%, #1e3a8a 35%, #1d4ed8 70%, #2563eb 100%)",
       }}
     >
       {/* Decorative blobs */}
@@ -29,7 +29,7 @@ export default function RegisterPage() {
 
       <div className="relative z-10 w-full max-w-[420px]">
         {/* Glass card */}
-        <div className="w-full bg-white/85 backdrop-blur-2xl border border-white/40 rounded-3xl shadow-2xl px-7 py-6">
+        <div className="w-full bg-white rounded-3xl border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.08),0_1px_4px_rgba(0,0,0,0.04)] px-7 py-6">
           {/* Logo — single link, arrow top-left, logo centered */}
           <Link href="/login" className="relative flex justify-center w-full mb-5 group">
             <span className="absolute left-0 top-1/2 -translate-y-1/2 p-1 text-gray-400 group-hover:text-gray-600 transition-colors">
