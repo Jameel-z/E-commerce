@@ -12,7 +12,7 @@ import {
   getRedirectUrl,
 } from "../../utils";
 import { AuthInput, PasswordInput, GoogleSignInButton } from "../ui";
-import { ArrowRight, AlertCircle, ChevronDown } from "lucide-react";
+import { ArrowRight, AlertCircle, ChevronDown, Mail } from "lucide-react";
 import Link from "next/link";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 
