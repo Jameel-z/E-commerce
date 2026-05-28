@@ -78,14 +78,6 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Back to store */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-blue-300/50 hover:text-blue-300 text-xs transition-colors group w-fit"
-        >
-          <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
-          Back to store
-        </Link>
       </div>
 
       {/* ── Right: Form panel ─────────────────────────── */}
@@ -106,6 +98,14 @@ export default function RegisterPage() {
 
           {/* Form card */}
           <div className="bg-white rounded-2xl shadow-2xl px-7 py-6">
+            {/* Back to store */}
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-gray-400 hover:text-gray-600 text-xs mb-5 transition-colors group"
+            >
+              <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              Back to store
+            </Link>
             <div className="mb-5">
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight mb-1">
                 Create your account

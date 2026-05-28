@@ -92,14 +92,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Back to store */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-blue-300/50 hover:text-blue-300 text-xs transition-colors group w-fit"
-        >
-          <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
-          Back to store
-        </Link>
       </div>
 
       {/* ── Right: Form panel ─────────────────────────── */}
@@ -120,6 +112,14 @@ export default function LoginPage() {
 
           {/* Form card */}
           <div className="bg-white rounded-2xl shadow-2xl px-8 py-8">
+            {/* Back to store */}
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-gray-400 hover:text-gray-600 text-xs mb-6 transition-colors group"
+            >
+              <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              Back to store
+            </Link>
             <div className="mb-7">
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mb-1.5">
                 Sign in to your account

@@ -15,7 +15,9 @@ import {
   User,
   Mail,
   ShieldCheck,
+  ArrowLeft,
 } from "lucide-react";
+import Link from "next/link";
 
 interface ProfileFormProps {
   onSuccess?: () => void;
@@ -159,8 +161,19 @@ export function ProfileForm({ onSuccess, className = "" }: ProfileFormProps) {
       {/* White card */}
       <div className="bg-white rounded-3xl shadow-2xl -mt-12 relative z-10">
 
+        {/* Back to store */}
+        <div className="px-5 pt-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-gray-400 hover:text-gray-600 text-xs transition-colors group"
+          >
+            <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+            Back to store
+          </Link>
+        </div>
+
         {/* User info header */}
-        <div className="text-center pt-14 pb-4 px-7">
+        <div className="text-center pt-4 pb-4 px-7">
           <h2 className="text-lg font-bold text-gray-900 tracking-tight mb-0.5">{displayName}</h2>
           <p className="text-gray-400 text-sm">{user?.email}</p>
           {user?.is_admin && (

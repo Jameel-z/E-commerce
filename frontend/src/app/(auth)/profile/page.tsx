@@ -26,7 +26,7 @@ export default function ProfilePage() {
 
         {/* Centered content */}
         <div className="relative z-10 min-h-screen flex items-center justify-center py-14 px-4">
-          <div className="w-full max-w-[480px]">
+          <div className="w-full max-w-sm">
             <ProfileForm />
           </div>
         </div>
