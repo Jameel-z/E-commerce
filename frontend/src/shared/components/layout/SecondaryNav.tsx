@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search, ChevronDown, Phone, LayoutGrid, ShoppingBag, Menu, X, ArrowRight } from "lucide-react";
+import { Search, ChevronDown, ChevronRight, Phone, LayoutGrid, ShoppingBag, Menu, X, ArrowRight } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import type { Category, Product } from "@/shared/types";
 import { CONTACT } from "@/shared/constants/config";
@@ -108,55 +108,70 @@ export function SecondaryNav() {
               <ChevronDown className={`h-3.5 w-3.5 hidden sm:block transition-transform duration-200 ${isCatOpen ? "rotate-180" : ""}`} />
             </button>
 
-            {/* Desktop dropdown — categories only */}
+            {/* Desktop dropdown — flyout layout */}
             {isCatOpen && (
-              <div className="hidden sm:block absolute top-full left-0 mt-1 w-64 bg-card border rounded-lg shadow-xl z-50 py-1 max-h-80 overflow-y-auto">
-                <Link
-                  href="/products"
-                  className="flex items-center px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
-                  onClick={closeAll}
-                >
-                  All Products
-                </Link>
-                <div className="border-t" />
-                {tree.length === 0 && (
-                  <span className="block px-4 py-2 text-sm text-muted-foreground">Loading…</span>
-                )}
-                {tree.map((cat) => (
-                  <div
-                    key={cat.id}
-                    onMouseEnter={() => cat.children.length > 0 && setHoveredId(cat.id)}
-                    onMouseLeave={() => setHoveredId(null)}
+              <div
+                className="hidden sm:flex absolute top-full left-0 mt-1 z-50"
+                onMouseLeave={() => setHoveredId(null)}
+              >
+                {/* Main category list */}
+                <div className="w-56 bg-card border rounded-lg shadow-xl py-1 max-h-80 overflow-y-auto">
+                  <Link
+                    href="/products"
+                    className="flex items-center px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
+                    onClick={closeAll}
                   >
-                    <Link
-                      href={buildCategoryUrl(categoryNames(cat))}
-                      className="flex items-center px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors gap-2"
-                      onClick={closeAll}
+                    All Products
+                  </Link>
+                  <div className="border-t" />
+                  {tree.length === 0 && (
+                    <span className="block px-4 py-2 text-sm text-muted-foreground">Loading…</span>
+                  )}
+                  {tree.map((cat) => (
+                    <div
+                      key={cat.id}
+                      onMouseEnter={() => setHoveredId(cat.children.length > 0 ? cat.id : null)}
+                      className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${hoveredId === cat.id ? "bg-muted" : "hover:bg-muted"}`}
                     >
-                      <span className="flex-1">{cat.name}</span>
+                      <Link
+                        href={buildCategoryUrl(categoryNames(cat))}
+                        className="flex-1"
+                        onClick={closeAll}
+                      >
+                        {cat.name}
+                      </Link>
                       {cat.children.length > 0 && (
-                        <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-md transition-colors ${hoveredId === cat.id ? "bg-primary text-primary-foreground" : "bg-primary/15 text-primary"}`}>
-                          {cat.children.length} ›
-                        </span>
+                        <ChevronRight className={`h-3.5 w-3.5 flex-shrink-0 transition-colors ${hoveredId === cat.id ? "text-primary" : "text-muted-foreground"}`} />
                       )}
-                    </Link>
-                    {hoveredId === cat.id && cat.children.length > 0 && (
-                      <div className="bg-muted/50 border-t border-b">
-                        {cat.children.map((child) => (
-                          <Link
-                            key={child.id}
-                            href={buildCategoryUrl([child.name])}
-                            className="flex items-center pl-6 pr-4 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors gap-2"
-                            onClick={closeAll}
-                          >
-                            <span className="w-1 h-1 rounded-full bg-primary/60 flex-shrink-0" />
-                            {child.name}
-                          </Link>
-                        ))}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Flyout subcategory panel */}
+                {(() => {
+                  const hoveredCat = tree.find((c) => c.id === hoveredId);
+                  if (!hoveredCat || hoveredCat.children.length === 0) return null;
+                  return (
+                    <div className="w-48 bg-card border rounded-lg shadow-xl py-1 max-h-80 overflow-y-auto ml-1">
+                      <div className="px-4 py-2 border-b">
+                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                          {hoveredCat.name}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                ))}
+                      {hoveredCat.children.map((child) => (
+                        <Link
+                          key={child.id}
+                          href={buildCategoryUrl([child.name])}
+                          className="flex items-center px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors gap-2"
+                          onClick={closeAll}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary/50 flex-shrink-0" />
+                          {child.name}
+                        </Link>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>
