@@ -18,7 +18,6 @@ import {
 import { ArrowLeft, Loader2, ShoppingCart } from "lucide-react";
 import { useToast } from "@/shared/hooks/use-toast";
 import Link from "next/link";
-import { siWhatsapp } from "simple-icons/icons";
 
 export default function CheckoutPage() {
   const router = useRouter();

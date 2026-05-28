@@ -11,10 +11,9 @@ import { Product } from "@/shared/types/api.types";
 
 export default function AdminProductsPage() {
   const [showForm, setShowForm] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<ProductDetail | null>(
-    null
-  );
+  const [editingProduct, setEditingProduct] = useState<ProductDetail | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Fetch categories for the form
   React.useEffect(() => {
@@ -47,8 +46,7 @@ export default function AdminProductsPage() {
 
     try {
       await apiClient.deleteProduct(productId);
-      // Trigger refetch through ProductManager context
-      window.location.reload(); // Simple reload for now
+      setRefreshKey((k) => k + 1);
     } catch (error) {
       console.error("Failed to delete product:", error);
       alert("Failed to delete product");
@@ -63,7 +61,7 @@ export default function AdminProductsPage() {
   const handleFormSuccess = () => {
     setShowForm(false);
     setEditingProduct(null);
-    window.location.reload(); // Trigger refetch
+    setRefreshKey((k) => k + 1);
   };
 
   const handleFormCancel = () => {
@@ -110,7 +108,7 @@ export default function AdminProductsPage() {
 
         {/* Product Manager */}
         <Suspense>
-        <ProductManager defaultPageSize={10}>
+        <ProductManager key={refreshKey} defaultPageSize={10}>
           {/* Header with Add Product Button */}
           <ProductManager.Header
             showSearch={true}

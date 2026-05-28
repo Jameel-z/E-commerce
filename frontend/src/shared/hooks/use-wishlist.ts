@@ -39,7 +39,10 @@ export function useWishlistProvider(): WishlistContextType {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) setItems(JSON.parse(stored));
-    } catch {}
+    } catch {
+      console.warn("Failed to parse wishlist from localStorage — resetting.");
+      localStorage.removeItem(STORAGE_KEY);
+    }
   }, []);
 
   const persist = (updated: Product[]) => {

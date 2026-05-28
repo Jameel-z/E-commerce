@@ -22,7 +22,7 @@ export function ProductDetailContent({
   isAddingToCart,
   className = "",
 }: ProductDetailContentProps) {
-  const fullDescription = (product as any).full_description;
+  const fullDescription = product.full_description;
 
   return (
     <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 ${className}`}>

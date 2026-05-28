@@ -29,15 +29,14 @@ export function AddToCartSection({
 
   const label = product.stock_quantity === 0 ? "Add to Cart Anyway" : "Add to Cart";
 
-  const p = product as any;
   const meta = [
-    p.sku               ? { label: "SKU",        value: p.sku }               : null,
-    p.condition         ? { label: "Condition",  value: p.condition }         : null,
+    product.sku       ? { label: "SKU",        value: product.sku }               : null,
+    product.condition ? { label: "Condition",  value: product.condition }         : null,
     product.category?.name ? { label: "Categories", value: product.category.name } : null,
-    p.tags              ? { label: "Tag",        value: p.tags }              : null,
-    p.brand             ? { label: "Brand",      value: p.brand, bold: true }  : null,
-    p.shipping          ? { label: "Shipping",   value: p.shipping }          : null,
-    p.vat               ? { label: "VAT",        value: p.vat }               : null,
+    product.tags      ? { label: "Tag",        value: product.tags }              : null,
+    product.brand     ? { label: "Brand",      value: product.brand, bold: true }  : null,
+    product.shipping  ? { label: "Shipping",   value: product.shipping }          : null,
+    product.vat       ? { label: "VAT",        value: product.vat }               : null,
   ].filter(Boolean) as { label: string; value: string; bold?: boolean }[];
 
   return (
@@ -67,13 +66,13 @@ export function AddToCartSection({
           toggleWishlist({
             id: product.id,
             name: product.name,
-            price: parseFloat(product.price as any) || 0,
+            price: parseFloat(product.price) || 0,
             primary_image_url: product.primary_image_url,
             category_name: product.category?.name ?? "",
             stock_quantity: product.stock_quantity,
             description: typeof product.description === "string" ? product.description : null,
-            regular_price: product.regular_price ? parseFloat(product.regular_price as any) : null,
-            sale_price: product.sale_price ? parseFloat(product.sale_price as any) : null,
+            regular_price: product.regular_price ? parseFloat(product.regular_price) : null,
+            sale_price: product.sale_price ? parseFloat(product.sale_price) : null,
             is_on_sale: product.is_on_sale,
             discount_percentage: product.discount_percentage,
             created_at: product.created_at,

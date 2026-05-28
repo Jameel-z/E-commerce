@@ -40,8 +40,6 @@ export function ProductCard({
   const { isWishlisted, toggleWishlist } = useWishlist();
   const { openSidebar: openWishlistSidebar } = useWishlistSidebar();
   const [isAdding, setIsAdding] = useState(false);
-  const [, setShowQuickViewOverlay] = useState(false);
-
   const handleAddToCart = async () => {
     setIsAdding(true);
     try {
@@ -57,7 +55,6 @@ export function ProductCard({
     if (onQuickView) {
       onQuickView(product);
     }
-    setShowQuickViewOverlay(true);
   };
 
   const isCompact = variant === "compact";
