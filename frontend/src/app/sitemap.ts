@@ -16,6 +16,7 @@ async function getAllProducts(): Promise<Product[]> {
   try {
     const res = await fetch(`${API_URL}/products/?per_page=1000`, {
       next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) return [];
     return res.json();
