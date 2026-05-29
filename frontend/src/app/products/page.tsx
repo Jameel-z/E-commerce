@@ -2,6 +2,7 @@
 
 import React, { Suspense, useState } from "react";
 import { UnifiedLayout } from "@/shared/components";
+import { getBreadcrumbSchema } from "@/shared/utils/schema";
 import { ProductManager } from "@/shared/components/products/ProductManager";
 import { Button } from "@/shared/components/ui/button";
 import { SlidersHorizontal } from "lucide-react";
@@ -18,7 +19,21 @@ export default function ProductsPage() {
     setQuickViewProduct(product);
   };
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://961shop.com";
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            getBreadcrumbSchema([
+              { name: "Home", url: siteUrl },
+              { name: "Products", url: `${siteUrl}/products` },
+            ])
+          ),
+        }}
+      />
     <UnifiedLayout
       pageHeaderProps={{
         backButton: { label: "Back to Home", href: "/" },
@@ -81,5 +96,6 @@ export default function ProductsPage() {
         />
       )}
     </UnifiedLayout>
+    </>
   );
 }

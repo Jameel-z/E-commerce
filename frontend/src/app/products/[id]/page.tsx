@@ -15,6 +15,7 @@ import { UnifiedLayout } from "@/shared/components";
 import { useRecentlyViewed } from "@/shared/hooks/use-recently-viewed";
 import { RecentlyViewedStrip } from "@/shared/components/products/RecentlyViewedStrip";
 import { RelatedProducts } from "@/shared/components/products/RelatedProducts";
+import { getProductSchema, getBreadcrumbSchema } from "@/shared/utils/schema";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -94,42 +95,60 @@ export default function ProductDetailPage() {
     return <ProductNotFound />;
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://961shop.com";
+  const breadcrumbItems = [
+    { name: "Home", url: siteUrl },
+    { name: "Products", url: `${siteUrl}/products` },
+    ...(product.category ? [{ name: product.category.name, url: `${siteUrl}/products?category=${product.category_id}` }] : []),
+    { name: product.name, url: `${siteUrl}/products/${product.id}` },
+  ];
+
   return (
-    <UnifiedLayout
-      pageHeaderProps={{
-        backButton: {
-          label: "Back to Products",
-          href: "/products",
-        },
-        title: product?.name,
-      }}
-    >
-      {error ? (
-        <ProductDetailError
-          error={error}
-          onRetry={() => window.location.reload()}
-        />
-      ) : (
-        <>
-          <ProductDetailContent
-            product={product}
-            quantity={quantity}
-            onQuantityChange={setQuantity}
-            onAddToCart={handleAddToCart}
-            isAddingToCart={isAddingToCart}
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(getProductSchema(product)) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(getBreadcrumbSchema(breadcrumbItems)) }}
+      />
+      <UnifiedLayout
+        pageHeaderProps={{
+          backButton: {
+            label: "Back to Products",
+            href: "/products",
+          },
+          title: product?.name,
+        }}
+      >
+        {error ? (
+          <ProductDetailError
+            error={error}
+            onRetry={() => window.location.reload()}
           />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t mt-4 pt-4 space-y-2">
-            {product.category_id && (
-              <RelatedProducts
-                categoryId={product.category_id}
-                excludeId={productId}
-                categoryName={product.category?.name}
-              />
-            )}
-            <RecentlyViewedStrip excludeId={productId} />
-          </div>
-        </>
-      )}
-    </UnifiedLayout>
+        ) : (
+          <>
+            <ProductDetailContent
+              product={product}
+              quantity={quantity}
+              onQuantityChange={setQuantity}
+              onAddToCart={handleAddToCart}
+              isAddingToCart={isAddingToCart}
+            />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t mt-4 pt-4 space-y-2">
+              {product.category_id && (
+                <RelatedProducts
+                  categoryId={product.category_id}
+                  excludeId={productId}
+                  categoryName={product.category?.name}
+                />
+              )}
+              <RecentlyViewedStrip excludeId={productId} />
+            </div>
+          </>
+        )}
+      </UnifiedLayout>
+    </>
   );
 }

@@ -2,6 +2,7 @@
 export { getImageUrl, getProductImageUrl } from "./image";
 export { cn, getDisplayName, getUserInitials, isAdmin } from "./utils";
 export * from "./product.utils";
+export * from "./schema";
 
 export function stripHtml(html: string | null | undefined): string {
   if (!html) return "";

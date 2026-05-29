@@ -1,6 +1,7 @@
 import type React from "react";
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, DM_Sans, Poppins } from "next/font/google";
+import { getOrganizationSchema, getWebSiteSchema } from "@/shared/utils/schema";
 import { AuthProvider, CartProvider, WishlistProvider } from "@/shared/components";
 import { CartSidebarProvider, WishlistSidebarProvider } from "@/features/cart/components";
 import { MainContentWrapper } from "@/shared/components/layout/MainContentWrapper";
@@ -47,6 +48,9 @@ export const metadata: Metadata = {
     ],
     apple: "/icon.jpg",
   },
+  verification: {
+    google: "b9odbP8KYnXuwfl_IRExZzP0fCZP_5eY09qNAMtgoD8",
+  },
 };
 
 export default function RootLayout({
@@ -60,6 +64,14 @@ export default function RootLayout({
       className={`${spaceGrotesk.variable} ${dmSans.variable} ${poppins.variable} antialiased light`}
     >
       <body className="font-sans overflow-x-hidden">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(getOrganizationSchema()) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(getWebSiteSchema()) }}
+        />
         <ThemeProvider>
           <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
           <ToastProvider>
