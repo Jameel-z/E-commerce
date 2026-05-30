@@ -64,9 +64,6 @@ export default function RootLayout({
       lang="en"
       className={`${spaceGrotesk.variable} ${dmSans.variable} ${poppins.variable} antialiased light`}
     >
-      <head>
-        <link rel="preconnect" href="https://api.961shop.com" />
-      </head>
       <body className="font-sans overflow-x-hidden">
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=AW-18196374318"

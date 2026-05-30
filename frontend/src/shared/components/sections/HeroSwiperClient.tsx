@@ -94,6 +94,7 @@ function BannerSlide({
         height={1080}
         style={{ width: "100%", height: "auto", display: "block" }}
         priority={priority}
+        fetchPriority={priority ? "high" : "auto"}
         sizes="100vw"
       />
     );
