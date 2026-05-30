@@ -1,4 +1,10 @@
 services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
   db:
     image: postgres:16-alpine
     env_file: ./backend/.env
@@ -14,11 +20,14 @@ services:
     image: ghcr.io/jameel-z/ecommerce-backend:latest
     build: ./backend
     env_file: ./backend/.env
-    environment:
-      DB_HOST: db
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DB_HOST: db
+      REDIS_URL: redis://redis:6379
     volumes:
       - static_files:/app/static
     ports:
@@ -42,3 +51,4 @@ services:
 volumes:
   postgres_data:
   static_files:
+  redis_data:
