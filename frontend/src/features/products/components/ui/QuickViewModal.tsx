@@ -115,25 +115,25 @@ export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalPro
             {/* Top / Left — Image */}
             <div className="flex flex-col bg-muted/20 sm:border-r border-b sm:border-b-0">
               {/* Main image */}
-              <div className="flex items-center justify-center p-4 sm:flex-1 sm:overflow-hidden sm:min-h-0">
+              <div className="flex items-center justify-center p-3 sm:flex-1 sm:overflow-hidden sm:min-h-0">
                 <Image
                   src={mainImage}
                   alt={product.name}
                   width={300}
                   height={280}
-                  className="max-h-[200px] sm:max-h-[280px] w-auto object-contain"
+                  className="max-h-[150px] sm:max-h-[280px] w-auto object-contain"
                   priority
                 />
               </div>
 
               {/* Thumbnail strip */}
               {allImages.length > 1 && (
-                <div className="flex gap-2 p-2.5 overflow-x-auto border-t bg-background flex-shrink-0">
+                <div className="flex gap-2 p-2 overflow-x-auto border-t bg-background flex-shrink-0">
                   {allImages.map((img, i) => (
                     <button
                       key={img.id}
                       onClick={() => setSelectedIndex(i)}
-                      className={`w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 rounded-md border-2 overflow-hidden transition-all ${
+                      className={`w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 rounded-md border-2 overflow-hidden transition-all ${
                         i === selectedIndex ? "border-primary ring-1 ring-primary/30" : "border-muted hover:border-muted-foreground/40"
                       }`}
                     >
@@ -151,31 +151,31 @@ export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalPro
             </div>
 
             {/* Bottom / Right — Info */}
-            <div className="flex flex-col p-4 sm:p-5 sm:overflow-y-auto">
+            <div className="flex flex-col p-3 sm:p-5 sm:overflow-y-auto">
               {/* Name */}
-              <h2 className="text-base font-bold text-foreground leading-snug mb-1.5">
+              <h2 className="text-sm sm:text-base font-bold text-foreground leading-snug mb-1.5">
                 {product.name}
               </h2>
 
               {/* Price */}
-              <div className="mb-3">
+              <div className="mb-2 sm:mb-3">
                 {salePrice ? (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-bold text-secondary">${salePrice}</span>
+                    <span className="text-lg sm:text-xl font-bold text-secondary">${salePrice}</span>
                     <span className="text-sm text-muted-foreground line-through">${regularPrice}</span>
                     {discount && (
                       <span className="text-xs font-semibold text-red-500 bg-red-50 px-1.5 py-0.5 rounded">−{discount}%</span>
                     )}
                   </div>
                 ) : (
-                  <span className="text-xl font-bold text-foreground">${regularPrice}</span>
+                  <span className="text-lg sm:text-xl font-bold text-foreground">${regularPrice}</span>
                 )}
               </div>
 
-              {/* Description */}
+              {/* Description — hidden on mobile to keep quick view compact */}
               {product.description && (
                 <div
-                  className="text-xs text-muted-foreground mb-3 leading-relaxed
+                  className="hidden sm:block text-xs text-muted-foreground mb-3 leading-relaxed
                     [&_p]:mb-1.5 [&_p:last-child]:mb-0
                     [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:mb-1.5
                     [&_ol]:list-decimal [&_ol]:pl-4 [&_ol]:mb-1.5
