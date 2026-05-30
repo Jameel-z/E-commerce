@@ -32,7 +32,6 @@ export function AddToCartSection({
   const meta = [
     product.sku       ? { label: "SKU",        value: product.sku }               : null,
     product.condition ? { label: "Condition",  value: product.condition }         : null,
-    product.category?.name ? { label: "Categories", value: product.category.name } : null,
     product.tags      ? { label: "Tag",        value: product.tags }              : null,
     product.brand     ? { label: "Brand",      value: product.brand, bold: true }  : null,
     product.shipping  ? { label: "Shipping",   value: product.shipping }          : null,

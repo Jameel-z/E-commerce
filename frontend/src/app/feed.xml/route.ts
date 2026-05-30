@@ -13,6 +13,7 @@ interface Product {
   brand: string | null;
   condition: string | null;
   sku: string | null;
+  vat: string | null;
   category_name: string;
   updated_at?: string | null;
   created_at: string;
@@ -54,6 +55,15 @@ export async function GET() {
       const brand = escapeXml(product.brand || "961shop");
       const id = product.sku || `product-${product.id}`;
 
+      const vatLower = (product.vat || "").toLowerCase();
+      const taxTag = vatLower.includes("excluded")
+        ? `<g:tax>
+      <g:country>LB</g:country>
+      <g:rate>11</g:rate>
+      <g:tax_ship>n</g:tax_ship>
+    </g:tax>`
+        : `<g:tax_label>included</g:tax_label>`;
+
       return `
   <entry>
     <g:id>${escapeXml(id)}</g:id>
@@ -65,6 +75,7 @@ export async function GET() {
     <g:price>${price} USD</g:price>
     <g:brand>${brand}</g:brand>
     <g:condition>${condition}</g:condition>
+    ${taxTag}
     <g:google_product_category>Apparel &amp; Accessories</g:google_product_category>
   </entry>`;
     })

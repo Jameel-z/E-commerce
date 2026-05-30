@@ -413,13 +413,18 @@ export function ProductForm({
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">VAT</Label>
-                  <Input
-                    value={formData.vat}
-                    onChange={(e) => updateField("vat", e.target.value)}
-                    placeholder="e.g. Excluding VAT"
-                    className="h-8 text-sm"
-                    maxLength={100}
-                  />
+                  <Select
+                    value={formData.vat || ""}
+                    onValueChange={(value) => updateField("vat", value)}
+                  >
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue placeholder="Select VAT type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Tax Included">Tax Included</SelectItem>
+                      <SelectItem value="Tax Excluded">Tax Excluded</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
