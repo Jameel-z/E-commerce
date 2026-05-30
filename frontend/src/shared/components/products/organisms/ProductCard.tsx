@@ -105,16 +105,6 @@ export function ProductCard({
               Out of Stock
             </div>
           )}
-          {product.stock_quantity > 0 &&
-            product.stock_quantity <= 2 &&
-            !product.is_on_sale &&
-            !isCompact && (
-              <ProductBadge
-                text="Low Stock"
-                variant="stock"
-                className="absolute top-10 right-2 z-10"
-              />
-            )}
 
           {/* New Badge - only when not on sale (sale ribbon occupies top-left) */}
           {isNew && !isCompact && !product.is_on_sale && product.stock_quantity > 0 && (

@@ -98,11 +98,6 @@ export function ProductImageGallery({
               Out of Stock
             </Badge>
           )}
-          {product.stock_quantity > 0 && product.stock_quantity <= 2 && (
-            <Badge variant="secondary" className="absolute top-4 right-4 z-10">
-              Low Stock
-            </Badge>
-          )}
 
           {/* Zoom Controls */}
           <div className="absolute top-4 left-4 z-10">

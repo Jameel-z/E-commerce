@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /wishlist
+Disallow: /checkout
+Disallow: /orders
+Disallow: /profile
+Disallow: /admin
+Disallow: /login
+Disallow: /register
+Disallow: /verify-email
+
+Sitemap: https://961shop.com/sitemap.xml

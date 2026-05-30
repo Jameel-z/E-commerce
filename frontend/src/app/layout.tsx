@@ -39,8 +39,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "961shop.com",
-  description: "961shop.com - Your online shopping destination",
+  title: "961shop.com | Laptops, Computers, Networking & CCTV in Lebanon",
+  description: "Shop laptops, computers, gaming monitors, MikroTik routers, WiFi, CCTV cameras and accessories in Lebanon. Fast delivery across Lebanon.",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
