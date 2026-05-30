@@ -63,6 +63,15 @@ export default function RootLayout({
       lang="en"
       className={`${spaceGrotesk.variable} ${dmSans.variable} ${poppins.variable} antialiased light`}
     >
+      <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18196374318" />
+        <script dangerouslySetInnerHTML={{ __html: `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'AW-18196374318');
+        `}} />
+      </head>
       <body className="font-sans overflow-x-hidden">
         <script
           type="application/ld+json"
