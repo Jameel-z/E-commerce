@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -54,9 +55,11 @@ const DEFAULT_BANNER: Banner = {
 function BannerSlide({
   banner,
   onVideoEnd,
+  priority,
 }: {
   banner: Banner;
   onVideoEnd?: () => void;
+  priority?: boolean;
 }) {
   const mediaUrl = banner.media_url ? getImageUrl(banner.media_url) : null;
   const hasMedia = !!mediaUrl;
@@ -105,11 +108,14 @@ function BannerSlide({
         className="w-full h-auto block"
       />
     ) : (
-      <img
+      <Image
         src={mediaUrl!}
         alt={banner.title ?? "Banner"}
-        className="w-full h-auto block"
-        draggable={false}
+        width={1920}
+        height={1080}
+        style={{ width: "100%", height: "auto", display: "block" }}
+        priority={priority}
+        sizes="100vw"
       />
     );
 
@@ -229,6 +235,7 @@ export function HeroSection() {
             <BannerSlide
               banner={banner}
               onVideoEnd={multi ? handleVideoEnd : undefined}
+              priority={i === 0}
             />
           </SwiperSlide>
         ))}

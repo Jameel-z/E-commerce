@@ -1,5 +1,6 @@
 import type React from "react";
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Space_Grotesk, DM_Sans, Poppins } from "next/font/google";
 import { getOrganizationSchema, getWebSiteSchema } from "@/shared/utils/schema";
 import { AuthProvider, CartProvider, WishlistProvider } from "@/shared/components";
@@ -63,16 +64,21 @@ export default function RootLayout({
       lang="en"
       className={`${spaceGrotesk.variable} ${dmSans.variable} ${poppins.variable} antialiased light`}
     >
-      <head>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18196374318" />
-        <script dangerouslySetInnerHTML={{ __html: `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'AW-18196374318');
-        `}} />
-      </head>
       <body className="font-sans overflow-x-hidden">
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-18196374318"
+          strategy="afterInteractive"
+        />
+        <Script
+          id="gtag-config"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{ __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-18196374318');
+          `}}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(getOrganizationSchema()) }}

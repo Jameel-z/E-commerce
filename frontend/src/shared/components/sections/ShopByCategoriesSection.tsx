@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { apiClient } from "@/lib/api";
 import { getImageUrl } from "@/shared/utils/image";
@@ -65,11 +66,12 @@ export function ShopByCategoriesSection() {
                     {/* Image */}
                     <div className="relative overflow-hidden rounded-2xl aspect-[3/2] w-full">
                       {imgUrl ? (
-                        <img
+                        <Image
+                          fill
                           src={imgUrl}
                           alt={cat.name}
-                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          draggable={false}
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
                         />
                       ) : (
                         <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />

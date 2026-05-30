@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Button } from "@/shared/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, ShoppingCart, Package } from "lucide-react";
@@ -32,10 +33,12 @@ function FeaturedCard({ product }: { product: Product }) {
       <div className="rounded-xl overflow-hidden border border-border/50 bg-card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
         {/* Image */}
         <div className="aspect-[4/3] relative overflow-hidden bg-muted">
-          <img
+          <Image
+            fill
             src={getProductImageUrl(product)}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
           />
           {product.is_on_sale && product.discount_percentage && (
             <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
