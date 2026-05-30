@@ -1,60 +1,47 @@
-"use client";
-
-import { useAuth } from "@/shared/hooks/use-auth";
-import { useEffect, useState } from "react";
-import { apiClient, type Product } from "@/lib/api";
 import {
   UnifiedLayout,
   HeroSection,
-  ErrorBanner,
   FeaturesSection,
   FeaturedProductsSection,
   CategoryProductRowsSection,
   ShopByCategoriesSection,
 } from "@/shared/components";
+import type { Banner } from "@/lib/api";
+import type { Product } from "@/shared/types";
 
-export default function HomePage() {
-  const { user, loading } = useAuth();
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [productsLoading, setProductsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
-  useEffect(() => {
-    const fetchFeaturedProducts = async () => {
-      try {
-        const featured = await apiClient.getFeaturedProducts();
-        setFeaturedProducts(featured);
-        setError(null);
-      } catch {
-        setError(
-          "Unable to load products. Please check if the backend server is running."
-        );
-      } finally {
-        setProductsLoading(false);
-      }
-    };
-
-    fetchFeaturedProducts();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">Loading...</div>
-      </div>
-    );
+async function fetchBanners(): Promise<Banner[]> {
+  try {
+    const res = await fetch(`${API}/banners/`, { next: { revalidate: 300 } });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
   }
+}
+
+async function fetchFeaturedProducts(): Promise<Product[]> {
+  try {
+    const res = await fetch(`${API}/products/featured`, { next: { revalidate: 300 } });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
+}
+
+export default async function HomePage() {
+  const [banners, featuredProducts] = await Promise.all([
+    fetchBanners(),
+    fetchFeaturedProducts(),
+  ]);
 
   return (
     <UnifiedLayout>
-      <HeroSection />
+      <HeroSection banners={banners} />
       <ShopByCategoriesSection />
-      {error && <ErrorBanner error={error} />}
-      <FeaturedProductsSection
-        products={featuredProducts}
-        loading={productsLoading}
-        error={error}
-      />
+      <FeaturedProductsSection products={featuredProducts} loading={false} error={null} />
       <CategoryProductRowsSection />
       <FeaturesSection />
     </UnifiedLayout>
