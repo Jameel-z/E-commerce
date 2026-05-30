@@ -23,11 +23,11 @@ export const metadata: Metadata = {
   },
 };
 
-const LAST_UPDATED = "May 24, 2026";
+const LAST_UPDATED = "May 30, 2026";
 const SITE_NAME = "961shop";
 const SITE_URL = "https://961shop.com";
-const CONTACT_EMAIL = "961shop@support.com";
-const CONTACT_PHONE = "+961 03751903";
+const CONTACT_EMAIL = "support@invoicepoint.net";
+const CONTACT_PHONE = "+961 76 840474";
 
 export default function TermsPage() {
   return (
@@ -97,6 +97,11 @@ export default function TermsPage() {
               <li>
                 You may create an account to access features such as order
                 tracking, wishlists, and a faster checkout experience.
+              </li>
+              <li>
+                A valid email address is required to register. You will receive a
+                verification email and must verify your address before accessing
+                all account features.
               </li>
               <li>
                 You are responsible for maintaining the confidentiality of your
@@ -207,14 +212,15 @@ export default function TermsPage() {
           <Section id="returns" title="7. Returns and Refunds">
             <ul>
               <li>
-                We accept returns on eligible items within{" "}
-                <strong>14 days</strong> of delivery, provided they are unused,
-                in original packaging, and accompanied by proof of purchase.
+                We accept returns <strong>only</strong> for items that are
+                defective, damaged during shipping, or incorrectly fulfilled
+                (wrong item received). Returns for change of mind or any other
+                reason are not accepted.
               </li>
               <li>
-                Items that are damaged due to misuse, missing accessories, or
-                returned without original packaging may not qualify for a full
-                refund.
+                Defective or incorrect items must be reported within{" "}
+                <strong>48 hours</strong> of delivery with photographic evidence
+                of the issue.
               </li>
               <li>
                 To initiate a return, please contact our support team at{" "}
@@ -224,17 +230,27 @@ export default function TermsPage() {
                 >
                   {CONTACT_EMAIL}
                 </a>{" "}
-                with your order number and reason for return.
+                with your order number, photos of the issue, and a description
+                of the defect.
               </li>
               <li>
-                Approved refunds will be issued within 5–10 business days
-                through the original payment method.
+                Approved refunds will be issued within 5–7 business days
+                through the original payment method. Shipping costs are
+                non-refundable unless the return is due to our error.
               </li>
               <li>
                 Certain products (e.g., opened software, consumables, or items
-                marked final sale) are not eligible for return.
+                marked final sale) are not eligible for return under any
+                circumstances.
               </li>
             </ul>
+            <p>
+              For full details, see our{" "}
+              <Link href="/return-policy" className="text-primary underline underline-offset-2">
+                Return Policy
+              </Link>
+              .
+            </p>
           </Section>
 
           {/* 8. Intellectual Property */}

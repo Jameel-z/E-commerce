@@ -6,7 +6,6 @@ import Link from "next/link";
 import { Search, ChevronDown, ChevronRight, Phone, LayoutGrid, ShoppingBag, Menu, X, ArrowRight } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import type { Category, Product } from "@/shared/types";
-import { CONTACT } from "@/shared/constants/config";
 import { getProductImageUrl } from "@/shared/utils/image";
 
 function categoryNames(cat: Category): string[] {
@@ -260,14 +259,14 @@ export function SecondaryNav() {
             </button>
           </form>
 
-          {/* ── Phone (desktop only) ──────────────────────────────────── */}
-          <a
-            href={`tel:${CONTACT.phone.tel}`}
+          {/* ── Contact Us (desktop only) ─────────────────────────────── */}
+          <Link
+            href="/contact"
             className="hidden md:flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary transition-colors flex-shrink-0"
           >
             <Phone className="h-3.5 w-3.5" />
-            <span>{CONTACT.phone.display}</span>
-          </a>
+            <span>Contact Us</span>
+          </Link>
         </div>
       </div>
 

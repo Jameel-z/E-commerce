@@ -23,11 +23,11 @@ export const metadata: Metadata = {
   },
 };
 
-const LAST_UPDATED = "May 24, 2026";
+const LAST_UPDATED = "May 30, 2026";
 const SITE_NAME = "961shop";
 const SITE_URL = "https://961shop.com";
-const CONTACT_EMAIL = "961shop@support.com";
-const CONTACT_PHONE = "+961 03751903";
+const CONTACT_EMAIL = "support@invoicepoint.net";
+const CONTACT_PHONE = "+961 76 840474";
 
 export default function PrivacyPage() {
   return (
@@ -176,7 +176,7 @@ export default function PrivacyPage() {
               <li>Comply with legal obligations and enforce our Terms.</li>
               <li>
                 Send transactional emails such as order confirmations, shipping
-                notifications, and password resets.
+                notifications, password resets, and account verification emails.
               </li>
             </ul>
 
@@ -248,6 +248,23 @@ export default function PrivacyPage() {
               <li>
                 <strong>Preference Cookies:</strong> Remember your settings such
                 as language, theme, and recently viewed products.
+              </li>
+            </ul>
+            <p>
+              We also use the following Google services which may collect data
+              independently under Google's privacy policy:
+            </p>
+            <ul>
+              <li>
+                <strong>Google Search Console:</strong> Used to monitor website
+                performance in Google Search. Google may collect anonymized
+                search and click data.
+              </li>
+              <li>
+                <strong>Google Merchant Center:</strong> A public product feed
+                (listing product names, prices, images, and availability) is
+                shared with Google to enable product listings in Google Search
+                and Shopping.
               </li>
             </ul>
             <p>

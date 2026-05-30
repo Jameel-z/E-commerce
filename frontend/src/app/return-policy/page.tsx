@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Return Policy | 961shop",
-  description: "Learn about 961shop's return and refund policy. We accept returns within 14 days of delivery.",
+  description: "Learn about 961shop's return and refund policy. We accept returns for defective or incorrect items.",
   openGraph: {
     title: "Return Policy | 961shop",
     description: "Learn about 961shop's return and refund policy.",
@@ -17,12 +17,12 @@ export const metadata: Metadata = {
   },
 };
 
-const LAST_UPDATED = "May 29, 2026";
+const LAST_UPDATED = "May 30, 2026";
 const SITE_NAME = "961shop";
 const SITE_URL = "https://961shop.com";
-const CONTACT_EMAIL = "961shop@support.com";
-const CONTACT_PHONE = "+961 03751903";
-const WHATSAPP = "+961 03751903";
+const CONTACT_EMAIL = "support@invoicepoint.net";
+const CONTACT_PHONE = "+961 76 840474";
+const WHATSAPP = "+961 76 840474";
 
 export default function ReturnPolicyPage() {
   return (
@@ -48,17 +48,23 @@ export default function ReturnPolicyPage() {
         <div className="prose prose-sm max-w-none space-y-8 text-foreground">
 
           <Section id="eligibility" title="1. Return Eligibility">
-            <p>You may request a return within <strong>14 days</strong> of receiving your order, provided that:</p>
+            <p>
+              We accept returns <strong>only</strong> in the following cases:
+            </p>
             <ul>
-              <li>The item is unused and in its original condition.</li>
-              <li>The item is in its original packaging with all tags attached.</li>
-              <li>You have proof of purchase (order number or receipt).</li>
+              <li>The item received is defective or not functioning as described.</li>
+              <li>The item was damaged during shipping or delivery.</li>
+              <li>You received the wrong item (different from what you ordered).</li>
             </ul>
-            <p>The following items are <strong>not eligible</strong> for return:</p>
+            <p>
+              Returns are <strong>not accepted</strong> for change of mind, incorrect size selection,
+              or any reason other than a product defect or fulfillment error.
+            </p>
+            <p>The following items are additionally <strong>not eligible</strong> for return:</p>
             <ul>
               <li>Items marked as "Final Sale" or "Non-Returnable" on the product page.</li>
               <li>Perishable goods, digital products, or downloadable items.</li>
-              <li>Items that have been used, damaged, or altered after delivery.</li>
+              <li>Items that have been used, damaged, or altered by the customer after delivery.</li>
             </ul>
           </Section>
 

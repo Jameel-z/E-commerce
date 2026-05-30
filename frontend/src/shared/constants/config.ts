@@ -11,8 +11,8 @@ export const API_BASE_URL =
 
 export const CONTACT = {
   phone: {
-    display: "+961 03751903",
-    tel: "+96103751903",
+    display: "+961 76 840474",
+    tel: "+96176840474",
   },
-  email: "961shop@support.com",
+  email: "support@invoicepoint.net",
 };

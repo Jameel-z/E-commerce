@@ -16,9 +16,9 @@ export function getOrganizationSchema() {
     },
     contactPoint: {
       "@type": "ContactPoint",
-      telephone: "+96103751903",
+      telephone: "+96176840474",
       contactType: "customer service",
-      email: "961shop@support.com",
+      email: "support@invoicepoint.net",
     },
   };
 }
@@ -62,6 +62,10 @@ export function getProductSchema(product: ProductDetail) {
     "@type": "Product",
     name: product.name,
     url: `${SITE_URL}/products/${product.id}`,
+    brand: {
+      "@type": "Brand",
+      name: product.brand || SITE_NAME,
+    },
     offers: {
       "@type": "Offer",
       url: `${SITE_URL}/products/${product.id}`,
@@ -72,13 +76,50 @@ export function getProductSchema(product: ProductDetail) {
         "@type": "Organization",
         name: SITE_NAME,
       },
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "LB",
+        returnPolicyCategory:
+          "https://schema.org/MerchantReturnNotPermitted",
+        itemDefectReturnFees: "https://schema.org/FreeReturn",
+        merchantReturnLink: `${SITE_URL}/return-policy`,
+      },
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: {
+          "@type": "MonetaryAmount",
+          value: "0",
+          currency: CURRENCY,
+        },
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "LB",
+        },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: {
+            "@type": "QuantitativeValue",
+            minValue: 0,
+            maxValue: 1,
+            unitCode: "DAY",
+          },
+          transitTime: {
+            "@type": "QuantitativeValue",
+            minValue: 1,
+            maxValue: 3,
+            unitCode: "DAY",
+          },
+        },
+      },
     },
   };
 
   if (product.description) schema.description = product.description;
   if (images.length > 0) schema.image = images;
-  if (product.sku) schema.sku = product.sku;
-  if (product.brand) schema.brand = { "@type": "Brand", name: product.brand };
+  if (product.sku) {
+    schema.sku = product.sku;
+    schema.mpn = product.sku;
+  }
   if (product.condition) {
     schema.itemCondition =
       conditionMap[product.condition.toLowerCase()] ??
