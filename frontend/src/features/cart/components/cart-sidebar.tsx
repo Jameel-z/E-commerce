@@ -143,6 +143,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close cart"
             className="h-7 w-7 flex items-center justify-center rounded-md border border-muted-foreground/40 hover:bg-destructive hover:text-white hover:border-destructive transition-colors"
           >
             <X className="h-5 w-5" strokeWidth={2.5} />

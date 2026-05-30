@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Path, File, Form, UploadFile, Body
+from fastapi.encoders import jsonable_encoder
 from typing import Optional, Union
 from sqlalchemy.orm import Session
 from pydantic import BaseModel as PydanticBaseModel
@@ -7,8 +8,12 @@ from database import get_db
 from schemas.category import Category, CategoryCreate, CategoryUpdate
 from crud.category_crud import category_crud
 from core.security import get_current_active_user, require_admin
+from core.cache import cache_get, cache_set, cache_delete
 from schemas.user import User
 from services.image_services import ImageService, FileValidator
+
+def _invalidate_category_cache():
+    cache_delete("categories:all", "categories:featured", "categories:rows", "categories:tree")
 
 class HomepageToggle(PydanticBaseModel):
     show_on_homepage: bool
@@ -32,34 +37,58 @@ router = APIRouter(
 @router.get("/", response_model=list[Category], status_code=status.HTTP_200_OK)
 def get_categories(db: Session = Depends(get_db)):
     """Flat list of all categories (public)."""
-    return category_crud.get_multi(db)
+    cached = cache_get("categories:all")
+    if cached is not None:
+        return cached
+    result = category_crud.get_multi(db)
+    data = jsonable_encoder(result)
+    cache_set("categories:all", data, ttl=300)
+    return data
 
 @router.get("/category-rows", response_model=list[Category], status_code=status.HTTP_200_OK)
 def get_category_rows(db: Session = Depends(get_db)):
     """Parent categories with show_category_row=True, ordered by category_row_order."""
+    cached = cache_get("categories:rows")
+    if cached is not None:
+        return cached
     from models.category import Category as CategoryModel
-    return (
+    result = (
         db.query(CategoryModel)
         .filter(CategoryModel.show_category_row == True, CategoryModel.parent_id == None)
         .order_by(CategoryModel.category_row_order)
         .all()
     )
+    data = jsonable_encoder(result)
+    cache_set("categories:rows", data, ttl=300)
+    return data
 
 @router.get("/featured", response_model=list[Category], status_code=status.HTTP_200_OK)
 def get_featured_categories(db: Session = Depends(get_db)):
     """Categories marked to show on homepage, ordered by homepage_order."""
+    cached = cache_get("categories:featured")
+    if cached is not None:
+        return cached
     from models.category import Category as CategoryModel
-    return (
+    result = (
         db.query(CategoryModel)
         .filter(CategoryModel.show_on_homepage == True)
         .order_by(CategoryModel.homepage_order)
         .all()
     )
+    data = jsonable_encoder(result)
+    cache_set("categories:featured", data, ttl=300)
+    return data
 
 @router.get("/tree", response_model=list[Category], status_code=status.HTTP_200_OK)
 def get_category_tree(db: Session = Depends(get_db)):
     """Tree of top-level categories with their children (public)."""
-    return category_crud.get_tree(db)
+    cached = cache_get("categories:tree")
+    if cached is not None:
+        return cached
+    result = category_crud.get_tree(db)
+    data = jsonable_encoder(result)
+    cache_set("categories:tree", data, ttl=300)
+    return data
 
 @router.post("/", response_model=Category, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
 async def create_category(
@@ -90,6 +119,7 @@ async def create_category(
         db.commit()
         db.refresh(db_category)
 
+    _invalidate_category_cache()
     return db_category
 
 @router.put("/{category_id}", response_model=Category, status_code=status.HTTP_200_OK, dependencies=[Depends(require_admin)])
@@ -131,6 +161,7 @@ async def update_category(
 
     db.commit()
     db.refresh(db_category)
+    _invalidate_category_cache()
     return db_category
 
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
@@ -145,6 +176,7 @@ def delete_category(
     if category.image_url:
         ImageService.delete_image(category.image_url)
     category_crud.remove(db, id=category_id)
+    _invalidate_category_cache()
 
 @router.get(
     "/{category_id}/row-pins",

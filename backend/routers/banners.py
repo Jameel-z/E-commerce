@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, File, Form, UploadFile
+from fastapi.encoders import jsonable_encoder
 from typing import Optional, List
 from sqlalchemy.orm import Session
 
@@ -6,20 +7,29 @@ from database import get_db
 from schemas.banner import Banner, BannerUpdate
 from models.banner import Banner as BannerModel
 from core.security import require_admin
+from core.cache import cache_get, cache_set, cache_delete
 from services.image_services import ImageService
 
 router = APIRouter(prefix="/banners")
+
+_BANNER_KEY = "banners:active"
 
 
 @router.get("/", response_model=List[Banner])
 def get_active_banners(db: Session = Depends(get_db)):
     """Return active banners ordered by display_order (public)."""
-    return (
+    cached = cache_get(_BANNER_KEY)
+    if cached is not None:
+        return cached
+    result = (
         db.query(BannerModel)
         .filter(BannerModel.is_active == True)
         .order_by(BannerModel.display_order)
         .all()
     )
+    data = jsonable_encoder(result)
+    cache_set(_BANNER_KEY, data, ttl=300)
+    return data
 
 
 @router.get("/all", response_model=List[Banner])
@@ -58,6 +68,7 @@ async def create_banner(
     db.add(banner)
     db.commit()
     db.refresh(banner)
+    cache_delete(_BANNER_KEY)
     return banner
 
 
@@ -75,6 +86,7 @@ def update_banner(
         setattr(banner, key, val)
     db.commit()
     db.refresh(banner)
+    cache_delete(_BANNER_KEY)
     return banner
 
 
@@ -89,3 +101,4 @@ def delete_banner(
         raise HTTPException(status_code=404, detail="Banner not found")
     db.delete(banner)
     db.commit()
+    cache_delete(_BANNER_KEY)

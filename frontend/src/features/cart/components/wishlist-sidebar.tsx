@@ -53,6 +53,7 @@ export function WishlistSidebar({ isOpen, onClose }: WishlistSidebarProps) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close wishlist"
             className="h-7 w-7 flex items-center justify-center rounded-md border border-muted-foreground/40 hover:bg-destructive hover:text-white hover:border-destructive transition-colors"
           >
             <X className="h-4 w-4" strokeWidth={2.5} />

@@ -3,10 +3,16 @@ from fastapi import (
     APIRouter, Depends, HTTPException, Query, status, Path,
     UploadFile, File, Form, Body
 )
+from fastapi.encoders import jsonable_encoder
 from typing import List, Optional, Annotated, Union
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from database import get_db
+from core.cache import cache_get, cache_set, cache_delete, cache_delete_pattern
+
+def _invalidate_product_cache():
+    cache_delete("products:featured")
+    cache_delete_pattern("products:list:*")
 from schemas.product import (
     ProductCreate,
     ProductUpdate,
@@ -55,7 +61,11 @@ def list_products(
     search: Optional[str] = Query(None, description="Search term")
 ):
     """Get paginated products with optional filters."""
-    return product_crud.get_list(
+    cache_key = f"products:list:{page}:{per_page}:{category_id}:{parent_category_id}:{search}"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        return cached
+    result = product_crud.get_list(
         db,
         skip=(page - 1) * per_page,
         limit=per_page,
@@ -63,6 +73,9 @@ def list_products(
         parent_category_id=parent_category_id,
         search_term=search
     )
+    data = jsonable_encoder(result)
+    cache_set(cache_key, data, ttl=120)
+    return data
 
 @router.get(
     "/featured",
@@ -71,14 +84,19 @@ def list_products(
 )
 def get_featured_products(db: Session = Depends(get_db)):
     """Return products marked as featured, ordered by featured_order."""
+    cached = cache_get("products:featured")
+    if cached is not None:
+        return cached
     from models.product import Product
-    products = (
+    result = (
         db.query(Product)
         .filter(Product.is_featured == True)
         .order_by(Product.featured_order)
         .all()
     )
-    return products
+    data = jsonable_encoder(result)
+    cache_set("products:featured", data, ttl=300)
+    return data
 
 @router.get(
     "/{product_id}",
@@ -190,7 +208,7 @@ async def create_product(
             primary_image=processed_primary_image,
             secondary_images=processed_secondary_images
         )
-        
+        _invalidate_product_cache()
         return product
         
     except ValueError as e:
@@ -277,14 +295,16 @@ async def update_product(
                 new_images=new_images
             )
 
-        return await product_crud.update_product_with_images(
+        result = await product_crud.update_product_with_images(
             db,
             product_id=product_id,
             product_data=product_data,
             image_data=image_update,
             new_primary_image=primary_image
         )
-    
+        _invalidate_product_cache()
+        return result
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -314,7 +334,8 @@ async def delete_product(
         )
     
     product_crud.remove(db, id=product_id)
-    
+    _invalidate_product_cache()
+
     try:
         await ImageService.delete_product_folder(product_id)
     except Exception as e:
@@ -346,4 +367,5 @@ def set_product_featured(
     product.featured_order = payload.featured_order
     db.commit()
     db.refresh(product)
+    _invalidate_product_cache()
     return product

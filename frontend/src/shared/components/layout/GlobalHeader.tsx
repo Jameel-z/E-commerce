@@ -67,7 +67,7 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
                   <Monitor className="h-4 w-4" />
                 )}
               </Button> */}
-              <button onClick={openWishlistSidebar} className="relative p-2 hover:text-primary transition-colors">
+              <button onClick={openWishlistSidebar} aria-label="Wishlist" className="relative p-2 hover:text-primary transition-colors">
                 <Heart className="h-5 w-5" />
                 {wishlistCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
@@ -132,6 +132,7 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
                 className="p-2"
               >
                 <User className="h-5 w-5" />
@@ -160,6 +161,7 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
               <span className="text-sm font-semibold">Menu</span>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
+                aria-label="Close menu"
                 className="p-1.5 rounded-md hover:bg-muted transition-colors"
               >
                 <X className="h-4 w-4" />

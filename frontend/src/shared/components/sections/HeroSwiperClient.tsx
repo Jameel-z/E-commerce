@@ -108,7 +108,7 @@ function BannerSlide({
 
     if (hasLink) {
       return (
-        <Link href={banner.cta_link!} className="block group cursor-pointer" aria-label={banner.cta_text ?? banner.title ?? "View offer"}>
+        <Link href={banner.cta_link!} className="block group cursor-pointer" aria-label={banner.cta_text || banner.title || "View offer"}>
           {inner}
         </Link>
       );
@@ -139,7 +139,7 @@ function BannerSlide({
 
   if (hasLink) {
     return (
-      <Link href={banner.cta_link!} className="block group cursor-pointer" aria-label={banner.cta_text ?? banner.title ?? "View offer"}>
+      <Link href={banner.cta_link!} className="block group cursor-pointer" aria-label={banner.cta_text || banner.title || "View offer"}>
         {fallback}
       </Link>
     );

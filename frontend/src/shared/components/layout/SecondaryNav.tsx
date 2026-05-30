@@ -96,6 +96,8 @@ export function SecondaryNav() {
           <div className="relative flex-shrink-0">
             <button
               onClick={() => { setIsCatOpen(!isCatOpen); setHoveredId(null); setExpandedId(null); }}
+              aria-label={isCatOpen ? "Close categories" : "Categories"}
+              aria-expanded={isCatOpen}
               className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-sm font-semibold bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
             >
               {isCatOpen
@@ -252,6 +254,7 @@ export function SecondaryNav() {
             {/* Submit: icon on mobile, text on desktop */}
             <button
               type="submit"
+              aria-label="Search"
               className="h-8 w-8 sm:w-auto sm:px-3 flex items-center justify-center text-xs font-semibold bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors flex-shrink-0"
             >
               <ArrowRight className="h-4 w-4 sm:hidden" />
@@ -297,6 +300,8 @@ export function SecondaryNav() {
                   </Link>
                   {cat.children.length > 0 && (
                     <button
+                      aria-label={expandedId === cat.id ? `Collapse ${cat.name}` : `Expand ${cat.name}`}
+                      aria-expanded={expandedId === cat.id}
                       className="px-4 py-3 text-muted-foreground hover:text-foreground"
                       onClick={() => setExpandedId(expandedId === cat.id ? null : cat.id)}
                     >

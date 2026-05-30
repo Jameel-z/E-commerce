@@ -6,7 +6,6 @@ import Link from "next/link";
 import { ChevronRight, ShoppingCart, Package } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
-import "swiper/css/pagination";
 import { apiClient, type Product, type Category } from "@/lib/api";
 import { getProductImageUrl } from "@/shared/utils/image";
 import { useCart } from "@/shared/hooks/use-cart";
@@ -105,7 +104,7 @@ function CategoryRow({ category }: { category: Category }) {
           setLoading(true);
           Promise.all([
             apiClient.getCategoryRowPins(category.id).catch(() => [] as number[]),
-            apiClient.getProducts({ parent_category_id: category.id, per_page: 100 }).catch(() => [] as Product[]),
+            apiClient.getProducts({ parent_category_id: category.id, per_page: 12 }).catch(() => [] as Product[]),
           ]).then(([pins, all]) => {
             const pinnedSet = new Set(pins);
             const pinned = pins.map((id) => all.find((p) => p.id === id)).filter(Boolean) as Product[];
@@ -127,9 +126,9 @@ function CategoryRow({ category }: { category: Category }) {
 
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-border/50 mb-5">
-          <h3 className="text-sm font-extrabold uppercase tracking-widest text-foreground/70">
+          <h2 className="text-sm font-extrabold uppercase tracking-widest text-foreground/70">
             {category.name}
-          </h3>
+          </h2>
           <Link
             href={`/products?category=${encodeURIComponent(category.name)}`}
             className="flex items-center gap-0.5 text-sm font-bold text-foreground/70 hover:text-foreground transition-colors"

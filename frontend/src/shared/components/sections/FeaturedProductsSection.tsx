@@ -110,7 +110,7 @@ export function FeaturedProductsSection({ products, loading, error }: FeaturedPr
 
         {/* Header */}
         <div className="text-center mb-5">
-          <h3 className="text-xl font-bold text-foreground">Featured Products</h3>
+          <h2 className="text-xl font-bold text-foreground">Featured Products</h2>
           <p className="text-xs text-muted-foreground mt-0.5">Explore our best-selling items</p>
         </div>
 
