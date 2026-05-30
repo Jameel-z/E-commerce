@@ -5,6 +5,16 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "Link", value: "<https://api.961shop.com>; rel=preconnect" },
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
