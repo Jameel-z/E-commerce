@@ -28,6 +28,18 @@ function escapeXml(str: string): string {
     .replace(/'/g, "&apos;");
 }
 
+function getGoogleCategory(categoryName: string): string {
+  const name = categoryName.toLowerCase();
+  if (name.includes("laptop") || name.includes("computer") || name.includes("pc")) return "Electronics > Computers > Laptops";
+  if (name.includes("monitor") || name.includes("display") || name.includes("screen")) return "Electronics > Video > Monitors";
+  if (name.includes("cctv") || name.includes("camera") || name.includes("security")) return "Electronics > Security > Security Cameras";
+  if (name.includes("router") || name.includes("mikrotik") || name.includes("wifi") || name.includes("network") || name.includes("switch")) return "Electronics > Networking";
+  if (name.includes("accessory") || name.includes("accessories") || name.includes("cable")) return "Electronics > Electronics Accessories";
+  if (name.includes("gaming")) return "Electronics > Video Game Consoles & Accessories";
+  if (name.includes("phone") || name.includes("mobile")) return "Electronics > Communications > Phones";
+  return "Electronics";
+}
+
 export async function GET() {
   let products: Product[] = [];
 
@@ -54,6 +66,7 @@ export async function GET() {
       const condition = product.condition?.toLowerCase() || "new";
       const brand = escapeXml(product.brand || "961shop");
       const id = product.sku || `product-${product.id}`;
+      const googleCategory = getGoogleCategory(product.category_name);
 
       const vatLower = (product.vat || "").toLowerCase();
       const taxTag = vatLower.includes("excluded")
@@ -76,7 +89,7 @@ export async function GET() {
     <g:brand>${brand}</g:brand>
     <g:condition>${condition}</g:condition>
     ${taxTag}
-    <g:google_product_category>Apparel &amp; Accessories</g:google_product_category>
+    <g:google_product_category>${googleCategory}</g:google_product_category>
   </entry>`;
     })
     .join("");
