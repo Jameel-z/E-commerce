@@ -66,6 +66,7 @@ class UserCreate(UserBase):
         description="Must be 8-64 chars with at least 1 uppercase, 1 lowercase and 1 number",
         examples=["Pass123word"]
     )
+    recaptcha_token: str = Field(default="", exclude=True)
 
     @field_validator('email', mode='before')
     @classmethod

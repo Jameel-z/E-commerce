@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/shared/hooks/use-auth";
+import { useRecaptcha } from "@/shared/hooks/use-recaptcha";
 import { useToast } from "@/shared/hooks/use-toast";
 import {
   loginSchema,
@@ -31,6 +32,7 @@ export function LoginForm({
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { execute: executeRecaptcha } = useRecaptcha();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -52,7 +54,8 @@ export function LoginForm({
     setFormError(null);
 
     try {
-      await login(data.email, data.password);
+      const recaptchaToken = await executeRecaptcha("login");
+      await login(data.email, data.password, recaptchaToken);
       handleAuthSuccess("login", toast);
       const redirect = redirectTo || getRedirectUrl(searchParams, "/");
       if (onSuccess) onSuccess();
@@ -166,6 +169,13 @@ export function LoginForm({
         >
           Create one here
         </Link>
+      </p>
+
+      <p className="text-center text-[11px] text-muted-foreground/60 pt-1">
+        Protected by reCAPTCHA —{" "}
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted-foreground">Privacy</a>
+        {" "}·{" "}
+        <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-muted-foreground">Terms</a>
       </p>
     </form>
   );

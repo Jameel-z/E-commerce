@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+.grecaptcha-badge {
+  visibility: hidden !important;
+}
+
 
 .whatsapp-button {
   background-color: #1cd460 !important;

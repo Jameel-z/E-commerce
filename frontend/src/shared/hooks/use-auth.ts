@@ -6,9 +6,9 @@ import { apiClient, type User } from "@/lib/api";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string, recaptchaToken?: string) => Promise<void>;
   loginWithGoogle: (credential: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, recaptchaToken?: string) => Promise<void>;
   logout: () => void;
   isAdmin: boolean;
   updateProfile: (data: { name: string; email?: string }) => Promise<void>;
@@ -51,8 +51,8 @@ export function useAuthProvider() {
     setUser(userData);
   };
 
-  const login = async (username: string, password: string) => {
-    await apiClient.login(username, password);
+  const login = async (username: string, password: string, recaptchaToken = "") => {
+    await apiClient.login(username, password, recaptchaToken);
     const userData = await apiClient.getCurrentUser();
 
     // Merge guest cart with user cart (now properly implemented!)
@@ -68,8 +68,8 @@ export function useAuthProvider() {
     setUser(userData);
   };
 
-  const register = async (name: string, email: string, password: string) => {
-    await apiClient.register({ name, email, password });
+  const register = async (name: string, email: string, password: string, recaptchaToken = "") => {
+    await apiClient.register({ name, email, password, recaptcha_token: recaptchaToken });
   };
 
   const updateProfile = async (data: { name: string; email?: string }) => {

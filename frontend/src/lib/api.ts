@@ -100,10 +100,11 @@ class ApiClient {
   /**
    * Login user - matches backend /users/token endpoint
    */
-  async login(username: string, password: string): Promise<AuthResponse> {
+  async login(username: string, password: string, recaptchaToken = ""): Promise<AuthResponse> {
     const formData = new FormData();
     formData.append("username", username);
     formData.append("password", password);
+    formData.append("recaptcha_token", recaptchaToken);
 
     const response = await fetch(`${API_BASE_URL}/users/token`, {
       method: "POST",

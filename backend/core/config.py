@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     # Google OAuth
     GOOGLE_CLIENT_ID: str = ""
 
+    # reCAPTCHA v3
+    RECAPTCHA_SECRET_KEY: str = ""
+    RECAPTCHA_ENABLED: bool = True
+
     # Email verification (Resend)
     RESEND_API_KEY: str = ""
     RESEND_FROM_EMAIL: str = "noreply@yourdomain.com"

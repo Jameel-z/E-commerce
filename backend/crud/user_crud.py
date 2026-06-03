@@ -14,7 +14,7 @@ class UserCRUD(CRUDBase[User, UserCreate, UserUpdate]):
 
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
-        create_data = obj_in.model_dump()
+        create_data = obj_in.model_dump(exclude={"recaptcha_token"})
         create_data["hashed_password"] = get_password_hash(create_data.pop("password"))
         create_data["is_admin"] = create_data.get("is_admin", False) 
         create_data["name"] = create_data.get("name")    

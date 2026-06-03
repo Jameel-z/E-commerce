@@ -22,6 +22,7 @@ export interface UserRegistrationRequest {
   name: string;
   email: string;
   password: string;
+  recaptcha_token?: string;
 }
 
 /**

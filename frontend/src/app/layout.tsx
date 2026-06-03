@@ -66,6 +66,10 @@ export default function RootLayout({
     >
       <body className="font-sans overflow-x-hidden">
         <Script
+          src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+          strategy="afterInteractive"
+        />
+        <Script
           src="https://www.googletagmanager.com/gtag/js?id=AW-18196374318"
           strategy="afterInteractive"
         />

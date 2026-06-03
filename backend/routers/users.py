@@ -2,7 +2,7 @@ import urllib.request
 import urllib.error
 import json
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Form, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import Annotated
@@ -21,14 +21,21 @@ from core.security import (
 )
 from core.config import settings
 from core.email import send_verification_email
+from core.recaptcha import verify_recaptcha
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    recaptcha_token: Annotated[str, Form()] = "",
     db: Session = Depends(get_db)
 ):
+    if not verify_recaptcha(recaptcha_token):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="reCAPTCHA verification failed. Please try again.",
+        )
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -57,6 +64,11 @@ def create_user(
     user: UserCreate,
     db: Session = Depends(get_db)
 ):
+    if not verify_recaptcha(user.recaptcha_token):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="reCAPTCHA verification failed. Please try again.",
+        )
     if not check_email_mx(user.email):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
