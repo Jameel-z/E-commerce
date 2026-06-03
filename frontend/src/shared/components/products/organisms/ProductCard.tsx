@@ -12,7 +12,7 @@ import { ProductImage, ProductBadge, PriceDisplay } from "../atoms";
 import { getProductImageUrl, stripHtml } from "@/shared/utils";
 import { useCart } from "@/shared/hooks/use-cart";
 import { useAuth } from "@/shared/hooks/use-auth";
-import { ShoppingCart, Eye, Maximize2, Heart } from "lucide-react";
+import { ShoppingCart, Eye, Maximize2, Heart, Check } from "lucide-react";
 import { Product } from "@/shared/types/api.types";
 import { cn } from "@/shared/utils";
 import { useWishlist } from "@/shared/hooks/use-wishlist";
@@ -35,7 +35,8 @@ export function ProductCard({
   actions,
   className,
 }: ProductCardProps) {
-  const { addToCart } = useCart();
+  const { addToCart, cart } = useCart();
+  const inCart = cart?.items.some((item) => item.product_id === product.id) ?? false;
   const { user } = useAuth();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const { openSidebar: openWishlistSidebar } = useWishlistSidebar();
@@ -254,10 +255,19 @@ export function ProductCard({
                     onClick={handleAddToCart}
                     disabled={isAdding || product.stock_quantity === 0}
                     size="sm"
-                    className="flex-1 font-semibold shadow-sm hover:shadow-md transition-shadow text-xs px-2 h-7 whitespace-nowrap"
+                    className={cn(
+                      "flex-1 font-semibold shadow-sm hover:shadow-md transition-all text-xs px-2 h-7 whitespace-nowrap",
+                      inCart && !isAdding && product.stock_quantity > 0 && "bg-green-600 hover:bg-green-700 text-white border-green-600"
+                    )}
                   >
-                    <ShoppingCart className="w-3 h-3 mr-1 flex-shrink-0" />
-                    {isAdding ? "..." : product.stock_quantity === 0 ? "Sold" : "Add"}
+                    {isAdding ? (
+                      <ShoppingCart className="w-3 h-3 mr-1 flex-shrink-0 animate-bounce" />
+                    ) : inCart && product.stock_quantity > 0 ? (
+                      <Check className="w-3 h-3 mr-1 flex-shrink-0" />
+                    ) : (
+                      <ShoppingCart className="w-3 h-3 mr-1 flex-shrink-0" />
+                    )}
+                    {isAdding ? "..." : product.stock_quantity === 0 ? "Sold" : inCart ? "In Cart" : "Add"}
                   </Button>
                   {product.stock_quantity > 0 && (
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse flex-shrink-0" title="In Stock" />
@@ -280,10 +290,19 @@ export function ProductCard({
                 onClick={handleAddToCart}
                 disabled={isAdding || product.stock_quantity === 0}
                 size="sm"
-                className="w-full font-semibold shadow-sm hover:shadow-md transition-shadow"
+                className={cn(
+                  "w-full font-semibold shadow-sm hover:shadow-md transition-all",
+                  inCart && !isAdding && product.stock_quantity > 0 && "bg-green-600 hover:bg-green-700 text-white border-green-600"
+                )}
               >
-                <ShoppingCart className="w-4 h-4 mr-1.5" />
-                {isAdding ? "Adding..." : product.stock_quantity === 0 ? "Notify Me" : "Add to Cart"}
+                {isAdding ? (
+                  <ShoppingCart className="w-4 h-4 mr-1.5 animate-bounce" />
+                ) : inCart && product.stock_quantity > 0 ? (
+                  <Check className="w-4 h-4 mr-1.5" />
+                ) : (
+                  <ShoppingCart className="w-4 h-4 mr-1.5" />
+                )}
+                {isAdding ? "Adding..." : product.stock_quantity === 0 ? "Out of Stock" : inCart ? "In Cart" : "Add to Cart"}
               </Button>
               <Button variant="outline" size="sm" asChild className="w-full">
                 <Link href={`/products/${product.id}`}>

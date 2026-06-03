@@ -10,7 +10,7 @@ import {
 import { apiClient, type ProductDetail } from "@/lib/api";
 import { useCart } from "@/shared/hooks/use-cart";
 import { useToast } from "@/shared/hooks/use-toast";
-import { Loader2, AlertCircle, ShoppingCart, ExternalLink } from "lucide-react";
+import { Loader2, AlertCircle, ShoppingCart, ExternalLink, Check } from "lucide-react";
 import { Button } from "@/shared/components/ui";
 import Link from "next/link";
 import Image from "next/image";
@@ -22,7 +22,7 @@ interface QuickViewModalProps {
 }
 
 export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalProps) {
-  const { addToCart } = useCart();
+  const { addToCart, cart } = useCart();
   const { toast } = useToast();
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -223,15 +223,26 @@ export function QuickViewModal({ productId, isOpen, onClose }: QuickViewModalPro
               </div>
 
               {/* Add to Cart */}
-              <Button
-                onClick={handleAddToCart}
-                disabled={isAddingToCart}
-                className="w-full mb-2"
-                size="md"
-              >
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                {isAddingToCart ? "Adding..." : "Add to Cart"}
-              </Button>
+              {(() => {
+                const inCart = cart?.items.some((item) => item.product_id === product?.id) ?? false;
+                return (
+                  <Button
+                    onClick={handleAddToCart}
+                    disabled={isAddingToCart}
+                    className={`w-full mb-2 transition-all ${inCart && !isAddingToCart ? "bg-green-600 hover:bg-green-700 text-white border-green-600" : ""}`}
+                    size="md"
+                  >
+                    {isAddingToCart ? (
+                      <ShoppingCart className="h-4 w-4 mr-2 animate-bounce" />
+                    ) : inCart ? (
+                      <Check className="h-4 w-4 mr-2" />
+                    ) : (
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                    )}
+                    {isAddingToCart ? "Adding..." : inCart ? "In Cart" : "Add to Cart"}
+                  </Button>
+                );
+              })()}
 
               {/* View full details */}
               <Link

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Button } from "@/shared/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, ShoppingCart, Package } from "lucide-react";
+import { ArrowRight, ShoppingCart, Package, Check } from "lucide-react";
 import { type Product } from "@/shared/types";
 import { getProductImageUrl } from "@/shared/utils/image";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -20,8 +20,9 @@ interface FeaturedProductsSectionProps {
 }
 
 function FeaturedCard({ product }: { product: Product }) {
-  const { addToCart } = useCart();
+  const { addToCart, cart } = useCart();
   const [adding, setAdding] = useState(false);
+  const inCart = cart?.items.some((item) => item.product_id === product.id) ?? false;
 
   const handleAdd = async () => {
     setAdding(true);
@@ -77,10 +78,16 @@ function FeaturedCard({ product }: { product: Product }) {
             <button
               onClick={(e) => { e.preventDefault(); handleAdd(); }}
               disabled={adding || product.stock_quantity === 0}
-              className="flex-shrink-0 flex items-center gap-1 text-[10px] font-semibold bg-secondary/10 hover:bg-secondary text-secondary hover:text-secondary-foreground px-2 py-1 rounded-md transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`flex-shrink-0 flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${
+                inCart && !adding && product.stock_quantity > 0
+                  ? "bg-green-600 text-white hover:bg-green-700"
+                  : "bg-secondary/10 hover:bg-secondary text-secondary hover:text-secondary-foreground"
+              }`}
             >
-              <ShoppingCart className="w-3 h-3" />
-              {adding ? "..." : product.stock_quantity === 0 ? "Sold Out" : "Add"}
+              {inCart && !adding && product.stock_quantity > 0
+                ? <Check className="w-3 h-3" />
+                : <ShoppingCart className="w-3 h-3" />}
+              {adding ? "..." : product.stock_quantity === 0 ? "Sold Out" : inCart ? "In Cart" : "Add"}
             </button>
           </div>
         </div>

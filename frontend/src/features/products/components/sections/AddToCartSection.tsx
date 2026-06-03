@@ -4,7 +4,8 @@ import { Button } from "@/shared/components";
 import { QuantitySelector } from "@/features/products/components";
 import { type ProductDetail } from "@/lib/api";
 import { useWishlist } from "@/shared/hooks/use-wishlist";
-import { ShoppingCart, Heart } from "lucide-react";
+import { useCart } from "@/shared/hooks/use-cart";
+import { ShoppingCart, Heart, Check } from "lucide-react";
 import { CONTACT } from "@/shared/constants/config";
 
 interface AddToCartSectionProps {
@@ -25,9 +26,9 @@ export function AddToCartSection({
   className = "",
 }: AddToCartSectionProps) {
   const { isWishlisted, toggleWishlist } = useWishlist();
+  const { cart } = useCart();
   const wishlisted = isWishlisted(product.id);
-
-  const label = product.stock_quantity === 0 ? "Add to Cart Anyway" : "Add to Cart";
+  const inCart = cart?.items.some((item) => item.product_id === product.id) ?? false;
 
   const meta = [
     product.sku       ? { label: "SKU",        value: product.sku }               : null,
@@ -50,11 +51,17 @@ export function AddToCartSection({
         <Button
           onClick={onAddToCart}
           disabled={isAddingToCart}
-          className="h-10 px-6 font-bold tracking-widest uppercase text-sm shrink-0"
+          className={`h-10 px-6 font-bold tracking-widest uppercase text-sm shrink-0 transition-all ${inCart && !isAddingToCart ? "bg-green-600 hover:bg-green-700 text-white border-green-600" : ""}`}
           size="md"
         >
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          {isAddingToCart ? "Adding..." : label}
+          {isAddingToCart ? (
+            <ShoppingCart className="h-4 w-4 mr-2 animate-bounce" />
+          ) : inCart ? (
+            <Check className="h-4 w-4 mr-2" />
+          ) : (
+            <ShoppingCart className="h-4 w-4 mr-2" />
+          )}
+          {isAddingToCart ? "Adding..." : inCart ? "In Cart" : product.stock_quantity === 0 ? "Add to Cart Anyway" : "Add to Cart"}
         </Button>
       </div>
 

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, ShoppingCart, Package } from "lucide-react";
+import { ChevronRight, ShoppingCart, Package, Check } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import { apiClient, type Product, type Category } from "@/lib/api";
@@ -11,8 +11,9 @@ import { getProductImageUrl } from "@/shared/utils/image";
 import { useCart } from "@/shared/hooks/use-cart";
 
 function CategoryProductCard({ product }: { product: Product }) {
-  const { addToCart } = useCart();
+  const { addToCart, cart } = useCart();
   const [adding, setAdding] = useState(false);
+  const inCart = cart?.items.some((item) => item.product_id === product.id) ?? false;
 
   const handleAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -63,10 +64,16 @@ function CategoryProductCard({ product }: { product: Product }) {
             <button
               onClick={handleAdd}
               disabled={adding || product.stock_quantity === 0}
-              className="flex-shrink-0 flex items-center gap-1 text-[10px] font-semibold bg-secondary/10 hover:bg-secondary text-secondary hover:text-secondary-foreground px-2 py-1 rounded-md transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`flex-shrink-0 flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${
+                inCart && !adding && product.stock_quantity > 0
+                  ? "bg-green-600 text-white hover:bg-green-700"
+                  : "bg-secondary/10 hover:bg-secondary text-secondary hover:text-secondary-foreground"
+              }`}
             >
-              <ShoppingCart className="w-3 h-3" />
-              {adding ? "..." : product.stock_quantity === 0 ? "Sold Out" : "Add"}
+              {inCart && !adding && product.stock_quantity > 0
+                ? <Check className="w-3 h-3" />
+                : <ShoppingCart className="w-3 h-3" />}
+              {adding ? "..." : product.stock_quantity === 0 ? "Sold Out" : inCart ? "In Cart" : "Add"}
             </button>
           </div>
         </div>

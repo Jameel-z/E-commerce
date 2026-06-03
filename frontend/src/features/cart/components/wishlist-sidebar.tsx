@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useWishlist } from "@/shared/hooks/use-wishlist";
 import { useCart } from "@/shared/hooks/use-cart";
-import { X, Heart, ShoppingCart, Trash2, ExternalLink } from "lucide-react";
+import { X, Heart, ShoppingCart, Trash2, ExternalLink, Check } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { getProductImageUrl } from "@/shared/utils/image";
 import Link from "next/link";
@@ -16,7 +16,7 @@ interface WishlistSidebarProps {
 
 export function WishlistSidebar({ isOpen, onClose }: WishlistSidebarProps) {
   const { items, removeFromWishlist, clearWishlist } = useWishlist();
-  const { addToCart } = useCart();
+  const { addToCart, cart } = useCart();
   const [addingId, setAddingId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -106,14 +106,26 @@ export function WishlistSidebar({ isOpen, onClose }: WishlistSidebarProps) {
 
                     {/* Actions */}
                     <div className="flex items-center gap-1.5 mt-2">
-                      <button
-                        onClick={() => handleAddToCart(product.id)}
-                        disabled={addingId === product.id || product.stock_quantity === 0}
-                        className="flex items-center gap-1 text-[10px] font-semibold bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground px-2 py-1 rounded-md transition-colors disabled:opacity-50"
-                      >
-                        <ShoppingCart className="w-3 h-3" />
-                        {addingId === product.id ? "Adding…" : product.stock_quantity === 0 ? "Out of Stock" : "Add to Cart"}
-                      </button>
+                      {(() => {
+                        const inCart = cart?.items.some((item) => item.product_id === product.id) ?? false;
+                        const isAdding = addingId === product.id;
+                        return (
+                          <button
+                            onClick={() => handleAddToCart(product.id)}
+                            disabled={isAdding || product.stock_quantity === 0}
+                            className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md transition-colors disabled:opacity-50 ${
+                              inCart && !isAdding && product.stock_quantity > 0
+                                ? "bg-green-600 text-white hover:bg-green-700"
+                                : "bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground"
+                            }`}
+                          >
+                            {inCart && !isAdding && product.stock_quantity > 0
+                              ? <Check className="w-3 h-3" />
+                              : <ShoppingCart className="w-3 h-3" />}
+                            {isAdding ? "Adding…" : product.stock_quantity === 0 ? "Out of Stock" : inCart ? "In Cart" : "Add to Cart"}
+                          </button>
+                        );
+                      })()}
                       <button
                         onClick={() => removeFromWishlist(product.id)}
                         className="p-1 text-muted-foreground hover:text-destructive transition-colors"

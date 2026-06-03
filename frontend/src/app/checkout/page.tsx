@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/shared/hooks/use-auth";
 import { useCart } from "@/shared/hooks/use-cart";
@@ -26,15 +26,26 @@ export default function CheckoutPage() {
   const { toast } = useToast();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const orderPlaced = useRef(false);
   const [formData, setFormData] = useState({
     customerName: "",
     customerPhone: "",
     shippingAddress: "",
     shippingCity: "",
-    shippingArea: "",
-    paymentMethod: "cash", // Always cash on delivery
+    paymentMethod: "cash",
     notes: "",
   });
+
+  const LEBANON_GOVERNORATES = ["Beirut", "Mount Lebanon", "North Lebanon", "South Lebanon", "Bekaa", "Nabatieh", "Akkar", "Baalbek-Hermel"];
+
+  const handleGovernorateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData({ ...formData, shippingCity: e.target.value });
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 8);
+    setFormData({ ...formData, customerPhone: digits });
+  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -43,7 +54,7 @@ export default function CheckoutPage() {
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    if (!cartLoading && itemCount === 0) {
+    if (!cartLoading && itemCount === 0 && !orderPlaced.current) {
       toast({
         title: "Cart is empty",
         description: "Add items to your cart before checkout",
@@ -51,7 +62,7 @@ export default function CheckoutPage() {
       });
       router.push("/");
     }
-  }, [itemCount, cartLoading, router]); // toast is stable via useCallback, excluded to prevent loop
+  }, [itemCount, cartLoading, router]);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -71,31 +82,30 @@ export default function CheckoutPage() {
 
     // Validate required fields
     if (!formData.customerName.trim()) {
-      toast({
-        title: "Name required",
-        description: "Please enter your full name",
-        variant: "destructive",
-      });
+      toast({ title: "Full name is required", variant: "destructive" });
       return;
     }
 
     if (!formData.customerPhone.trim()) {
-      toast({
-        title: "Phone required",
-        description: "Please enter your phone number",
-        variant: "destructive",
-      });
+      toast({ title: "Phone number is required", variant: "destructive" });
+      return;
+    }
+
+    if (formData.customerPhone.length < 7) {
+      toast({ title: "Enter a valid Lebanese phone number", variant: "destructive" });
       return;
     }
 
     if (!formData.shippingAddress.trim()) {
-      toast({
-        title: "Address required",
-        description: "Please enter your delivery address",
-        variant: "destructive",
-      });
+      toast({ title: "Delivery address is required", variant: "destructive" });
       return;
     }
+
+    if (!formData.shippingCity) {
+      toast({ title: "Governorate is required", variant: "destructive" });
+      return;
+    }
+
 
     try {
       setIsSubmitting(true);
@@ -107,10 +117,10 @@ export default function CheckoutPage() {
         "online",
         formData.paymentMethod,
         formData.customerName,
-        formData.customerPhone,
+        `+961${formData.customerPhone}`,
         formData.shippingAddress,
         formData.shippingCity,
-        formData.shippingArea
+        ""
       );
 
       toast({
@@ -118,6 +128,7 @@ export default function CheckoutPage() {
         description: `Order #${order.id} has been created. You will be redirected to your order.`,
       });
 
+      orderPlaced.current = true;
       await refreshCart();
       router.push(`/orders/${order.id}`);
     } catch (error) {
@@ -139,11 +150,10 @@ export default function CheckoutPage() {
     let message = `🛒 *New Order #${orderId}*\n\n`;
     message += `👤 *Customer Details:*\n`;
     message += `Name: ${formData.customerName}\n`;
-    message += `Phone: ${formData.customerPhone}\n\n`;
+    message += `Phone: +961${formData.customerPhone}\n\n`;
     message += `📍 *Delivery Address:*\n`;
     message += `${formData.shippingAddress}\n`;
-    if (formData.shippingArea) message += `Area: ${formData.shippingArea}\n`;
-    if (formData.shippingCity) message += `City: ${formData.shippingCity}\n\n`;
+    if (formData.shippingCity) message += `Governorate: ${formData.shippingCity}\n\n`;
 
     message += `💳 *Payment Method:* ${formData.paymentMethod.toUpperCase()}\n\n`;
 
@@ -219,14 +229,23 @@ export default function CheckoutPage() {
                     <Label htmlFor="customerPhone">
                       Phone Number <span className="text-destructive">*</span>
                     </Label>
-                    <Input
-                      id="customerPhone"
-                      name="customerPhone"
-                      type="tel"
-                      value={formData.customerPhone}
-                      onChange={handleInputChange}
-                      required
-                    />
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm text-muted-foreground font-medium select-none">
+                        +961
+                      </span>
+                      <Input
+                        id="customerPhone"
+                        name="customerPhone"
+                        type="tel"
+                        inputMode="numeric"
+                        placeholder="Phone Number"
+                        value={formData.customerPhone}
+                        onChange={handlePhoneChange}
+                        required
+                        className="rounded-l-none"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Enter your local number without the country code</p>
                   </div>
 
                   {/* Address */}
@@ -245,26 +264,22 @@ export default function CheckoutPage() {
                     />
                   </div>
 
-                  {/* City and Area */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="shippingCity">City</Label>
-                      <Input
-                        id="shippingCity"
-                        name="shippingCity"
-                        value={formData.shippingCity}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="shippingArea">Area/District</Label>
-                      <Input
-                        id="shippingArea"
-                        name="shippingArea"
-                        value={formData.shippingArea}
-                        onChange={handleInputChange}
-                      />
-                    </div>
+                  {/* Governorate */}
+                  <div>
+                    <Label htmlFor="shippingCity">Governorate <span className="text-destructive">*</span></Label>
+                    <select
+                      id="shippingCity"
+                      name="shippingCity"
+                      value={formData.shippingCity}
+                      onChange={handleGovernorateChange}
+                      required
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <option value="">Select governorate</option>
+                      {LEBANON_GOVERNORATES.map((gov) => (
+                        <option key={gov} value={gov}>{gov}</option>
+                      ))}
+                    </select>
                   </div>
 
                   {/* Payment Method - Fixed to Cash on Delivery */}

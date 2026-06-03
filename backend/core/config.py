@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str = ""
     ADMIN_PASSWORD: str = ""
 
+    # Order notification — email that receives new order alerts
+    ORDER_NOTIFICATION_EMAIL: str = ""
+
     # Google OAuth
     GOOGLE_CLIENT_ID: str = ""
 

@@ -5,6 +5,7 @@ import logging
 
 from database import get_db
 from core.security import get_current_active_user, require_admin
+from core.email import send_order_notification_email, send_order_confirmation_email
 import models, schemas, crud
 
 logger = logging.getLogger(__name__)
@@ -125,7 +126,16 @@ async def create_order(
         
         # Clear cart after successful order
         crud.cart_crud.clear_cart(db, cart)
-        
+
+        # Reload order with items for email
+        order_with_items = db.query(models.Order).options(
+            joinedload(models.Order.order_items).joinedload(models.OrderItem.product)
+        ).filter(models.Order.id == order.id).first()
+
+        # Notify admin + confirm to customer
+        send_order_notification_email(order_with_items)
+        send_order_confirmation_email(order_with_items, current_user.email)
+
         logger.info(f"Order {order.id} created for user {current_user.id}")
         return order
         
