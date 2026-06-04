@@ -677,6 +677,11 @@ export default function HomepageManagementPage() {
       const result = await apiClient.setCategoryRowPins(pinningCategory.id, pinnedProducts.map((p) => p.id));
       console.log("Pins saved:", result);
       toast({ title: "Pins saved", description: `${pinnedProducts.length} products pinned to ${pinningCategory.name} row.` });
+
+      // Refetch the category rows to show updated pins
+      const updatedRows = await apiClient.getCategoryRows();
+      setCategoryRows(updatedRows);
+
       closePinModal();
     } catch (error) {
       console.error("Failed to save pins:", error);
