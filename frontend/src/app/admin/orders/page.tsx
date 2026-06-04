@@ -264,7 +264,6 @@ function OrderCard({ order, onStatusUpdate, onDelete, updatingId }: OrderCardPro
             )}
           </CardContent>
         )}
-      )}
     </Card>
   );
 }
