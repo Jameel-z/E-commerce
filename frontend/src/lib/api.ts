@@ -629,13 +629,22 @@ class ApiClient {
   }
 
   /**
+   * Delete a cancelled order - matches backend /orders/{id} DELETE endpoint (Admin only)
+   */
+  async deleteOrder(id: number): Promise<void> {
+    return this.request<void>(`/orders/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  /**
    * Get all orders - matches backend /orders/ GET endpoint (Admin only)
    */
-  async getAllOrders(statusFilter?: string): Promise<Order[]> {
-    const url = statusFilter
-      ? `/orders/?status_filter=${statusFilter}`
-      : "/orders/";
-    return this.request<Order[]>(url);
+  async getAllOrders(page = 1, perPage = 20, statusFilter?: string, search?: string): Promise<{ orders: Order[]; total: number; page: number; per_page: number }> {
+    const params = new URLSearchParams({ page: String(page), per_page: String(perPage) });
+    if (statusFilter) params.set("status_filter", statusFilter);
+    if (search) params.set("search", search);
+    return this.request(`/orders/?${params.toString()}`);
   }
 
   // ========================================

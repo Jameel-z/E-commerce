@@ -213,6 +213,7 @@ def set_row_pins(
     for order, product_id in enumerate(payload.product_ids):
         db.add(CategoryRowPin(category_id=category_id, product_id=product_id, pin_order=order))
     db.commit()
+    _invalidate_category_cache()
     return payload.product_ids
 
 @router.patch(
@@ -235,6 +236,7 @@ def set_category_row(
     category.category_row_order = payload.category_row_order
     db.commit()
     db.refresh(category)
+    _invalidate_category_cache()
     return category
 
 @router.patch(

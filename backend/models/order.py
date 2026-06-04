@@ -5,8 +5,9 @@ from .base import Base
 
 class Order(Base):
     __tablename__ = "orders"
-    
+
     id = Column(Integer, primary_key=True, index=True)
+    order_code = Column(String(20), unique=True, index=True, nullable=False)  # e.g., I12345
     user_id = Column(Integer, ForeignKey("users.id"))
     total_amount = Column(Numeric(10, 2), nullable=False)
     status = Column(String, default="pending")

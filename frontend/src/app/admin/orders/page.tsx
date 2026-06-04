@@ -10,10 +10,13 @@ import {
 } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import Input from "@/shared/components/ui/input";
 import { apiClient, type Order } from "@/lib/api";
 import {
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   User,
   Phone,
   MapPin,
@@ -23,7 +26,10 @@ import {
   Truck,
   XCircle,
   RefreshCw,
+  Trash2,
 } from "lucide-react";
+
+const PER_PAGE = 20;
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -64,11 +70,13 @@ function formatDate(iso: string) {
 interface OrderCardProps {
   order: Order;
   onStatusUpdate: (id: number, status: string) => Promise<void>;
+  onDelete: (id: number) => Promise<void>;
   updatingId: number | null;
 }
 
-function OrderCard({ order, onStatusUpdate, updatingId }: OrderCardProps) {
+function OrderCard({ order, onStatusUpdate, onDelete, updatingId }: OrderCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const isUpdating = updatingId === order.id;
 
   const nextActions: { label: string; status: string; variant: "default" | "outline" | "destructive" }[] = [];
@@ -83,56 +91,58 @@ function OrderCard({ order, onStatusUpdate, updatingId }: OrderCardProps) {
     nextActions.push({ label: "Mark as Done", status: "delivered", variant: "default" });
   }
 
+  const handleDelete = async () => {
+    if (confirm("Are you sure you want to delete this order? This action cannot be undone.")) {
+      setDeleting(true);
+      try {
+        await onDelete(order.id);
+      } finally {
+        setDeleting(false);
+      }
+    }
+  };
+
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="pb-3">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <CardTitle className="text-base font-semibold">
-              Order #{order.id}
-            </CardTitle>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {formatDate(order.created_at)}
-            </p>
-          </div>
+      {/* Clickable Header - Always Visible */}
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full text-left hover:bg-muted/50 transition-colors"
+      >
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex-1">
+              <CardTitle className="text-base font-semibold">
+                Order {order.order_code}
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {formatDate(order.created_at)}
+              </p>
+            </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <span
-              className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
-                STATUS_BG[order.status] ?? "bg-muted text-muted-foreground"
-              }`}
-            >
-              {statusLabel(order.status)}
-            </span>
-
-            {nextActions.map((action) => (
-              <Button
-                key={action.status}
-                size="sm"
-                variant={action.variant}
-                disabled={isUpdating}
-                onClick={() => onStatusUpdate(order.id, action.status)}
-                className={action.status === "delivered" ? "gap-1.5" : ""}
+            <div className="flex items-center gap-2 shrink-0">
+              <span
+                className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
+                  STATUS_BG[order.status] ?? "bg-muted text-muted-foreground"
+                }`}
               >
-                {isUpdating ? (
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                ) : action.status === "delivered" ? (
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                ) : action.status === "shipped" ? (
-                  <Truck className="h-3.5 w-3.5" />
-                ) : action.status === "cancelled" ? (
-                  <XCircle className="h-3.5 w-3.5" />
-                ) : null}
-                {action.label}
-              </Button>
-            ))}
+                {statusLabel(order.status)}
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 text-muted-foreground transition-transform ${
+                  expanded ? "rotate-180" : ""
+                }`}
+              />
+            </div>
           </div>
-        </div>
-      </CardHeader>
+        </CardHeader>
+      </button>
 
-      <CardContent className="space-y-3">
-        {/* Customer info — always shown */}
-        <div className="rounded-md bg-muted/50 border px-3 py-2.5 space-y-1.5 text-sm">
+      {/* Expandable Details */}
+      {expanded && (
+        <CardContent className="space-y-3 border-t pt-4">
+          {/* Customer info */}
+          <div className="rounded-md bg-muted/50 border px-3 py-2.5 space-y-1.5 text-sm">
           <div className="flex items-center gap-2">
             <User className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             <span className="font-medium">
@@ -157,68 +167,104 @@ function OrderCard({ order, onStatusUpdate, updatingId }: OrderCardProps) {
               <span className="text-muted-foreground italic">No location provided</span>
             )}
           </div>
-        </div>
-
-        {/* Order meta */}
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <CreditCard className="h-3.5 w-3.5 shrink-0" />
-            <span>
-              {order.payment_method ?? "—"}{" "}
-              <span className="text-xs">({order.order_method})</span>
-            </span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Package className="h-3.5 w-3.5 shrink-0" />
-            <span>
-              {order.order_items?.length ?? 0} item
-              {order.order_items?.length !== 1 ? "s" : ""} · $
-              {Number(order.total_amount).toFixed(2)}
-            </span>
+
+          {/* Order meta */}
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <CreditCard className="h-3.5 w-3.5 shrink-0" />
+              <span>
+                {order.payment_method ?? "—"}{" "}
+                <span className="text-xs">({order.order_method})</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Package className="h-3.5 w-3.5 shrink-0" />
+              <span>
+                {order.order_items?.length ?? 0} item
+                {order.order_items?.length !== 1 ? "s" : ""} · $
+                {Number(order.total_amount).toFixed(2)}
+              </span>
+            </div>
           </div>
-        </div>
 
-        {order.notes && (
-          <p className="text-xs text-muted-foreground border-t pt-2">
-            <span className="font-medium">Note: </span>
-            {order.notes}
-          </p>
-        )}
+          {order.notes && (
+            <p className="text-xs text-muted-foreground border-t pt-2">
+              <span className="font-medium">Note: </span>
+              {order.notes}
+            </p>
+          )}
 
-        {/* Toggle items */}
-        <button
-          onClick={() => setExpanded((v) => !v)}
-          className="flex items-center gap-1 text-xs text-primary hover:underline"
-        >
-          {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-          {expanded ? "Hide items" : "Show items"}
-        </button>
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-2 pt-2 border-t">
+              {nextActions.map((action) => (
+                <Button
+                  key={action.status}
+                  size="sm"
+                  variant={action.variant}
+                  disabled={isUpdating || deleting}
+                  onClick={() => onStatusUpdate(order.id, action.status)}
+                >
+                  {isUpdating ? (
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                  ) : action.status === "delivered" ? (
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                  ) : action.status === "shipped" ? (
+                    <Truck className="h-3.5 w-3.5" />
+                  ) : action.status === "cancelled" ? (
+                    <XCircle className="h-3.5 w-3.5" />
+                  ) : null}
+                  {action.label}
+                </Button>
+              ))}
 
-        {expanded && order.order_items && order.order_items.length > 0 && (
-          <div className="border rounded-md divide-y text-sm">
-            {order.order_items.map((item) => (
-              <div key={item.id} className="flex items-center justify-between px-3 py-2 gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  {item.product_image_url && (
-                    <img
-                      src={item.product_image_url}
-                      alt={item.product_name}
-                      className="h-8 w-8 rounded object-cover shrink-0"
-                    />
+              {order.status === "cancelled" && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={deleting}
+                  onClick={handleDelete}
+                  className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+                >
+                  {deleting ? (
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-3.5 w-3.5" />
                   )}
-                  <span className="truncate">{item.product_name}</span>
-                </div>
-                <div className="text-right shrink-0 text-muted-foreground">
-                  <span>{item.quantity} × ${Number(item.price_at_order).toFixed(2)}</span>
-                  <span className="ml-2 font-medium text-foreground">
-                    = ${Number(item.total_price).toFixed(2)}
-                  </span>
-                </div>
+                  Delete
+                </Button>
+              )}
+            </div>
+
+            {/* Order Items */}
+            {order.order_items && order.order_items.length > 0 && (
+              <div className="border rounded-md divide-y text-sm pt-2">
+                <p className="text-xs font-medium text-muted-foreground px-3 py-2">Items</p>
+                {order.order_items.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between px-3 py-2 gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {item.product_image_url && (
+                        <img
+                          src={item.product_image_url}
+                          alt={item.product_name}
+                          className="h-8 w-8 rounded object-cover shrink-0"
+                        />
+                      )}
+                      <span className="truncate text-xs">{item.product_name}</span>
+                    </div>
+                    <div className="text-right shrink-0 text-xs text-muted-foreground">
+                      <span>{item.quantity} × ${Number(item.price_at_order).toFixed(2)}</span>
+                      <span className="ml-2 font-medium text-foreground">
+                        = ${Number(item.total_price).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </CardContent>
         )}
-      </CardContent>
+      )}
     </Card>
   );
 }
@@ -236,26 +282,32 @@ const FILTERS: { key: StatusFilter; label: string }[] = [
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<StatusFilter>("all");
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const fetchOrders = useCallback(async () => {
+  const totalPages = Math.ceil(total / PER_PAGE);
+
+  const fetchOrders = useCallback(async (p = page, query = searchQuery) => {
     setLoading(true);
     try {
-      const data = await apiClient.getAllOrders();
-      setOrders(data);
+      const data = await apiClient.getAllOrders(p, PER_PAGE, activeFilter === "all" ? undefined : activeFilter, query || undefined);
+      setOrders(data.orders);
+      setTotal(data.total);
     } catch {
       showToast("Failed to load orders", false);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, searchQuery, activeFilter]);
 
   useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
+    fetchOrders(page);
+  }, [page, fetchOrders]);
 
   function showToast(msg: string, ok: boolean) {
     setToast({ msg, ok });
@@ -266,10 +318,11 @@ export default function AdminOrdersPage() {
     setUpdatingId(orderId);
     try {
       const updated = await apiClient.updateOrderStatus(orderId, newStatus);
+      const updatedOrder = orders.find(o => o.id === orderId);
       setOrders((prev) =>
         prev.map((o) => (o.id === orderId ? { ...o, status: updated.status } : o))
       );
-      showToast(`Order #${orderId} marked as ${newStatus}`, true);
+      showToast(`Order ${updatedOrder?.order_code} marked as ${newStatus}`, true);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to update order";
       showToast(msg, false);
@@ -278,13 +331,42 @@ export default function AdminOrdersPage() {
     }
   }
 
-  const counts: Record<string, number> = { all: orders.length };
+  async function handleDelete(orderId: number) {
+    try {
+      const deletedOrder = orders.find(o => o.id === orderId);
+      await apiClient.deleteOrder(orderId);
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      setTotal((prev) => prev - 1);
+      showToast(`Order ${deletedOrder?.order_code} deleted successfully`, true);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to delete order";
+      showToast(msg, false);
+    }
+  }
+
+  const counts: Record<string, number> = { all: total };
   for (const o of orders) {
     counts[o.status] = (counts[o.status] ?? 0) + 1;
   }
 
   const filtered =
     activeFilter === "all" ? orders : orders.filter((o) => o.status === activeFilter);
+
+  const handleFilterChange = (key: StatusFilter) => {
+    setActiveFilter(key);
+    setPage(1);
+    setSearchQuery("");
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setPage(1);
+  };
+
+  const handlePageChange = (p: number) => {
+    setPage(p);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <AdminLayout title="Orders">
@@ -301,6 +383,16 @@ export default function AdminOrdersPage() {
         </div>
       )}
 
+      {/* Search bar */}
+      <div className="mb-6">
+        <Input
+          placeholder="Search by order code (e.g., I12345), customer name, or phone..."
+          value={searchQuery}
+          onChange={(e) => handleSearch(e.target.value)}
+          className="w-full"
+        />
+      </div>
+
       {/* Filter bar */}
       <div className="flex flex-wrap gap-2 mb-6">
         {FILTERS.map(({ key, label }) => (
@@ -308,7 +400,7 @@ export default function AdminOrdersPage() {
             key={key}
             size="sm"
             variant={activeFilter === key ? "default" : "outline"}
-            onClick={() => setActiveFilter(key)}
+            onClick={() => handleFilterChange(key)}
           >
             {label}
             {counts[key] !== undefined && counts[key] > 0 && (
@@ -322,7 +414,7 @@ export default function AdminOrdersPage() {
         <Button
           size="sm"
           variant="ghost"
-          onClick={fetchOrders}
+          onClick={() => fetchOrders(page)}
           disabled={loading}
           className="ml-auto"
         >
@@ -362,9 +454,59 @@ export default function AdminOrdersPage() {
               key={order.id}
               order={order}
               onStatusUpdate={handleStatusUpdate}
+              onDelete={handleDelete}
               updatingId={updatingId}
             />
           ))}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t">
+              <p className="text-sm text-muted-foreground">
+                Showing {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, total)} of {total} orders
+              </p>
+              <div className="flex items-center gap-1">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={page === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                  .reduce<(number | "...")[]>((acc, p, i, arr) => {
+                    if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((p, i) =>
+                    p === "..." ? (
+                      <span key={`ellipsis-${i}`} className="px-1 text-muted-foreground text-sm">…</span>
+                    ) : (
+                      <Button
+                        key={p}
+                        size="sm"
+                        variant={p === page ? "default" : "outline"}
+                        onClick={() => handlePageChange(p as number)}
+                        className="w-8 h-8 p-0"
+                      >
+                        {p}
+                      </Button>
+                    )
+                  )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={page === totalPages}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </AdminLayout>

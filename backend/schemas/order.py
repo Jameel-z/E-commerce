@@ -86,6 +86,7 @@ class OrderCreate(OrderBase):
 class Order(TimestampSchema, OrderBase):
     """Complete order response schema with system-generated fields"""
     id: int = Field(..., examples=[1])
+    order_code: str = Field(..., examples=["I12345"], description="Unique order code")
     user_id: int = Field(..., examples=[456])
     total_amount: Annotated[Decimal, Field(gt=0, decimal_places=2, examples=[59.98])]
     order_method: str = Field(default="online", examples=["online", "whatsapp"])
@@ -134,3 +135,10 @@ class OrderUpdate(BaseSchema):
 class OrderWithItems(Order):
     """Order response with expanded item details"""
     order_items: List['OrderItem'] = Field(..., exclude=False)
+
+class OrdersPage(BaseSchema):
+    """Paginated orders response"""
+    orders: List[Order]
+    total: int
+    page: int
+    per_page: int

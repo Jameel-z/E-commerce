@@ -6,7 +6,7 @@ from .category import CategoryBase, CategoryCreate, Category, CategoryUpdate  # 
 from .product import ProductBase, ProductCreate, ProductUpdate  # Then Product
 from .cart import CartBase, CartItemCreate, CartItem, CartItemUpdate, Cart, CartCreate, CartUpdate, OfflineCheckout, ShippingOption, GuestCartMergeRequest, GuestCartItemRequest
 from .order_item import OrderItemBase, OrderItemCreate, OrderItem
-from .order import OrderBase, OrderCreate, Order, OrderUpdate
+from .order import OrderBase, OrderCreate, Order, OrderUpdate, OrdersPage
 
 # Now import the relationship schemas after their components are defined
 from .category import CategoryWithProducts
@@ -68,5 +68,6 @@ __all__ = [
     'OrderCreate',
     'Order',
     'OrderUpdate',
-    'OrderWithItems'
+    'OrderWithItems',
+    'OrdersPage',
 ]

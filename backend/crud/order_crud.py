@@ -7,12 +7,21 @@ from models.order_item import OrderItem
 from models.product import Product
 from schemas.order import OrderCreate, OrderUpdate
 import logging
+import random
+import string
 
 logger = logging.getLogger(__name__)
 
 class OrderCRUD(CRUDBase[Order, OrderCreate, OrderUpdate]):
     """Order-specific business logic"""
-    
+
+    def generate_order_code(self, db: Session) -> str:
+        """Generate unique order code: I + 5 random digits"""
+        while True:
+            code = "I" + "".join(random.choices(string.digits, k=5))
+            if not db.query(Order).filter(Order.order_code == code).first():
+                return code
+
     def reserve_stock(self, db: Session, product_id: int, quantity: int) -> None:
         """Reserve stock for an order (prevents overselling)"""
         product = db.query(Product).filter(Product.id == product_id).with_for_update().first()
@@ -75,14 +84,15 @@ class OrderCRUD(CRUDBase[Order, OrderCreate, OrderUpdate]):
             for item in obj_in.order_items:
                 self.reserve_stock(db, item.product_id, item.quantity)
             
-            # Calculate total
+            # Calculate total and generate order code
             order_data = obj_in.model_dump(exclude={"order_items"})
             order_data["user_id"] = user_id
+            order_data["order_code"] = self.generate_order_code(db)
             order_data["total_amount"] = sum(
-                item.price_at_order * item.quantity 
+                item.price_at_order * item.quantity
                 for item in obj_in.order_items
             )
-            
+
             # Create order
             db_order = self.model(**order_data)
             db.add(db_order)

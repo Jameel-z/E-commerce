@@ -266,24 +266,80 @@ async def update_order_status(
         )
 
 
-@router.get("/", response_model=List[schemas.Order])
-async def get_all_orders(
-    skip: int = 0,
-    limit: int = 100,
-    status_filter: Optional[str] = None,
+@router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_order(
+    order_id: int,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_admin),
 ):
     """
-    Get all orders (Admin only).
-    
-    Optional filtering by status.
-    Returns orders sorted by creation date (newest first).
+    Delete a cancelled order (Admin only).
+
+    Only orders with status "cancelled" can be deleted.
+    Deleting will remove the order and all its items from the database.
+    """
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+
+    if not order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order not found"
+        )
+
+    if order.status != "cancelled":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot delete order with status '{order.status}'. Only cancelled orders can be deleted."
+        )
+
+    try:
+        db.delete(order)
+        db.commit()
+        logger.info(f"Order {order_id} deleted by admin {current_user.id}")
+        return
+    except Exception as e:
+        logger.error(f"Failed to delete order {order_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete order"
+        )
+
+
+@router.get("/", response_model=schemas.OrdersPage)
+async def get_all_orders(
+    page: int = 1,
+    per_page: int = 20,
+    status_filter: Optional[str] = None,
+    search: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_admin),
+):
+    """
+    Get all orders with optional filtering and search.
+
+    **Filters:**
+    - status_filter: "pending", "processing", "shipped", "delivered", "cancelled"
+    - search: Search by order code, customer name, phone number, or date (YYYY-MM-DD)
     """
     query = db.query(models.Order).order_by(models.Order.created_at.desc())
-    
+
     if status_filter:
         query = query.filter(models.Order.status == status_filter)
-    
-    orders = query.offset(skip).limit(limit).all()
-    return orders
+
+    if search:
+        search_term = f"%{search}%"
+        from sqlalchemy import or_
+        filters = [
+            models.Order.customer_name.ilike(search_term),
+            models.Order.customer_phone.ilike(search_term)
+        ]
+        # Add order_code search if column exists
+        try:
+            filters.append(models.Order.order_code.ilike(search_term))
+        except:
+            pass
+        query = query.filter(or_(*filters))
+
+    total = query.count()
+    orders = query.offset((page - 1) * per_page).limit(per_page).all()
+    return {"orders": orders, "total": total, "page": page, "per_page": per_page}

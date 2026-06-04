@@ -98,6 +98,15 @@ with engine.connect() as conn:
     conn.execute(text(
         "ALTER TABLE banners ADD COLUMN IF NOT EXISTS hide_overlay BOOLEAN NOT NULL DEFAULT FALSE"
     ))
+    conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS category_row_pins (
+            id SERIAL PRIMARY KEY,
+            category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+            product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+            pin_order INTEGER NOT NULL DEFAULT 0,
+            CONSTRAINT uq_category_product_pin UNIQUE (category_id, product_id)
+        )
+    """))
 
     conn.commit()
 
