@@ -688,8 +688,8 @@ class ApiClient {
     return this.request<number[]>(`/categories/${categoryId}/row-pins`);
   }
 
-  async setCategoryRowPins(categoryId: number, productIds: number[]): Promise<void> {
-    await this.request(`/categories/${categoryId}/row-pins`, {
+  async setCategoryRowPins(categoryId: number, productIds: number[]): Promise<number[]> {
+    return this.request<number[]>(`/categories/${categoryId}/row-pins`, {
       method: "PUT",
       body: JSON.stringify({ product_ids: productIds }),
     });

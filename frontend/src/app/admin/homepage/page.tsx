@@ -674,10 +674,12 @@ export default function HomepageManagementPage() {
     if (!pinningCategory) return;
     setSavingPins(true);
     try {
-      await apiClient.setCategoryRowPins(pinningCategory.id, pinnedProducts.map((p) => p.id));
+      const result = await apiClient.setCategoryRowPins(pinningCategory.id, pinnedProducts.map((p) => p.id));
+      console.log("Pins saved:", result);
       toast({ title: "Pins saved", description: `${pinnedProducts.length} products pinned to ${pinningCategory.name} row.` });
       closePinModal();
-    } catch {
+    } catch (error) {
+      console.error("Failed to save pins:", error);
       toast({ title: "Error", description: "Failed to save pins.", variant: "destructive" });
     } finally {
       setSavingPins(false);
