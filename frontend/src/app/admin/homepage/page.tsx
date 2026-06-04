@@ -678,10 +678,7 @@ export default function HomepageManagementPage() {
       console.log("Pins saved:", result);
       toast({ title: "Pins saved", description: `${pinnedProducts.length} products pinned to ${pinningCategory.name} row.` });
 
-      // Refetch the category rows to show updated pins
-      const updatedRows = await apiClient.getCategoryRows();
-      setCategoryRows(updatedRows);
-
+      // Just close the modal - homepage will automatically fetch updated pins on next view
       closePinModal();
     } catch (error) {
       console.error("Failed to save pins:", error);
