@@ -106,9 +106,12 @@ function CategoryRow({ category }: { category: Category }) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsVisible(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect(); // fetch once, never re-trigger on scroll
+        }
       },
-      { rootMargin: "200px" } // start loading 200px before row enters viewport
+      { rootMargin: "200px" }
     );
 
     observer.observe(el);
