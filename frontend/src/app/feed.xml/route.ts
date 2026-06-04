@@ -60,7 +60,7 @@ export async function GET() {
       const description = escapeXml(product.description || product.name);
       const link = `${SITE_URL}/products/${product.id}`;
       const imageLink = product.primary_image_url || "";
-      const price = Number(product.price).toFixed(2);
+      const priceBeforeTaxUSD = Math.floor(Number(product.price) / 1.11).toString();
       const availability =
         product.stock_quantity > 0 ? "in_stock" : "out_of_stock";
       const condition = product.condition?.toLowerCase() || "new";
@@ -68,14 +68,11 @@ export async function GET() {
       const id = product.sku || `product-${product.id}`;
       const googleCategory = getGoogleCategory(product.category_name);
 
-      const vatLower = (product.vat || "").toLowerCase();
-      const taxTag = vatLower.includes("excluded")
-        ? `<g:tax>
+      const taxTag = `<g:tax>
       <g:country>LB</g:country>
       <g:rate>11</g:rate>
       <g:tax_ship>n</g:tax_ship>
-    </g:tax>`
-        : `<g:tax_label>included</g:tax_label>`;
+    </g:tax>`;
 
       return `
   <entry>
@@ -85,7 +82,7 @@ export async function GET() {
     <g:link>${link}</g:link>
     ${imageLink ? `<g:image_link>${imageLink}</g:image_link>` : ""}
     <g:availability>${availability}</g:availability>
-    <g:price>${price} USD</g:price>
+    <g:price>${priceBeforeTaxUSD} USD</g:price>
     <g:brand>${brand}</g:brand>
     <g:condition>${condition}</g:condition>
     ${taxTag}
