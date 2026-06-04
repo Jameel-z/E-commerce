@@ -176,7 +176,7 @@ function CategoryRow({ category }: { category: Category }) {
         )}
 
         {/* Empty */}
-        {!loading && fetched && products.length === 0 && (
+        {!loading && isVisible && products.length === 0 && (
           <div className="flex items-center justify-center py-8 text-muted-foreground">
             <Package className="w-5 h-5 mr-2 opacity-40" />
             <span className="text-sm">No products in this category yet.</span>
