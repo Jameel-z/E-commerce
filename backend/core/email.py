@@ -64,7 +64,7 @@ def send_order_confirmation_email(order: Any, customer_email: str) -> bool:
     <div style="font-family:sans-serif;max-width:600px;margin:auto;color:#222">
       <div style="background:#1a4a8a;padding:20px 24px;border-radius:8px 8px 0 0">
         <h2 style="margin:0;color:#fff;font-size:20px">✅ Order Confirmed!</h2>
-        <p style="margin:4px 0 0;color:#c8d8f0;font-size:13px">Order #{order.id} · 961shop.com</p>
+        <p style="margin:4px 0 0;color:#c8d8f0;font-size:13px">Order {order.order_code} · 961shop.com</p>
       </div>
 
       <div style="background:#f9fafb;padding:20px 24px;border:1px solid #e5e7eb;border-top:none">
@@ -123,9 +123,9 @@ def send_order_confirmation_email(order: Any, customer_email: str) -> bool:
 
     try:
         resend.Emails.send({
-            "from": settings.RESEND_FROM_EMAIL,
+            "from": f"961shop <{settings.RESEND_FROM_EMAIL}>",
             "to": [customer_email],
-            "subject": f"Order #{order.id} Confirmed — Thank you for your purchase!",
+            "subject": f"Order {order.order_code} Confirmed — Thank you for your purchase!",
             "html": html,
         })
         logger.info("Order confirmation sent to %s for order %s", customer_email, order.id)
@@ -156,7 +156,7 @@ def send_order_notification_email(order: Any) -> bool:
     html = f"""
     <div style="font-family:sans-serif;max-width:600px;margin:auto;color:#222">
       <div style="background:#1a4a8a;padding:20px 24px;border-radius:8px 8px 0 0">
-        <h2 style="margin:0;color:#fff;font-size:20px">🛒 New Order #{order.id}</h2>
+        <h2 style="margin:0;color:#fff;font-size:20px">🛒 New Order {order.order_code}</h2>
         <p style="margin:4px 0 0;color:#c8d8f0;font-size:13px">961shop.com</p>
       </div>
 
@@ -218,7 +218,7 @@ def send_order_notification_email(order: Any) -> bool:
         resend.Emails.send({
             "from": settings.RESEND_FROM_EMAIL,
             "to": [settings.ORDER_NOTIFICATION_EMAIL],
-            "subject": f"New Order #{order.id} — {order.customer_name or 'Customer'} — ${total:.2f}",
+            "subject": f"New Order {order.order_code} — {order.customer_name or 'Customer'} — ${total:.2f}",
             "html": html,
         })
         logger.info("Order notification sent for order %s", order.id)

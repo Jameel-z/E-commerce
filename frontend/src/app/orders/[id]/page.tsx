@@ -110,7 +110,7 @@ export default function OrderDetailPage() {
             </Button>
             <div className="flex items-center gap-2">
               <Package className="h-5 w-5 text-primary" />
-              <h1 className="text-xl font-bold">Order #{order.id}</h1>
+              <h1 className="text-xl font-bold">Order {order.order_code}</h1>
             </div>
           </div>
         </div>
