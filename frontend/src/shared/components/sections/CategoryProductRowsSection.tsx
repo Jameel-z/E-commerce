@@ -97,7 +97,7 @@ function SkeletonCard() {
 function CategoryRow({ category }: { category: Category }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
-  const [fetched, setFetched] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -106,26 +106,29 @@ function CategoryRow({ category }: { category: Category }) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !fetched) {
-          setFetched(true);
-          setLoading(true);
-          Promise.all([
-            apiClient.getCategoryRowPins(category.id).catch(() => [] as number[]),
-            apiClient.getProducts({ parent_category_id: category.id, per_page: 12 }).catch(() => [] as Product[]),
-          ]).then(([pins, all]) => {
-            const pinnedSet = new Set(pins);
-            const pinned = pins.map((id) => all.find((p) => p.id === id)).filter(Boolean) as Product[];
-            const unpinned = all.filter((p) => !pinnedSet.has(p.id));
-            setProducts([...pinned, ...unpinned]);
-          }).finally(() => setLoading(false));
-        }
+        setIsVisible(entry.isIntersecting);
       },
       { rootMargin: "200px" } // start loading 200px before row enters viewport
     );
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [category.id, fetched]);
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    setLoading(true);
+    Promise.all([
+      apiClient.getCategoryRowPins(category.id).catch(() => [] as number[]),
+      apiClient.getProducts({ parent_category_id: category.id, per_page: 12 }).catch(() => [] as Product[]),
+    ]).then(([pins, all]) => {
+      const pinnedSet = new Set(pins);
+      const pinned = pins.map((id) => all.find((p) => p.id === id)).filter(Boolean) as Product[];
+      const unpinned = all.filter((p) => !pinnedSet.has(p.id));
+      setProducts([...pinned, ...unpinned]);
+    }).finally(() => setLoading(false));
+  }, [category.id, isVisible]);
 
   return (
     <section ref={sectionRef} className="py-6 bg-background">
