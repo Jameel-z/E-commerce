@@ -259,4 +259,5 @@ def set_category_featured(
     category.homepage_order = payload.homepage_order
     db.commit()
     db.refresh(category)
+    _invalidate_category_cache()
     return category
