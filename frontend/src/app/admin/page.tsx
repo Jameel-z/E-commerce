@@ -50,7 +50,7 @@ export default function AdminDashboard() {
           total: products.length,
           lowStock: products.filter((p) => p.stock_quantity < 10).length,
         });
-        setOrders(allOrders);
+        setOrders(allOrders.orders);
       } catch (error) {
         console.error("Failed to fetch dashboard stats:", error);
       } finally {
