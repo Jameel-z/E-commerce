@@ -119,14 +119,17 @@ function CategoryRow({ category }: { category: Category }) {
   }, []);
 
   const fetchProducts = () => {
+    console.log('🔄 Fetching products for category:', category.id);
     setLoading(true);
     Promise.all([
       apiClient.getCategoryRowPins(category.id).catch(() => [] as number[]),
       apiClient.getProducts({ parent_category_id: category.id, per_page: 12 }).catch(() => [] as Product[]),
     ]).then(([pins, all]) => {
+      console.log('✅ Fetched pins:', pins);
       const pinnedSet = new Set(pins);
       const pinned = pins.map((id) => all.find((p) => p.id === id)).filter(Boolean) as Product[];
       const unpinned = all.filter((p) => !pinnedSet.has(p.id));
+      console.log('📦 Final order:', pinned.map(p => p.id));
       setProducts([...pinned, ...unpinned]);
     }).finally(() => setLoading(false));
   };
@@ -139,14 +142,16 @@ function CategoryRow({ category }: { category: Category }) {
   // Refetch when user returns from admin after saving pins
   useEffect(() => {
     const handleVisibilityChange = () => {
+      console.log('👀 Visibility changed - hidden:', document.hidden, 'isVisible:', isVisible);
       if (!document.hidden && isVisible) {
+        console.log('🔁 Triggering refetch on visibility change');
         fetchProducts();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [category.id, isVisible]);
+  }, [category.id, isVisible, fetchProducts]);
 
   return (
     <section ref={sectionRef} className="py-6 bg-background">
