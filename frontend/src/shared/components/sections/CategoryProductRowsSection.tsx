@@ -129,16 +129,14 @@ function CategoryRow({ category }: { category: Category }) {
           return apiClient.getProducts({ parent_category_id: category.id, per_page: 12 })
             .then(prods => ({ pins: [], products: prods }));
         }
-        // Fetch products for each pinned ID, then get unpinned
-        return Promise.all([
-          Promise.all(pins.map(id => apiClient.getProduct(id).catch(() => null))),
-          apiClient.getProducts({ parent_category_id: category.id, per_page: 100 })
-        ]).then(([pinnedProds, all]) => {
-          const pinned = pinnedProds.filter(Boolean) as Product[];
-          const pinnedSet = new Set(pins);
-          const unpinned = all.filter((p) => !pinnedSet.has(p.id));
-          return { pins, products: [...pinned, ...unpinned] };
-        });
+        // Fetch all products and filter to pinned order
+        return apiClient.getProducts({ parent_category_id: category.id, per_page: 100 })
+          .then(all => {
+            const pinnedSet = new Set(pins);
+            const pinned = pins.map((id) => all.find((p) => p.id === id)).filter(Boolean) as Product[];
+            const unpinned = all.filter((p) => !pinnedSet.has(p.id));
+            return { pins, products: [...pinned, ...unpinned] };
+          });
       })
       .then(({ products }) => {
         console.log('📦 Final order:', products.slice(0, 12).map(p => p.id));
