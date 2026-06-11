@@ -106,7 +106,10 @@ function CategoryRow({ category }: { category: Category }) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsVisible(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
       },
       { rootMargin: "200px" }
     );
@@ -115,9 +118,7 @@ function CategoryRow({ category }: { category: Category }) {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (!isVisible) return;
-
+  const fetchProducts = () => {
     setLoading(true);
     Promise.all([
       apiClient.getCategoryRowPins(category.id).catch(() => [] as number[]),
@@ -128,6 +129,23 @@ function CategoryRow({ category }: { category: Category }) {
       const unpinned = all.filter((p) => !pinnedSet.has(p.id));
       setProducts([...pinned, ...unpinned]);
     }).finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    if (!isVisible) return;
+    fetchProducts();
+  }, [category.id, isVisible]);
+
+  // Refetch when user returns from admin after saving pins
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && isVisible) {
+        fetchProducts();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [category.id, isVisible]);
 
   return (
