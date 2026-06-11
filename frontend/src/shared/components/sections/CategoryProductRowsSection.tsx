@@ -106,10 +106,7 @@ function CategoryRow({ category }: { category: Category }) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect(); // fetch once, never re-trigger on scroll
-        }
+        setIsVisible(entry.isIntersecting);
       },
       { rootMargin: "200px" }
     );
