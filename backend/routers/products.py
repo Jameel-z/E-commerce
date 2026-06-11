@@ -3,6 +3,9 @@ from fastapi import (
     APIRouter, Depends, HTTPException, Query, status, Path,
     UploadFile, File, Form, Body
 )
+from fastapi.responses import StreamingResponse
+import io
+import csv
 from fastapi.encoders import jsonable_encoder
 from typing import List, Optional, Annotated, Union
 from decimal import Decimal
@@ -121,17 +124,17 @@ def get_product(
 
 @router.get(
     "/feed/meta",
-    summary="Meta Catalog Product Feed",
-    description="Returns products in Meta Catalog format for Facebook/Instagram Shopping"
+    summary="Meta Catalog Product Feed (CSV)",
+    description="Returns products in CSV format for Facebook/Instagram Shopping"
 )
 def get_meta_product_feed(
     db: Session = Depends(get_db),
-    limit: int = Query(100, ge=1, le=1000),
+    limit: int = Query(1000, ge=1, le=10000),
     offset: int = Query(0, ge=0)
 ):
     """
     Product feed endpoint for Meta Catalog data source integration.
-    Returns products formatted for Facebook/Instagram Shopping ads.
+    Returns products in CSV format for Facebook/Instagram Shopping ads.
     """
     try:
         from models.product import Product as ProductModel
@@ -144,14 +147,20 @@ def get_meta_product_feed(
                 joinedload(ProductModel.images),
                 joinedload(ProductModel.category)
             )
-            .filter(ProductModel.is_active == True)
             .order_by(ProductModel.created_at.desc())
             .offset(offset)
             .limit(limit)
             .all()
         )
 
-        feed_items = []
+        # Create CSV in memory
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=[
+            "id", "title", "description", "price", "image_url", "url",
+            "availability", "category", "brand", "sku", "condition"
+        ])
+        writer.writeheader()
+
         for product in products:
             try:
                 # Use sale price if available, otherwise regular price
@@ -170,11 +179,11 @@ def get_meta_product_feed(
                 if product.category:
                     category_name = product.category.name
 
-                feed_item = {
+                writer.writerow({
                     "id": str(product.id),
                     "title": product.name,
                     "description": product.description or "",
-                    "price": f"{price:.2f} USD",
+                    "price": f"{price:.2f}",
                     "image_url": image_url,
                     "url": f"https://961shop.com/products/{product.id}",
                     "availability": availability,
@@ -182,18 +191,18 @@ def get_meta_product_feed(
                     "brand": product.brand or "",
                     "sku": product.sku or "",
                     "condition": product.condition or "new"
-                }
-                feed_items.append(feed_item)
+                })
             except Exception as e:
                 logger.error(f"Error processing product {product.id}: {str(e)}")
                 continue
 
-        return {
-            "products": feed_items,
-            "total_count": len(feed_items),
-            "offset": offset,
-            "limit": limit
-        }
+        # Return CSV as stream
+        output.seek(0)
+        return StreamingResponse(
+            iter([output.getvalue()]),
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=products_feed.csv"}
+        )
     except Exception as e:
         logger.error(f"Error in Meta product feed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
