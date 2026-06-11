@@ -96,9 +96,14 @@ function SkeletonCard() {
 
 function CategoryRow({ category }: { category: Category }) {
   const [products, setProducts] = useState<Product[]>([]);
+  const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
+  const swiperRef = useRef<any>(null);
+  const BATCH_SIZE = 10;
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -118,7 +123,7 @@ function CategoryRow({ category }: { category: Category }) {
     return () => observer.disconnect();
   }, []);
 
-  const fetchProducts = () => {
+  const fetchProducts = (isInitial = true) => {
     console.log('🔄 Fetching products for category:', category.id);
     setLoading(true);
     apiClient.getCategoryRowPins(category.id)
@@ -126,11 +131,11 @@ function CategoryRow({ category }: { category: Category }) {
         console.log('✅ Fetched pins:', pins);
         if (pins.length === 0) {
           // No pins, fetch all products
-          return apiClient.getProducts({ parent_category_id: category.id, per_page: 12 })
+          return apiClient.getProducts({ parent_category_id: category.id, per_page: 1000 })
             .then(prods => ({ pins: [], products: prods }));
         }
         // Fetch all products and filter to pinned order
-        return apiClient.getProducts({ parent_category_id: category.id, per_page: 100 })
+        return apiClient.getProducts({ parent_category_id: category.id, per_page: 1000 })
           .then(all => {
             const pinnedSet = new Set(pins);
             const pinned = pins.map((id) => all.find((p) => p.id === id)).filter(Boolean) as Product[];
@@ -138,9 +143,16 @@ function CategoryRow({ category }: { category: Category }) {
             return { pins, products: [...pinned, ...unpinned] };
           });
       })
-      .then(({ products }) => {
-        console.log('📦 Final order:', products.slice(0, 12).map(p => p.id));
-        setProducts(products);
+      .then(({ products: allProducts }) => {
+        console.log('📦 Total products:', allProducts.length);
+        setProducts(allProducts);
+
+        // Show first batch
+        if (isInitial) {
+          setDisplayedProducts(allProducts.slice(0, BATCH_SIZE));
+          setOffset(BATCH_SIZE);
+          setHasMore(allProducts.length > BATCH_SIZE);
+        }
       })
       .catch(err => {
         console.error('Failed to fetch products:', err);
@@ -148,9 +160,18 @@ function CategoryRow({ category }: { category: Category }) {
       .finally(() => setLoading(false));
   };
 
+  const loadMoreProducts = () => {
+    if (!hasMore || loading) return;
+    console.log('📥 Loading more products, offset:', offset);
+    const newProducts = products.slice(offset, offset + BATCH_SIZE);
+    setDisplayedProducts(prev => [...prev, ...newProducts]);
+    setOffset(prev => prev + BATCH_SIZE);
+    setHasMore(offset + BATCH_SIZE < products.length);
+  };
+
   useEffect(() => {
     if (!isVisible) return;
-    fetchProducts();
+    fetchProducts(true);
   }, [category.id, isVisible]);
 
   // Refetch when user returns from admin after saving pins
@@ -159,13 +180,13 @@ function CategoryRow({ category }: { category: Category }) {
       console.log('👀 Visibility changed - hidden:', document.hidden, 'isVisible:', isVisible);
       if (!document.hidden && isVisible) {
         console.log('🔁 Triggering refetch on visibility change');
-        fetchProducts();
+        fetchProducts(true);
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [category.id, isVisible, fetchProducts]);
+  }, [category.id, isVisible]);
 
   return (
     <section ref={sectionRef} className="py-6 bg-background">
@@ -192,28 +213,37 @@ function CategoryRow({ category }: { category: Category }) {
         )}
 
         {/* Products */}
-        {!loading && products.length > 0 && (
-          <Swiper
-            spaceBetween={12}
-            slidesPerView={2}
-            loop={products.length > 2}
-            breakpoints={{
-              640:  { slidesPerView: 3, spaceBetween: 12 },
-              1024: { slidesPerView: 4, spaceBetween: 14 },
-              1280: { slidesPerView: 5, spaceBetween: 16 },
-            }}
-            className="pb-2"
-          >
-            {products.map((product) => (
-              <SwiperSlide key={product.id}>
-                <CategoryProductCard product={product} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+        {displayedProducts.length > 0 && (
+          <>
+            <Swiper
+              ref={swiperRef}
+              spaceBetween={12}
+              slidesPerView={2}
+              loop={false}
+              onReachEnd={() => loadMoreProducts()}
+              breakpoints={{
+                640:  { slidesPerView: 3, spaceBetween: 12 },
+                1024: { slidesPerView: 4, spaceBetween: 14 },
+                1280: { slidesPerView: 5, spaceBetween: 16 },
+              }}
+              className="pb-2"
+            >
+              {displayedProducts.map((product) => (
+                <SwiperSlide key={product.id}>
+                  <CategoryProductCard product={product} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+            {loading && (
+              <div className="flex justify-center py-4">
+                <div className="text-sm text-muted-foreground">Loading more...</div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Empty */}
-        {!loading && isVisible && products.length === 0 && (
+        {!loading && isVisible && displayedProducts.length === 0 && (
           <div className="flex items-center justify-center py-8 text-muted-foreground">
             <Package className="w-5 h-5 mr-2 opacity-40" />
             <span className="text-sm">No products in this category yet.</span>
