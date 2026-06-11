@@ -141,7 +141,7 @@ def get_meta_product_feed(
         products = (
             db.query(ProductModel)
             .options(
-                joinedload(ProductModel.product_images),
+                joinedload(ProductModel.images),
                 joinedload(ProductModel.category)
             )
             .filter(ProductModel.is_active == True)
@@ -162,8 +162,8 @@ def get_meta_product_feed(
 
                 # Get primary image URL
                 image_url = ""
-                if product.product_images and len(product.product_images) > 0:
-                    image_url = product.product_images[0].url or ""
+                if product.images and len(product.images) > 0:
+                    image_url = product.images[0].url or ""
 
                 # Get category name
                 category_name = "Uncategorized"
