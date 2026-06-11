@@ -119,6 +119,70 @@ def get_product(
         )
     return product
 
+@router.get(
+    "/feed/meta",
+    summary="Meta Catalog Product Feed",
+    description="Returns products in Meta Catalog format for Facebook/Instagram Shopping"
+)
+def get_meta_product_feed(
+    db: Session = Depends(get_db),
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = Query(0, ge=0)
+):
+    """
+    Product feed endpoint for Meta Catalog data source integration.
+    Returns products formatted for Facebook/Instagram Shopping ads.
+    """
+    from models.product import Product as ProductModel
+
+    # Get products with pagination
+    products = (
+        db.query(ProductModel)
+        .filter(ProductModel.is_active == True)
+        .order_by(ProductModel.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    feed_items = []
+    for product in products:
+        # Use sale price if available, otherwise regular price
+        price = float(product.sale_price or product.regular_price or product.price)
+
+        # Determine availability
+        availability = "in stock" if product.stock_quantity > 0 else "out of stock"
+
+        # Get primary image URL
+        image_url = None
+        if product.product_images:
+            image_url = product.product_images[0].url
+
+        # Get category name
+        category_name = product.category.name if product.category else "Uncategorized"
+
+        feed_item = {
+            "id": str(product.id),
+            "title": product.name,
+            "description": product.description or "",
+            "price": f"{price:.2f} USD",
+            "image_url": image_url or "",
+            "url": f"https://961shop.com/products/{product.id}",
+            "availability": availability,
+            "category": category_name,
+            "brand": product.brand or "",
+            "sku": product.sku or "",
+            "condition": product.condition or "new"
+        }
+        feed_items.append(feed_item)
+
+    return {
+        "products": feed_items,
+        "total_count": len(feed_items),
+        "offset": offset,
+        "limit": limit
+    }
+
 # --------------------------
 # ADMIN-ONLY ENDPOINTS
 # --------------------------
