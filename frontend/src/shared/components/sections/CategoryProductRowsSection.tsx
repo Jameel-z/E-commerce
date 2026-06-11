@@ -219,7 +219,7 @@ function CategoryRow({ category }: { category: Category }) {
               ref={swiperRef}
               spaceBetween={12}
               slidesPerView={2}
-              loop={false}
+              loop={true}
               onReachEnd={() => loadMoreProducts()}
               breakpoints={{
                 640:  { slidesPerView: 3, spaceBetween: 12 },
