@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
     remotePatterns: [
       {
         protocol: "http",
