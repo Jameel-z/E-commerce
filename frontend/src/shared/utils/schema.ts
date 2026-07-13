@@ -18,7 +18,7 @@ export function getOrganizationSchema() {
       "@type": "ContactPoint",
       telephone: "+96176840474",
       contactType: "customer service",
-      email: "support@invoicepoint.net",
+      email: "support@961shop.com",
     },
   };
 }

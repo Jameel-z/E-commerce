@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 const LAST_UPDATED = "May 30, 2026";
 const SITE_NAME = "961shop";
 const SITE_URL = "https://961shop.com";
-const CONTACT_EMAIL = "support@invoicepoint.net";
+const CONTACT_EMAIL = "support@961shop.com";
 const CONTACT_PHONE = "+961 76 840474";
 const WHATSAPP = "+961 76 840474";
 

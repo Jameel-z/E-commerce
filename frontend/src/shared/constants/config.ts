@@ -14,5 +14,5 @@ export const CONTACT = {
     display: "+961 76 840474",
     tel: "+96176840474",
   },
-  email: "support@invoicepoint.net",
+  email: "support@961shop.com",
 };
