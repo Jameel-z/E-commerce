@@ -113,7 +113,7 @@ export function FeaturedProductsSection({ products, loading, error }: FeaturedPr
 
   return (
     <section className="py-8 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
         <div className="text-center mb-5">
