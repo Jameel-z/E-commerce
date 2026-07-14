@@ -49,6 +49,30 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <Link
+                  href="/about"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/return-policy"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Return Policy
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/terms"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
