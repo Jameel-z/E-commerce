@@ -14,6 +14,14 @@ export function getOrganizationSchema() {
       "@type": "ImageObject",
       url: `${SITE_URL}/icon.jpg`,
     },
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Hamdan Building, Main Road, 1st Floor",
+      addressLocality: "Beirut",
+      addressRegion: "Beirut Governorate",
+      postalCode: "1200",
+      addressCountry: "LB",
+    },
     contactPoint: {
       "@type": "ContactPoint",
       telephone: "+96176840474",
