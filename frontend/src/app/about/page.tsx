@@ -6,11 +6,11 @@ import { MapPin, Phone, Mail, MessageCircle } from "lucide-react";
 export const metadata: Metadata = {
   title: "About Us | 961shop",
   description:
-    "961shop is a Lebanon-based retailer of laptops, computers, and tech accessories, with a physical store in Beirut and online ordering with cash on delivery.",
+    "961shop is a Lebanon-based retailer of laptops, computers, and tech accessories, with a physical store in Zefta, Nabatieh and online ordering with cash on delivery.",
   openGraph: {
     title: "About Us | 961shop",
     description:
-      "961shop is a Lebanon-based retailer of laptops, computers, and tech accessories, with a physical store in Beirut and online ordering with cash on delivery.",
+      "961shop is a Lebanon-based retailer of laptops, computers, and tech accessories, with a physical store in Zefta, Nabatieh and online ordering with cash on delivery.",
     url: "https://961shop.com/about",
     siteName: "961shop",
     type: "website",
@@ -29,7 +29,7 @@ const SALES_PHONE_TEL = "+96176840474";
 const SUPPORT_PHONE = "+961 03751903";
 const SUPPORT_PHONE_TEL = "+96103751903";
 const CONTACT_EMAIL = "support@961shop.com";
-const ADDRESS = "Hamdan Building, Main Road, 1st Floor, Beirut, Beirut Governorate 1200, Lebanon";
+const ADDRESS = "Hamdan Building, Main Road, 1st Floor, Zefta, Nabatieh Governorate 7104, Lebanon";
 
 export default function AboutPage() {
   return (
@@ -66,7 +66,7 @@ export default function AboutPage() {
             We offer a carefully curated selection of laptops, desktops, and
             accessories from the world&apos;s most trusted technology brands —
             chosen for their quality, performance, and reliability. Our products
-            are available through our Beirut store and online at{" "}
+            are available through our Zefta store and online at{" "}
             <a href="https://961shop.com" className="text-primary underline underline-offset-2">
               961shop.com
             </a>

@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
-import { siInstagram, siWhatsapp } from "simple-icons";
+import { siInstagram, siFacebook, siWhatsapp } from "simple-icons";
 import { CONTACT } from "@/shared/constants/config";
 
 const Footer: React.FC = () => {
@@ -109,6 +109,20 @@ const Footer: React.FC = () => {
                 />
               </a>
               <a
+                href="https://www.facebook.com/961shop"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Facebook"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-5 w-5"
+                  dangerouslySetInnerHTML={{ __html: siFacebook.svg }}
+                />
+              </a>
+              <a
                 href={`https://wa.me/${CONTACT.phone.tel.replace("+", "")}?text=Hi%20961shop,%20I%20have%20a%20question%20about%20your%20products.`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -126,7 +140,7 @@ const Footer: React.FC = () => {
             <div className="space-y-1 text-sm text-muted-foreground">
               <p>Email: {CONTACT.email}</p>
               <p>Phone: {CONTACT.phone.display}</p>
-              <p>Beirut, Lebanon</p>
+              <p>Nabatieh, Lebanon</p>
             </div>
           </div>
         </div>
