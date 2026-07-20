@@ -109,7 +109,7 @@ const Footer: React.FC = () => {
                 />
               </a>
               <a
-                href="https://www.facebook.com/961shop"
+                href="https://www.facebook.com/profile.php?id=61557674957923"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground transition-colors"
