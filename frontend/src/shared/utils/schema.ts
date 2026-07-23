@@ -16,10 +16,9 @@ export function getOrganizationSchema() {
     },
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Hamdan Building, Main Road, 1st Floor",
-      addressLocality: "Zefta",
+      streetAddress: "Main Road",
+      addressLocality: "Nmairiyeh",
       addressRegion: "Nabatieh Governorate",
-      postalCode: "7104",
       addressCountry: "LB",
     },
     contactPoint: {

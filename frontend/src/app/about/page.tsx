@@ -6,11 +6,11 @@ import { MapPin, Phone, Mail, MessageCircle } from "lucide-react";
 export const metadata: Metadata = {
   title: "About Us | 961shop",
   description:
-    "961shop is a Lebanon-based retailer of laptops, computers, and tech accessories, with a physical store in Zefta, Nabatieh and online ordering with cash on delivery.",
+    "961shop is a Lebanon-based online retailer of laptops, computers, and tech accessories, with a showroom in Nmairiyeh, Nabatieh and nationwide cash-on-delivery.",
   openGraph: {
     title: "About Us | 961shop",
     description:
-      "961shop is a Lebanon-based retailer of laptops, computers, and tech accessories, with a physical store in Zefta, Nabatieh and online ordering with cash on delivery.",
+      "961shop is a Lebanon-based online retailer of laptops, computers, and tech accessories, with a showroom in Nmairiyeh, Nabatieh and nationwide cash-on-delivery.",
     url: "https://961shop.com/about",
     siteName: "961shop",
     type: "website",
@@ -29,7 +29,7 @@ const SALES_PHONE_TEL = "+96176840474";
 const SUPPORT_PHONE = "+961 03751903";
 const SUPPORT_PHONE_TEL = "+96103751903";
 const CONTACT_EMAIL = "support@961shop.com";
-const ADDRESS = "Hamdan Building, Main Road, 1st Floor, Zefta, Nabatieh Governorate 7104, Lebanon";
+const ADDRESS = "Main Road, Nmairiyeh, Nabatieh Governorate, Lebanon";
 
 export default function AboutPage() {
   return (
@@ -66,11 +66,12 @@ export default function AboutPage() {
             We offer a carefully curated selection of laptops, desktops, and
             accessories from the world&apos;s most trusted technology brands —
             chosen for their quality, performance, and reliability. Our products
-            are available through our Zefta store and online at{" "}
+            are available online at{" "}
             <a href="https://961shop.com" className="text-primary underline underline-offset-2">
               961shop.com
             </a>
-            , with cash-on-delivery service for added convenience.
+            , with nationwide cash-on-delivery, and can also be viewed in person
+            at our showroom.
           </p>
 
           <p>
@@ -79,12 +80,12 @@ export default function AboutPage() {
               full product range
             </Link>
             . Should you have any questions, our team is available by phone,
-            WhatsApp, email, or in person at our store.
+            WhatsApp, email, or in person at our showroom.
           </p>
         </div>
 
         <div className="prose prose-sm max-w-none space-y-8 text-foreground">
-          <Section id="our-store" title="Our Store">
+          <Section id="our-showroom" title="Our Showroom">
             <div className="flex items-start gap-3 p-4 bg-muted rounded-lg">
               <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
