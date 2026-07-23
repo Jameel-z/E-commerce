@@ -89,7 +89,7 @@ export function SecondaryNav() {
 
   return (
     <div className="border-b bg-muted/50 relative" ref={navRef}>
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="px-3 sm:px-6 lg:px-8">
         <div className="flex items-center h-10 gap-2 sm:gap-3">
 
           {/* ── Hamburger / Categories button ─────────────────────────── */}

@@ -32,7 +32,7 @@ export function GlobalHeader({ className = "" }: GlobalHeaderProps) {
     <header
       className={`border-b bg-background sticky top-0 z-50 shadow-sm ${className}`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-12">
           {/* Brand Section - Left */}
           <div className="flex items-center gap-2">
