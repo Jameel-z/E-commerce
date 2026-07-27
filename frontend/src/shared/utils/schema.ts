@@ -87,7 +87,10 @@ export function getProductSchema(product: ProductDetail) {
         "@type": "MerchantReturnPolicy",
         applicableCountry: "LB",
         returnPolicyCategory:
-          "https://schema.org/MerchantReturnNotPermitted",
+          "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 1,
+        returnMethod: "https://schema.org/ReturnByMail",
+        returnFees: "https://schema.org/FreeReturn",
         itemDefectReturnFees: "https://schema.org/FreeReturn",
         merchantReturnLink: `${SITE_URL}/return-policy`,
       },

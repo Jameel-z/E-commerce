@@ -307,6 +307,19 @@ export default function CheckoutPage() {
                     />
                   </div>
 
+                  {/* Policy consent */}
+                  <p className="text-xs text-muted-foreground text-center">
+                    By placing this order, you agree to our{" "}
+                    <Link href="/terms" target="_blank" className="underline underline-offset-2 hover:text-foreground">
+                      Terms &amp; Conditions
+                    </Link>{" "}
+                    and{" "}
+                    <Link href="/return-policy" target="_blank" className="underline underline-offset-2 hover:text-foreground">
+                      Return Policy
+                    </Link>
+                    .
+                  </p>
+
                   {/* Submit Button */}
                   <Button
                     type="submit"
