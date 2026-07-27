@@ -212,15 +212,16 @@ export default function TermsPage() {
           <Section id="returns" title="7. Returns and Refunds">
             <ul>
               <li>
-                We accept returns <strong>only</strong> for items that are
-                defective, damaged during shipping, or incorrectly fulfilled
-                (wrong item received). Returns for change of mind or any other
-                reason are not accepted.
+                General returns (any reason, including change of mind) are
+                accepted within <strong>1 day</strong> of delivery for unused,
+                unopened items in original packaging. We cover return shipping
+                and charge no restocking fee.
               </li>
               <li>
-                Defective or incorrect items must be reported within{" "}
-                <strong>48 hours</strong> of delivery with photographic evidence
-                of the issue.
+                Defective, damaged, or incorrectly fulfilled items must be
+                reported within <strong>48 hours</strong> of delivery with
+                photographic evidence of the issue, and are returned free of
+                charge.
               </li>
               <li>
                 To initiate a return, please contact our support team at{" "}
@@ -235,8 +236,9 @@ export default function TermsPage() {
               </li>
               <li>
                 Approved refunds will be issued within 5–7 business days
-                through the original payment method. Shipping costs are
-                non-refundable unless the return is due to our error.
+                through the original payment method. Return shipping is
+                covered by {SITE_NAME} for both general and defective/incorrect
+                item returns, with no restocking fee.
               </li>
               <li>
                 Certain products (e.g., opened software, consumables, or items

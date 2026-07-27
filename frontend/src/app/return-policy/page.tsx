@@ -4,10 +4,10 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Return Policy | 961shop",
-  description: "Learn about 961shop's return and refund policy. We accept returns for defective or incorrect items.",
+  description: "Learn about 961shop's return and refund policy, including our 1-day general return window and free returns for defective or incorrect items.",
   openGraph: {
     title: "Return Policy | 961shop",
-    description: "Learn about 961shop's return and refund policy.",
+    description: "Learn about 961shop's return and refund policy, including our 1-day general return window and free returns for defective or incorrect items.",
     url: "https://961shop.com/return-policy",
     siteName: "961shop",
     type: "website",
@@ -48,19 +48,29 @@ export default function ReturnPolicyPage() {
         <div className="prose prose-sm max-w-none space-y-8 text-foreground">
 
           <Section id="eligibility" title="1. Return Eligibility">
+            <p>We accept returns under two categories:</p>
+
+            <h3 className="text-sm font-semibold text-foreground mt-3 mb-1">
+              a) General Returns (Any Reason)
+            </h3>
             <p>
-              We accept returns <strong>only</strong> in the following cases:
+              You may return an item for any reason, including change of mind, within{" "}
+              <strong>1 day</strong> of delivery, provided it is unused, unopened, and in its
+              original packaging. We cover the cost of return shipping, and there is{" "}
+              <strong>no restocking fee</strong>.
             </p>
+
+            <h3 className="text-sm font-semibold text-foreground mt-3 mb-1">
+              b) Defective, Damaged, or Incorrect Items
+            </h3>
             <ul>
               <li>The item received is defective or not functioning as described.</li>
               <li>The item was damaged during shipping or delivery.</li>
               <li>You received the wrong item (different from what you ordered).</li>
             </ul>
-            <p>
-              Returns are <strong>not accepted</strong> for change of mind, incorrect size selection,
-              or any reason other than a product defect or fulfillment error.
-            </p>
-            <p>The following items are additionally <strong>not eligible</strong> for return:</p>
+            <p>These returns are accepted free of charge, as described in Section 2 below.</p>
+
+            <p>The following items are <strong>not eligible</strong> for return under either category:</p>
             <ul>
               <li>Items marked as "Final Sale" or "Non-Returnable" on the product page.</li>
               <li>Perishable goods, digital products, or downloadable items.</li>
@@ -104,8 +114,8 @@ export default function ReturnPolicyPage() {
               <li>Refunds are issued to the original payment method used at checkout.</li>
             </ul>
             <p>
-              <strong>Shipping costs</strong> are non-refundable unless the return is due to our error
-              (wrong item, defective product).
+              <strong>Return shipping</strong> is covered by {SITE_NAME} for both general returns
+              and defective/incorrect item returns. There is no restocking fee.
             </p>
           </Section>
 
