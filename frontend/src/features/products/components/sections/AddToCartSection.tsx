@@ -1,11 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@/shared/components";
 import { QuantitySelector } from "@/features/products/components";
 import { type ProductDetail } from "@/lib/api";
 import { useWishlist } from "@/shared/hooks/use-wishlist";
 import { useCart } from "@/shared/hooks/use-cart";
-import { ShoppingCart, Heart, Check } from "lucide-react";
+import { ShoppingCart, Heart, Check, ShieldCheck, BadgeCheck, Undo2, Banknote } from "lucide-react";
 import { CONTACT } from "@/shared/constants/config";
 
 interface AddToCartSectionProps {
@@ -126,6 +127,34 @@ export function AddToCartSection({
         </svg>
         Contact Us on WhatsApp
       </a>
+
+      {/* Trust badges */}
+      <div className="flex flex-wrap gap-2">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-xs font-medium text-foreground">
+          <BadgeCheck className="h-3.5 w-3.5 text-primary" />
+          Genuine Products
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-xs font-medium text-foreground">
+          <Banknote className="h-3.5 w-3.5 text-primary" />
+          Cash on Delivery
+        </span>
+        <Link
+          href="/return-policy"
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-xs font-medium text-foreground hover:bg-muted/70 transition-colors"
+        >
+          <Undo2 className="h-3.5 w-3.5 text-primary" />
+          1-Day Returns
+        </Link>
+      </div>
+
+      <div className="flex items-start gap-3 p-4 bg-muted/50 border border-border rounded-lg">
+        <ShieldCheck className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          <strong className="text-foreground">Genuine Products Guaranteed.</strong> We
+          source directly from authorized distributors, and eligible products include
+          manufacturer warranty coverage (terms vary by product and distributor).
+        </p>
+      </div>
     </div>
   );
 }
