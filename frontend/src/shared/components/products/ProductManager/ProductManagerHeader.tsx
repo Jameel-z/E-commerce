@@ -22,6 +22,7 @@ interface ProductManagerHeaderProps {
   showSearch?: boolean;
   showSort?: boolean;
   showItemsPerPage?: boolean;
+  showCount?: boolean;
   className?: string;
 }
 
@@ -30,6 +31,7 @@ export function ProductManagerHeader({
   showSearch = true,
   showSort = true,
   showItemsPerPage = true,
+  showCount = true,
   className,
 }: ProductManagerHeaderProps) {
   const {
@@ -57,10 +59,12 @@ export function ProductManagerHeader({
         className
       )}
     >
-      <span className="text-sm font-semibold text-muted-foreground whitespace-nowrap">
-        {paginatedProducts.length}{" "}
-        {paginatedProducts.length === 1 ? "product" : "products"}
-      </span>
+      {showCount && (
+        <span className="text-sm font-semibold text-muted-foreground whitespace-nowrap">
+          {paginatedProducts.length}{" "}
+          {paginatedProducts.length === 1 ? "product" : "products"}
+        </span>
+      )}
 
       <div className="flex items-center gap-2 flex-wrap">
         {showSearch && (

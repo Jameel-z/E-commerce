@@ -73,6 +73,7 @@ export default function ProductsPage() {
                 showSearch={false}
                 showSort={true}
                 showItemsPerPage={true}
+                showCount={false}
               />
 
               {/* Product Grid with Pagination */}
