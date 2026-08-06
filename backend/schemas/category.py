@@ -21,6 +21,7 @@ class CategoryBase(BaseSchema):
     homepage_order: int = Field(0)
     show_category_row: bool = Field(False)
     category_row_order: int = Field(0)
+    sort_order: int = Field(0)
 
     @field_validator('image_url', mode='before')
     @classmethod

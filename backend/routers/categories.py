@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Path, File, Form,
 from fastapi.encoders import jsonable_encoder
 from typing import Optional, Union
 from sqlalchemy.orm import Session
-from pydantic import BaseModel as PydanticBaseModel
+from pydantic import BaseModel as PydanticBaseModel, Field
 
 from database import get_db
 from schemas.category import Category, CategoryCreate, CategoryUpdate
@@ -25,6 +25,9 @@ class RowPinsPayload(PydanticBaseModel):
 class CategoryRowToggle(PydanticBaseModel):
     show_category_row: bool
     category_row_order: int = 0
+
+class ReorderPayload(PydanticBaseModel):
+    category_ids: list[int] = Field(..., min_length=1)
 
 router = APIRouter(
     prefix="/categories",
@@ -177,6 +180,39 @@ def delete_category(
         ImageService.delete_image(category.image_url)
     category_crud.remove(db, id=category_id)
     _invalidate_category_cache()
+
+@router.patch(
+    "/reorder",
+    response_model=list[Category],
+    dependencies=[Depends(require_admin)],
+    summary="Reorder a set of sibling categories (same parent level)",
+)
+def reorder_categories(
+    payload: ReorderPayload = Body(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Persists display order for the given category ids. Pass the full list of
+    sibling ids (all top-level categories, or all children of one parent) in
+    their desired order; each gets sort_order = its position in the list.
+    """
+    from models.category import Category as CategoryModel
+    categories = (
+        db.query(CategoryModel)
+        .filter(CategoryModel.id.in_(payload.category_ids))
+        .all()
+    )
+    cat_map = {c.id: c for c in categories}
+    for order, cat_id in enumerate(payload.category_ids):
+        if cat_id in cat_map:
+            cat_map[cat_id].sort_order = order
+    db.commit()
+    _invalidate_category_cache()
+    ordered = [cat_map[cid] for cid in payload.category_ids if cid in cat_map]
+    for c in ordered:
+        db.refresh(c)
+    return ordered
 
 @router.get(
     "/{category_id}/row-pins",

@@ -1,3 +1,4 @@
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import users, products, categories, carts, orders, banners
@@ -7,15 +8,30 @@ from core.config import settings
 from core.middleware import cleanup_temp_files, category_image_fallback
 from core.seed import seed_admin
 
+logger = logging.getLogger(__name__)
+
 create_database()
+
+# pgvector must exist BEFORE create_tables() runs, since the products table's
+# `embedding` column type depends on it — on a brand-new database, create_all()
+# would otherwise try to create that column type before the extension exists.
+# Best-effort: if the extension isn't installed at the OS level yet, this is a
+# no-op and semantic search stays disabled until it's installed (see below).
+from database import engine
+from sqlalchemy import text
+with engine.connect() as conn:
+    try:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+
 create_tables()
 
 with SessionLocal() as db:
     seed_admin(db)
 
 # Add parent_id to categories if it doesn't exist yet (safe migration)
-from database import engine
-from sqlalchemy import text
 with engine.connect() as conn:
     conn.execute(text(
         "ALTER TABLE categories ADD COLUMN IF NOT EXISTS parent_id INTEGER "
@@ -59,6 +75,9 @@ with engine.connect() as conn:
     ))
     conn.execute(text(
         "ALTER TABLE categories ADD COLUMN IF NOT EXISTS category_row_order INTEGER NOT NULL DEFAULT 0"
+    ))
+    conn.execute(text(
+        "ALTER TABLE categories ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0"
     ))
 
     # pg_trgm: enable extension + create GIN indexes for fast ILIKE search
@@ -109,6 +128,27 @@ with engine.connect() as conn:
     """))
 
     conn.commit()
+
+# pgvector: enables semantic product search (services/embedding_service.py).
+# Isolated in its own connection/transaction — if the `vector` extension isn't
+# installed at the OS level yet (`sudo apt install postgresql-18-pgvector`),
+# this fails without blocking the rest of startup; search just falls back to
+# keyword-only until the extension is installed and the app is restarted.
+with engine.connect() as conn:
+    try:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        conn.execute(text(
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS embedding vector(384)"
+        ))
+        conn.commit()
+        logger.info("✅ pgvector ready — semantic search enabled")
+    except Exception as e:
+        conn.rollback()
+        logger.warning(
+            f"⚠️ pgvector extension unavailable ({e}) — semantic search disabled, "
+            "keyword search still works. Install with: "
+            "sudo apt install postgresql-18-pgvector"
+        )
 
 app = FastAPI(title="E-commerce Backend API")
 

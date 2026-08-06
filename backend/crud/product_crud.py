@@ -13,9 +13,10 @@ from schemas.product import (
 from fastapi import UploadFile
 import logging
 from services.image_services import ImageService
+from services import embedding_service
 from core.utils import generate_static_url
 # import func
-from sqlalchemy import func, Integer, case, or_
+from sqlalchemy import func, Integer, case, or_, and_, literal
 
 logger = logging.getLogger(__name__)
 
@@ -87,9 +88,13 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
             all_ids = [parent_category_id] + child_ids
             query = query.filter(Product.category_id.in_(all_ids))
 
+        distance_expr = None
+        keyword_match = None
+
         if search_term:
             # Remove hyphens so "wifi" matches "Wi-Fi"
             words = [w.replace("-", "") for w in search_term.split() if w.replace("-", "")]
+            word_conditions = []
             for word in words:
                 # Exact substring match (fast via GIN index)
                 exact = or_(
@@ -106,12 +111,40 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
                         func.word_similarity(word, func.replace(Category.name, "-", "")) >= 0.4,
                         func.word_similarity(word, func.replace(ParentCategory.name, "-", "")) >= 0.4,
                     )
-                    query = query.filter(exact | fuzzy)
+                    word_conditions.append(exact | fuzzy)
                 else:
-                    query = query.filter(exact)
+                    word_conditions.append(exact)
+            keyword_match = and_(*word_conditions) if word_conditions else None
 
-        # Newest products first
-        query = query.order_by(Product.created_at.desc())
+            # Semantic match: catches queries with no shared words at all
+            # (e.g. "gift for a gamer" → mechanical keyboard). Silently
+            # skipped if the local embedding model or the pgvector column
+            # isn't available yet, so keyword search keeps working either way.
+            query_embedding = None
+            if embedding_service.db_column_ready(db):
+                query_embedding = embedding_service.embed(search_term)
+            if query_embedding is not None:
+                distance_expr = Product.embedding.cosine_distance(query_embedding)
+                # 0 = identical, 2 = opposite. Measured on this catalog: genuinely
+                # related products land ~0.5-0.7, unrelated ones ~0.85+, so 0.75
+                # sits safely in that gap. Re-check this once the catalog is
+                # bigger — the right cutoff can drift with product-text style.
+                semantic_match = distance_expr < 0.75
+                if keyword_match is not None:
+                    query = query.filter(or_(keyword_match, semantic_match))
+                else:
+                    query = query.filter(semantic_match)
+            elif keyword_match is not None:
+                query = query.filter(keyword_match)
+
+        if search_term and distance_expr is not None:
+            # Keyword matches first (they're the more confident signal), then
+            # rank the semantic-only matches by how close they are, then recency.
+            relevance_rank = case((keyword_match, 0), else_=1) if keyword_match is not None else literal(0)
+            query = query.order_by(relevance_rank, distance_expr.nullslast(), Product.created_at.desc())
+        else:
+            # Newest products first
+            query = query.order_by(Product.created_at.desc())
 
         results = query.offset(skip).limit(limit).all()
         return [row._asdict() for row in results]
@@ -166,6 +199,13 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
             # Create product first
             product = self.create(db, obj_in=product_data)
             logger.info(f"Created product with ID: {product.id}")
+
+            # Best-effort semantic embedding — never blocks product creation
+            if embedding_service.db_column_ready(db):
+                try:
+                    product.embedding = embedding_service.embed_product(product)
+                except Exception as e:
+                    logger.warning(f"Embedding generation skipped for product {product.id}: {e}")
             
             # Handle primary image
             logger.info(f"Processing primary_image: {type(primary_image)} - {primary_image}")
@@ -233,6 +273,14 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
                 for field, value in update_data.items():
                     setattr(db_product, field, value)
                 db.add(db_product)
+
+                # Re-embed only if a field that feeds the embedding text changed
+                embed_fields = {"name", "brand", "tags", "condition", "description"}
+                if embed_fields & update_data.keys() and embedding_service.db_column_ready(db):
+                    try:
+                        db_product.embedding = embedding_service.embed_product(db_product)
+                    except Exception as e:
+                        logger.warning(f"Embedding update skipped for product {product_id}: {e}")
 
             # Handle primary image
             old_primary_url = None

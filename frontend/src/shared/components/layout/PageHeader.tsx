@@ -13,6 +13,8 @@ export interface PageHeaderProps {
   };
   actions?: ReactNode;
   className?: string;
+  /** Align with full-width page content instead of a centered max-w-7xl container */
+  fullWidth?: boolean;
 }
 
 export function PageHeader({
@@ -20,10 +22,17 @@ export function PageHeader({
   backButton,
   actions,
   className = "",
+  fullWidth = false,
 }: PageHeaderProps) {
   return (
     <div className={`border-b bg-card/30 ${className}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+      <div
+        className={`py-2 ${
+          fullWidth
+            ? "w-full px-3 sm:px-4 lg:px-6"
+            : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+        }`}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {backButton && (

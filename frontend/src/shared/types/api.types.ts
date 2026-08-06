@@ -17,6 +17,7 @@ export interface Category {
   homepage_order?: number;
   show_category_row?: boolean;
   category_row_order?: number;
+  sort_order?: number;
 }
 
 /**

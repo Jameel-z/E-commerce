@@ -9,7 +9,7 @@ import { Button } from "@/shared/components/ui/button";
 import Input from "@/shared/components/ui/input";
 import Label from "@/shared/components/ui/label";
 import { useToast } from "@/shared/hooks/use-toast";
-import { Plus, Trash2, FolderOpen, Folder, ChevronDown, Edit2, X, ImageIcon } from "lucide-react";
+import { Plus, Trash2, FolderOpen, Folder, ChevronDown, Edit2, X, ImageIcon, ArrowUp, ArrowDown } from "lucide-react";
 import { getImageUrl } from "@/shared/utils/image";
 
 interface CategoryFormState {
@@ -116,6 +116,41 @@ export default function AdminCategories() {
     } catch {
       toast({ title: "Error", description: "Failed to delete category", variant: "destructive" });
     }
+  };
+
+  const swap = <T,>(arr: T[], i: number, j: number): T[] => {
+    const next = [...arr];
+    [next[i], next[j]] = [next[j], next[i]];
+    return next;
+  };
+
+  const persistOrder = async (ids: number[], onFail: () => void) => {
+    try {
+      await apiClient.reorderCategories(ids);
+    } catch {
+      onFail();
+      toast({ title: "Error", description: "Failed to save category order", variant: "destructive" });
+    }
+  };
+
+  const moveParent = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= tree.length) return;
+    const prevTree = tree;
+    const reordered = swap(tree, index, target);
+    setTree(reordered);
+    persistOrder(reordered.map((c) => c.id), () => setTree(prevTree));
+  };
+
+  const moveChild = (parentIndex: number, childIndex: number, direction: -1 | 1) => {
+    const parent = tree[parentIndex];
+    const target = childIndex + direction;
+    if (target < 0 || target >= parent.children.length) return;
+    const prevTree = tree;
+    const reorderedChildren = swap(parent.children, childIndex, target);
+    const reorderedTree = tree.map((c, i) => (i === parentIndex ? { ...c, children: reorderedChildren } : c));
+    setTree(reorderedTree);
+    persistOrder(reorderedChildren.map((c) => c.id), () => setTree(prevTree));
   };
 
   const topLevel = flatList.filter((c) => c.parent_id === null);
@@ -258,7 +293,7 @@ export default function AdminCategories() {
           </Card>
         ) : (
           <div className="space-y-3">
-            {tree.map((parent) => (
+            {tree.map((parent, parentIndex) => (
               <Card key={parent.id}>
                 <CardContent className="p-4 space-y-2">
                   {/* Parent row */}
@@ -283,10 +318,28 @@ export default function AdminCategories() {
                       )}
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button size="sm" variant="ghost" onClick={() => openEdit(parent)}>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        disabled={parentIndex === 0}
+                        onClick={() => moveParent(parentIndex, -1)}
+                        title="Move up"
+                      >
+                        <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        disabled={parentIndex === tree.length - 1}
+                        onClick={() => moveParent(parentIndex, 1)}
+                        title="Move down"
+                      >
+                        <ArrowDown className="h-4 w-4" strokeWidth={2.5} />
+                      </Button>
+                      <Button size="icon" variant="ghost" onClick={() => openEdit(parent)}>
                         <Edit2 className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => handleDelete(parent.id, parent.name)} className="text-destructive hover:text-destructive">
+                      <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => handleDelete(parent.id, parent.name)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -295,7 +348,7 @@ export default function AdminCategories() {
                   {/* Children */}
                   {parent.children.length > 0 && (
                     <div className="ml-6 border-l pl-4 space-y-1">
-                      {parent.children.map((child) => (
+                      {parent.children.map((child, childIndex) => (
                         <div key={child.id} className="flex items-center justify-between py-1">
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             {child.image_url ? (
@@ -306,10 +359,28 @@ export default function AdminCategories() {
                             <span>{child.name}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => openEdit(child)}>
+                            <Button
+                              size="icon-sm"
+                              variant="ghost"
+                              disabled={childIndex === 0}
+                              onClick={() => moveChild(parentIndex, childIndex, -1)}
+                              title="Move up"
+                            >
+                              <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.5} />
+                            </Button>
+                            <Button
+                              size="icon-sm"
+                              variant="ghost"
+                              disabled={childIndex === parent.children.length - 1}
+                              onClick={() => moveChild(parentIndex, childIndex, 1)}
+                              title="Move down"
+                            >
+                              <ArrowDown className="h-3.5 w-3.5" strokeWidth={2.5} />
+                            </Button>
+                            <Button size="icon-sm" variant="ghost" onClick={() => openEdit(child)}>
                               <Edit2 className="h-3.5 w-3.5" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={() => handleDelete(child.id, child.name)} className="text-destructive hover:text-destructive h-7 w-7 p-0">
+                            <Button size="icon-sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => handleDelete(child.id, child.name)}>
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </div>

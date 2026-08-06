@@ -38,7 +38,6 @@ export function ProductManagerGrid({
     pagination,
     setPage,
     totalPages,
-    sortedProducts,
   } = useProductManager();
 
   const handlePageChange = (page: number) => {
@@ -46,29 +45,8 @@ export function ProductManagerGrid({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const startItem = (pagination.page - 1) * pagination.pageSize + 1;
-  const endItem = Math.min(
-    pagination.page * pagination.pageSize,
-    sortedProducts.length
-  );
-
   return (
     <div className={cn("space-y-6", className)}>
-      {/* Product Count Summary */}
-      {sortedProducts.length > 0 && !isLoading && (
-        <div className="text-sm text-muted-foreground">
-          Showing{" "}
-          <span className="font-medium text-foreground">{startItem}</span>
-          {" - "}
-          <span className="font-medium text-foreground">{endItem}</span>
-          {" of "}
-          <span className="font-medium text-foreground">
-            {sortedProducts.length}
-          </span>{" "}
-          {sortedProducts.length === 1 ? "product" : "products"}
-        </div>
-      )}
-
       {/* Product Grid */}
       <ProductGrid
         products={paginatedProducts}

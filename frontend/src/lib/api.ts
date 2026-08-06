@@ -472,6 +472,17 @@ class ApiClient {
     });
   }
 
+  /**
+   * Reorder a set of sibling categories (all top-level, or all children of one
+   * parent) - matches backend PATCH /categories/reorder endpoint (Admin only)
+   */
+  async reorderCategories(categoryIds: number[]): Promise<Category[]> {
+    return this.request<Category[]>("/categories/reorder", {
+      method: "PATCH",
+      body: JSON.stringify({ category_ids: categoryIds }),
+    });
+  }
+
   // ========================================
   // CART APIS
   // ========================================

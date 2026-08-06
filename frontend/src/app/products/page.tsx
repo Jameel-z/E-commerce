@@ -38,6 +38,7 @@ export default function ProductsPage() {
       pageHeaderProps={{
         backButton: { label: "Back to Home", href: "/" },
         title: "Discover Products",
+        fullWidth: true,
       }}
     >
       <div className="w-full px-3 sm:px-4 lg:px-6 py-4">

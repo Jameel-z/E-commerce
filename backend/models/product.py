@@ -1,7 +1,12 @@
 # backend/models/product.py
 from sqlalchemy import Column, Integer, String, Text, Numeric, Boolean, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
+from pgvector.sqlalchemy import Vector
 from .base import Base
+
+# Dimension of the local embedding model (services/embedding_service.py).
+# Keep these in sync — changing the model requires re-embedding all products.
+EMBEDDING_DIM = 384
 
 class ProductImage(Base):
     __tablename__ = "product_images"
@@ -35,6 +40,10 @@ class Product(Base):
     category_id = Column(Integer, ForeignKey("categories.id"))
     is_featured = Column(Boolean, default=False, nullable=False)
     featured_order = Column(Integer, default=0, nullable=False)
+    # Semantic-search vector over name + brand + tags + description. Nullable so
+    # products created before this feature (or when the embedding model fails
+    # to load) simply fall back to keyword search — see product_crud.get_list.
+    embedding = Column(Vector(EMBEDDING_DIM), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
