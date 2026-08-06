@@ -84,7 +84,11 @@ export function useProductFilters({
 
   const [sortBy, setSortBy] = useState<SortOption>(() => {
     const sort = searchParams.get("sort");
-    return (sort as SortOption) || defaultSort;
+    if (sort) return sort as SortOption;
+    // No explicit sort chosen: default to relevance while a search is
+    // active (the backend ranks results — see useProducts), otherwise fall
+    // back to the page's normal default (usually "newest").
+    return searchParams.get("search") ? "relevance" : defaultSort;
   });
 
   const [pagination, setPagination] = useState<PaginationState>(() => ({
@@ -106,6 +110,21 @@ export function useProductFilters({
       if (sameSearch && sameCategory) return prev;
       return { ...prev, search: urlSearch, category: urlCategory };
     });
+  }, [searchParams]);
+
+  // If a search newly becomes active (e.g. typed into an in-page search box
+  // rather than a fresh page load) and the user hasn't explicitly chosen a
+  // sort, switch to relevance so the backend's ranking isn't silently
+  // overridden by whatever sort was active before. Never overrides a sort
+  // the user picked on purpose.
+  const prevHadSearchRef = useRef(!!searchParams.get("search"));
+  useEffect(() => {
+    const hasSearch = !!searchParams.get("search");
+    const hasExplicitSort = !!searchParams.get("sort");
+    if (hasSearch && !prevHadSearchRef.current && !hasExplicitSort) {
+      setSortBy("relevance");
+    }
+    prevHadSearchRef.current = hasSearch;
   }, [searchParams]);
 
   // Apply filters

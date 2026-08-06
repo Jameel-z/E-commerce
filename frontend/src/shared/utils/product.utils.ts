@@ -63,16 +63,12 @@ export function filterProducts(
 ): Product[] {
   let filtered = [...products];
 
-  // Search filter — split into words, normalize hyphens, AND all words
-  if (filters.search) {
-    const words = filters.search.split(/\s+/).map((w) => w.replace(/-/g, "").toLowerCase()).filter(Boolean);
-    filtered = filtered.filter((product) => {
-      const name = product.name.toLowerCase().replace(/-/g, "");
-      const desc = (product.description ?? "").toLowerCase().replace(/-/g, "");
-      const cat  = (product.category_name ?? "").toLowerCase().replace(/-/g, "");
-      return words.every((word) => name.includes(word) || desc.includes(word) || cat.includes(word));
-    });
-  }
+  // No client-side search matching here on purpose: whenever filters.search is
+  // set, useProducts() already fetched from the backend with that search term,
+  // so `products` is already relevance-ordered (keyword + semantic matching —
+  // see backend/crud/product_crud.py). Re-filtering by crude substring match
+  // here would both duplicate that work and silently drop semantic-only
+  // matches that don't literally contain the search words.
 
   // Category filter
   const categories = Array.isArray(filters.category)
@@ -126,6 +122,12 @@ export function sortProducts(
 
   sorted.sort((a, b) => {
     switch (sortBy) {
+      case "relevance":
+        // No-op: preserve the order already returned by the backend, which
+        // ranks by keyword + semantic relevance when a search is active.
+        // Array.prototype.sort is a stable sort, so returning 0 for every
+        // pair keeps the original order intact.
+        return 0;
       case "newest":
         return new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime();
       case "name-asc":

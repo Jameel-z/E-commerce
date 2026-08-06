@@ -6,6 +6,7 @@
 "use client";
 
 import React, { ReactNode, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useProducts } from "@/shared/hooks/useProducts";
 import { useProductFilters } from "@/shared/hooks/useProductFilters";
 import { apiClient } from "@/lib/api";
@@ -32,7 +33,15 @@ export function ProductManagerRoot({
   defaultSort,
   defaultPageSize,
 }: ProductManagerRootProps) {
-  const { products, isLoading, error, refetch } = useProducts();
+  // The URL's `search` param is the single source of truth for the active
+  // search term (SearchBar/useProductFilters both write it there). Reading
+  // it here means product fetching stays in sync whether the term changed
+  // via a full navigation (header search bar) or an in-page search box
+  // (admin panel), without the two hooks needing to coordinate directly.
+  const searchParams = useSearchParams();
+  const activeSearch = searchParams.get("search") || "";
+
+  const { products, isLoading, error, refetch } = useProducts(activeSearch);
   const [categoryTree, setCategoryTree] = useState<Category[]>([]);
 
   useEffect(() => {

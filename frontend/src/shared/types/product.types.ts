@@ -8,7 +8,7 @@ import { Category } from "./api.types";
 /**
  * Sort options for product lists
  */
-export type SortOption = "newest" | "name-asc" | "name-desc" | "price-asc" | "price-desc";
+export type SortOption = "relevance" | "newest" | "name-asc" | "name-desc" | "price-asc" | "price-desc";
 
 /**
  * Product filter state interface

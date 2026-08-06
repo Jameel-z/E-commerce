@@ -13,7 +13,12 @@ interface UseProductsReturn {
   refetch: () => Promise<void>;
 }
 
-export function useProducts(): UseProductsReturn {
+/**
+ * @param search - Active search term, if any. When set, this is sent to the
+ * backend so results come back ranked by keyword + semantic relevance
+ * (see backend/crud/product_crud.py). Refetches whenever it changes.
+ */
+export function useProducts(search: string = ""): UseProductsReturn {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +26,9 @@ export function useProducts(): UseProductsReturn {
   const fetchProducts = useCallback(async () => {
     try {
       setIsLoading(true);
-      const data = await apiClient.getProducts({ per_page: 1000 });
+      const data = await apiClient.getProducts(
+        search ? { search, per_page: 1000 } : { per_page: 1000 }
+      );
       setProducts(data);
       setError(null);
     } catch (err) {
@@ -33,7 +40,7 @@ export function useProducts(): UseProductsReturn {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [search]);
 
   useEffect(() => {
     fetchProducts();
