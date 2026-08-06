@@ -60,7 +60,7 @@ export async function GET() {
       const description = escapeXml(product.description || product.name);
       const link = `${SITE_URL}/products/${product.id}`;
       const imageLink = product.primary_image_url || "";
-      const priceBeforeTaxUSD = Math.floor(Number(product.price) / 1.11).toString();
+      const priceBeforeTaxUSD = (Number(product.price) / 1.11).toFixed(2);
       const availability =
         product.stock_quantity > 0 ? "in_stock" : "out_of_stock";
       const condition = product.condition?.toLowerCase() || "new";
