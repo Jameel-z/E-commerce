@@ -12,8 +12,11 @@ keyword search instead of raising.
 """
 
 import logging
+import re
 import threading
 from typing import Optional
+
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
 
 logger = logging.getLogger(__name__)
 
@@ -100,18 +103,34 @@ def embed(text: str) -> Optional[list[float]]:
 def build_product_text(product) -> str:
     """Assemble the text blob a product is embedded from.
 
-    Kept deliberately simple: name carries the most signal, so it's repeated
-    to weight it slightly higher relative to the rest.
+    Name carries the most signal, so it's repeated to weight it slightly
+    higher. Category name is included so same-category products (e.g. all
+    laptops) cluster together in embedding space, which matters for vague
+    intent queries ("good for editing photos") that don't share words with
+    any single product. HTML tags are stripped out of the description —
+    raw markup is just noise to the embedding model.
     """
+    category_name = ""
+    try:
+        if product.category is not None:
+            category_name = product.category.name or ""
+    except Exception:
+        pass  # category not loaded on this instance — skip rather than fail
+
+    description = product.description or ""
+    if description:
+        description = _HTML_TAG_RE.sub(" ", description)
+
     parts = [
         product.name,
         product.name,
+        category_name,
         product.brand or "",
         product.tags or "",
         product.condition or "",
-        product.description or "",
+        description,
     ]
-    return " ".join(p for p in parts if p).strip()
+    return " ".join(p.strip() for p in parts if p and p.strip())
 
 
 def embed_product(product) -> Optional[list[float]]:

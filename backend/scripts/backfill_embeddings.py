@@ -1,20 +1,27 @@
 """
-One-off script: compute embeddings for every product that doesn't have one
-yet (existing products created before semantic search was added).
+One-off script: compute embeddings for products.
 
-New products get embedded automatically on create/update — this is only
-needed once, right after the pgvector migration runs for the first time.
+By default, only embeds products that don't have one yet (existing products
+created before semantic search was added — new products get embedded
+automatically on create/update). Pass --force to re-embed every product
+regardless of current state — use this after changing how product text is
+built (see embedding_service.build_product_text), since existing embeddings
+were computed from the old text and won't reflect the change otherwise.
 
 Usage (from backend/):
     venv/bin/python -m scripts.backfill_embeddings
+    venv/bin/python -m scripts.backfill_embeddings --force
 """
 
+import argparse
 import logging
 import sys
 from pathlib import Path
 
 # Allow running as `python -m scripts.backfill_embeddings` from backend/
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from sqlalchemy.orm import joinedload
 
 from database import SessionLocal
 from models.product import Product
@@ -24,7 +31,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
-def run():
+def run(force: bool = False):
     if not embedding_service.is_available():
         logger.error(
             "Embedding model unavailable — check that fastembed is installed "
@@ -35,7 +42,11 @@ def run():
 
     db = SessionLocal()
     try:
-        products = db.query(Product).filter(Product.embedding.is_(None)).all()
+        query = db.query(Product).options(joinedload(Product.category))
+        if not force:
+            query = query.filter(Product.embedding.is_(None))
+        products = query.all()
+
         total = len(products)
         if total == 0:
             logger.info("Nothing to do — every product already has an embedding.")
@@ -63,4 +74,11 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Re-embed every product, not just ones missing an embedding",
+    )
+    args = parser.parse_args()
+    run(force=args.force)
