@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
 };
 
-const LAST_UPDATED = "May 30, 2026";
+const LAST_UPDATED = "November 19, 2026";
 const SITE_NAME = "961shop";
 const SITE_URL = "https://961shop.com";
 const CONTACT_EMAIL = "support@961shop.com";
@@ -212,38 +212,24 @@ export default function TermsPage() {
           <Section id="returns" title="7. Returns and Refunds">
             <ul>
               <li>
-                General returns (any reason, including change of mind) are
-                accepted within <strong>1 day</strong> of delivery for unused,
-                unopened items in original packaging. We cover return shipping
-                and charge no restocking fee.
+                We accept returns <strong>only</strong> for items that arrive
+                defective, damaged, or different from what you ordered. We do
+                not accept returns or exchanges for change of mind.
               </li>
               <li>
-                Defective, damaged, or incorrectly fulfilled items must be
-                reported within <strong>48 hours</strong> of delivery with
-                photographic evidence of the issue, and are returned free of
-                charge.
-              </li>
-              <li>
-                To initiate a return, please contact our support team at{" "}
+                Problems must be reported within <strong>48 hours</strong> of
+                delivery, with your order number and photos, by contacting{" "}
                 <a
                   href={`mailto:${CONTACT_EMAIL}`}
                   className="text-primary underline underline-offset-2"
                 >
                   {CONTACT_EMAIL}
                 </a>{" "}
-                with your order number, photos of the issue, and a description
-                of the defect.
+                or our WhatsApp.
               </li>
               <li>
-                Approved refunds will be issued within 5–7 business days
-                through the original payment method. Return shipping is
-                covered by {SITE_NAME} for both general and defective/incorrect
-                item returns, with no restocking fee.
-              </li>
-              <li>
-                Certain products (e.g., opened software, consumables, or items
-                marked final sale) are not eligible for return under any
-                circumstances.
+                We collect the item free of charge and send a replacement or
+                issue a full refund within 5–7 business days.
               </li>
             </ul>
             <p>

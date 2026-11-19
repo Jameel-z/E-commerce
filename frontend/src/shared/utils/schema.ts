@@ -83,17 +83,6 @@ export function getProductSchema(product: ProductDetail) {
         "@type": "Organization",
         name: SITE_NAME,
       },
-      hasMerchantReturnPolicy: {
-        "@type": "MerchantReturnPolicy",
-        applicableCountry: "LB",
-        returnPolicyCategory:
-          "https://schema.org/MerchantReturnFiniteReturnWindow",
-        merchantReturnDays: 1,
-        returnMethod: "https://schema.org/ReturnByMail",
-        returnFees: "https://schema.org/FreeReturn",
-        itemDefectReturnFees: "https://schema.org/FreeReturn",
-        merchantReturnLink: `${SITE_URL}/return-policy`,
-      },
       shippingDetails: {
         "@type": "OfferShippingDetails",
         shippingRate: {

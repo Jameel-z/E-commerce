@@ -4,10 +4,10 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Return Policy | 961shop",
-  description: "Learn about 961shop's return and refund policy, including our 1-day general return window and free returns for defective or incorrect items.",
+  description: "961shop accepts returns only for defective, damaged, or incorrect items reported within 48 hours of delivery, with free collection and a replacement or full refund.",
   openGraph: {
     title: "Return Policy | 961shop",
-    description: "Learn about 961shop's return and refund policy, including our 1-day general return window and free returns for defective or incorrect items.",
+    description: "961shop accepts returns only for defective, damaged, or incorrect items reported within 48 hours of delivery, with free collection and a replacement or full refund.",
     url: "https://961shop.com/return-policy",
     siteName: "961shop",
     type: "website",
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
 };
 
-const LAST_UPDATED = "May 30, 2026";
+const LAST_UPDATED = "November 19, 2026";
 const SITE_NAME = "961shop";
 const SITE_URL = "https://961shop.com";
 const CONTACT_EMAIL = "support@961shop.com";
@@ -47,51 +47,26 @@ export default function ReturnPolicyPage() {
 
         <div className="prose prose-sm max-w-none space-y-8 text-foreground">
 
-          <Section id="eligibility" title="1. Return Eligibility">
-            <p>We accept returns under two categories:</p>
-
-            <h3 className="text-sm font-semibold text-foreground mt-3 mb-1">
-              a) General Returns (Any Reason)
-            </h3>
+          <Section id="eligibility" title="1. What We Accept">
             <p>
-              You may return an item for any reason, including change of mind, within{" "}
-              <strong>1 day</strong> of delivery, provided it is unused, unopened, and in its
-              original packaging. We cover the cost of return shipping, and there is{" "}
-              <strong>no restocking fee</strong>.
+              We accept returns <strong>only</strong> for items that arrive defective, damaged,
+              or different from what you ordered:
             </p>
-
-            <h3 className="text-sm font-semibold text-foreground mt-3 mb-1">
-              b) Defective, Damaged, or Incorrect Items
-            </h3>
             <ul>
-              <li>The item received is defective or not functioning as described.</li>
-              <li>The item was damaged during shipping or delivery.</li>
-              <li>You received the wrong item (different from what you ordered).</li>
+              <li>The item is defective or does not work as described.</li>
+              <li>The item was damaged during delivery.</li>
+              <li>You received the wrong item.</li>
             </ul>
-            <p>These returns are accepted free of charge, as described in Section 2 below.</p>
-
-            <p>The following items are <strong>not eligible</strong> for return under either category:</p>
-            <ul>
-              <li>Items marked as "Final Sale" or "Non-Returnable" on the product page.</li>
-              <li>Perishable goods, digital products, or downloadable items.</li>
-              <li>Items that have been used, damaged, or altered by the customer after delivery.</li>
-            </ul>
+            <p>
+              We do <strong>not</strong> accept returns or exchanges for change of mind or for
+              items that work as described.
+            </p>
           </Section>
 
-          <Section id="defective" title="2. Defective or Damaged Items">
-            <p>
-              If you receive a defective, damaged, or incorrect item, please contact us within
-              <strong> 48 hours</strong> of delivery. We will arrange a free return and send you
-              a replacement or issue a full refund at no cost to you.
-            </p>
-            <p>Please include photos of the damage when contacting us.</p>
-          </Section>
-
-          <Section id="how-to-return" title="3. How to Start a Return">
-            <p>To initiate a return:</p>
+          <Section id="how-to-return" title="2. How to Report a Problem">
             <ol className="list-decimal pl-5 space-y-1.5">
               <li>
-                Contact us via WhatsApp at{" "}
+                Contact us within <strong>48 hours</strong> of delivery via WhatsApp at{" "}
                 <a href={`https://wa.me/${WHATSAPP.replace(/\s+/g, "")}`} className="text-primary underline underline-offset-2">
                   {WHATSAPP}
                 </a>{" "}
@@ -99,34 +74,25 @@ export default function ReturnPolicyPage() {
                 <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-2">
                   {CONTACT_EMAIL}
                 </a>
+                .
               </li>
-              <li>Provide your order number and reason for return.</li>
-              <li>We will confirm eligibility and provide return instructions within <strong>24 hours</strong>.</li>
-              <li>Ship the item back using the provided instructions.</li>
+              <li>Include your order number and photos of the problem.</li>
+              <li>We will confirm and arrange collection of the item.</li>
             </ol>
           </Section>
 
-          <Section id="refunds" title="4. Refunds">
-            <p>Once we receive and inspect your returned item:</p>
+          <Section id="refunds" title="3. Replacement or Refund">
             <ul>
-              <li>We will notify you of the approval or rejection of your refund.</li>
-              <li>If approved, your refund will be processed within <strong>5–7 business days</strong>.</li>
-              <li>Refunds are issued to the original payment method used at checkout.</li>
+              <li>We collect the item from you <strong>free of charge</strong>.</li>
+              <li>
+                Once we receive and check it, we send you a replacement or give you a{" "}
+                <strong>full refund</strong>.
+              </li>
+              <li>Refunds are processed within <strong>5–7 business days</strong>.</li>
             </ul>
-            <p>
-              <strong>Return shipping</strong> is covered by {SITE_NAME} for both general returns
-              and defective/incorrect item returns. There is no restocking fee.
-            </p>
           </Section>
 
-          <Section id="exchanges" title="5. Exchanges">
-            <p>
-              We offer exchanges for items of the same value. If you need a different size, color,
-              or variant, contact us and we will arrange an exchange subject to availability.
-            </p>
-          </Section>
-
-          <Section id="contact" title="6. Contact Us">
+          <Section id="contact" title="4. Contact Us">
             <p>For any return or refund questions, reach us through:</p>
             <div className="mt-3 p-4 bg-muted rounded-lg text-sm space-y-1">
               <p><strong>WhatsApp:</strong>{" "}

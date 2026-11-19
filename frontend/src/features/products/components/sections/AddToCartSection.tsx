@@ -143,7 +143,7 @@ export function AddToCartSection({
           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-xs font-medium text-foreground hover:bg-muted/70 transition-colors"
         >
           <Undo2 className="h-3.5 w-3.5 text-primary" />
-          1-Day Returns
+          Defective Item Returns
         </Link>
       </div>
 
