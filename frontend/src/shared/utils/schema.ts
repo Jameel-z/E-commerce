@@ -16,9 +16,6 @@ export function getOrganizationSchema() {
     },
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Main Road",
-      addressLocality: "Nmairiyeh",
-      addressRegion: "Nabatieh Governorate",
       addressCountry: "LB",
     },
     contactPoint: {

@@ -6,11 +6,11 @@ import { MapPin, Phone, Mail, MessageCircle } from "lucide-react";
 export const metadata: Metadata = {
   title: "About Us | 961shop",
   description:
-    "961shop is a Lebanon-based online retailer of laptops, computers, and tech accessories, with a showroom in Nmairiyeh, Nabatieh and nationwide cash-on-delivery.",
+    "961shop is a Lebanon-based online retailer of laptops, computers, and tech accessories, with stock in Beirut and Nabatieh and nationwide cash-on-delivery.",
   openGraph: {
     title: "About Us | 961shop",
     description:
-      "961shop is a Lebanon-based online retailer of laptops, computers, and tech accessories, with a showroom in Nmairiyeh, Nabatieh and nationwide cash-on-delivery.",
+      "961shop is a Lebanon-based online retailer of laptops, computers, and tech accessories, with stock in Beirut and Nabatieh and nationwide cash-on-delivery.",
     url: "https://961shop.com/about",
     siteName: "961shop",
     type: "website",
@@ -29,7 +29,6 @@ const SALES_PHONE_TEL = "+96176840474";
 const SUPPORT_PHONE = "+961 03751903";
 const SUPPORT_PHONE_TEL = "+96103751903";
 const CONTACT_EMAIL = "support@961shop.com";
-const ADDRESS = "Main Road, Nmairiyeh, Nabatieh Governorate, Lebanon";
 
 export default function AboutPage() {
   return (
@@ -70,8 +69,7 @@ export default function AboutPage() {
             <a href="https://961shop.com" className="text-primary underline underline-offset-2">
               961shop.com
             </a>
-            , with nationwide cash-on-delivery, and can also be viewed in person
-            at our showroom.
+            , with nationwide cash-on-delivery.
           </p>
 
           <p>
@@ -80,18 +78,18 @@ export default function AboutPage() {
               full product range
             </Link>
             . Should you have any questions, our team is available by phone,
-            WhatsApp, email, or in person at our showroom.
+            WhatsApp, or email.
           </p>
         </div>
 
         <div className="prose prose-sm max-w-none space-y-8 text-foreground">
-          <Section id="our-showroom" title="Our Showroom">
+          <Section id="our-locations" title="Our Locations">
             <div className="flex items-start gap-3 p-4 bg-muted rounded-lg">
               <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-foreground text-sm">961shop</p>
-                <p className="text-sm text-muted-foreground">{ADDRESS}</p>
-              </div>
+              <p className="text-sm text-muted-foreground">
+                We keep stock in two locations, Beirut and Nabatieh, and deliver
+                orders from whichever is closer to you.
+              </p>
             </div>
           </Section>
 
