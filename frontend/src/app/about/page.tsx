@@ -26,8 +26,8 @@ export const metadata: Metadata = {
 
 const SALES_PHONE = "+961 76 840474";
 const SALES_PHONE_TEL = "+96176840474";
-const SUPPORT_PHONE = "+961 03751903";
-const SUPPORT_PHONE_TEL = "+96103751903";
+const SUPPORT_PHONE = "+961 3 751903";
+const SUPPORT_PHONE_TEL = "+9613751903";
 const CONTACT_EMAIL = "support@961shop.com";
 
 export default function AboutPage() {

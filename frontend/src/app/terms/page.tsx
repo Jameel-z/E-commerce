@@ -193,13 +193,10 @@ export default function TermsPage() {
                 the carrier.
               </li>
               <li>
-                Shipping fees are calculated at checkout and are non-refundable
-                unless the item is defective or the order was incorrectly
-                fulfilled.
+                Delivery is free of charge on all orders.
               </li>
               <li>
-                We currently deliver within Lebanon. International shipping may
-                be available for select products — please contact us for details.
+                We deliver within Lebanon only. We do not ship internationally.
               </li>
               <li>
                 If a delivery attempt is unsuccessful due to an incorrect

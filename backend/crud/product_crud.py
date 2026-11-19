@@ -69,6 +69,10 @@ class ProductCRUD(CRUDBase[Product, ProductCreate, ProductUpdate]):
                 Product.stock_quantity,
                 Product.regular_price,
                 Product.sale_price,
+                Product.brand,
+                Product.sku,
+                Product.condition,
+                Product.vat,
                 Product.created_at,
                 is_on_sale_expr,
                 discount_percentage_expr
