@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
 };
 
-const LAST_UPDATED = "November 19, 2026";
+const LAST_UPDATED = "November 23, 2026";
 const SITE_NAME = "961shop";
 const SITE_URL = "https://961shop.com";
 const CONTACT_EMAIL = "support@961shop.com";
@@ -184,25 +184,38 @@ export default function TermsPage() {
           <Section id="shipping" title="6. Shipping and Delivery">
             <ul>
               <li>
-                Delivery times are estimates and are not guaranteed. Delays may
-                occur due to circumstances beyond our control including customs,
-                weather, or carrier delays.
+                We deliver to all regions of Lebanon. We do not ship outside
+                Lebanon.
               </li>
               <li>
-                Risk of loss and title for items pass to you upon delivery to
-                the carrier.
+                Delivery is free of charge on all orders, with no minimum order
+                amount and no extra fees.
               </li>
               <li>
-                Delivery is free of charge on all orders.
+                Orders are processed within 0–1 business days and delivered
+                within 1–3 business days after they are sent. Delivery times are
+                estimates; rare delays can happen because of weather, road
+                conditions, or other events outside our control.
               </li>
               <li>
-                We deliver within Lebanon only. We do not ship internationally.
+                If a delivery attempt is unsuccessful, we will contact you to
+                arrange another delivery time, free of charge.
               </li>
               <li>
-                If a delivery attempt is unsuccessful due to an incorrect
-                address or absence of the recipient, re-delivery fees may apply.
+                Risk of loss and title for items pass to you when the order is
+                delivered to you.
               </li>
             </ul>
+            <p>
+              Full details are in our{" "}
+              <Link
+                href="/shipping-policy"
+                className="text-primary underline underline-offset-2"
+              >
+                Shipping Policy
+              </Link>
+              .
+            </p>
           </Section>
 
           {/* 7. Returns & Refunds */}
