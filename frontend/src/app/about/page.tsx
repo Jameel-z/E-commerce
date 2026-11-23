@@ -26,8 +26,6 @@ export const metadata: Metadata = {
 
 const SALES_PHONE = "+961 76 840474";
 const SALES_PHONE_TEL = "+96176840474";
-const SUPPORT_PHONE = "+961 3 751903";
-const SUPPORT_PHONE_TEL = "+9613751903";
 const CONTACT_EMAIL = "support@961shop.com";
 
 export default function AboutPage() {
@@ -98,16 +96,9 @@ export default function AboutPage() {
             <div className="mt-3 p-4 bg-muted rounded-lg text-sm space-y-2">
               <p className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-primary flex-shrink-0" />
-                <strong>Sales:</strong>{" "}
+                <strong>Phone:</strong>{" "}
                 <a href={`tel:${SALES_PHONE_TEL}`} className="text-primary underline underline-offset-2">
                   {SALES_PHONE}
-                </a>
-              </p>
-              <p className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-primary flex-shrink-0" />
-                <strong>Support:</strong>{" "}
-                <a href={`tel:${SUPPORT_PHONE_TEL}`} className="text-primary underline underline-offset-2">
-                  {SUPPORT_PHONE}
                 </a>
               </p>
               <p className="flex items-center gap-2">

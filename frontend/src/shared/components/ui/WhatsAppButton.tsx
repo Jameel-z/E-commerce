@@ -1,7 +1,9 @@
+import { CONTACT } from "@/shared/constants/config";
+
 export function WhatsAppButton() {
   return (
     <a
-      href="https://wa.me/9613751903"
+      href={`https://wa.me/${CONTACT.phone.tel.replace("+", "")}`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"

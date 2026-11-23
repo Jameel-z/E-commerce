@@ -14,8 +14,13 @@ export function getOrganizationSchema() {
       "@type": "ImageObject",
       url: `${SITE_URL}/icon.jpg`,
     },
+    // Must match the business address in Merchant Center exactly.
     address: {
       "@type": "PostalAddress",
+      streetAddress: "Main Road",
+      addressLocality: "Nmairiyeh",
+      addressRegion: "Nabatieh Governorate",
+      postalCode: "0000",
       addressCountry: "LB",
     },
     contactPoint: {

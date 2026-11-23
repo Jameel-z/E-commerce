@@ -140,7 +140,11 @@ const Footer: React.FC = () => {
             <div className="space-y-1 text-sm text-muted-foreground">
               <p>Email: {CONTACT.email}</p>
               <p>Phone: {CONTACT.phone.display}</p>
-              <p>Beirut &amp; Nabatieh, Lebanon</p>
+              <p>
+                {CONTACT.address.line1}
+                <br />
+                {CONTACT.address.line2}
+              </p>
             </div>
           </div>
         </div>

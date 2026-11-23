@@ -15,4 +15,9 @@ export const CONTACT = {
     tel: "+96176840474",
   },
   email: "support@961shop.com",
+  // Must match the business address in Merchant Center exactly.
+  address: {
+    line1: "Main Road, Nmairiyeh",
+    line2: "Nabatieh Governorate, Lebanon",
+  },
 };
