@@ -49,6 +49,20 @@ export function getWebSiteSchema() {
   };
 }
 
+function stripHtml(html: string | null | undefined): string {
+  return (html || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 5000);
+}
+
 export function getProductSchema(product: ProductDetail) {
   const price = parseFloat(product.price);
   const images: string[] = [];
@@ -71,10 +85,6 @@ export function getProductSchema(product: ProductDetail) {
     "@type": "Product",
     name: product.name,
     url: `${SITE_URL}/products/${product.id}`,
-    brand: {
-      "@type": "Brand",
-      name: product.brand || SITE_NAME,
-    },
     offers: {
       "@type": "Offer",
       url: `${SITE_URL}/products/${product.id}`,
@@ -115,7 +125,13 @@ export function getProductSchema(product: ProductDetail) {
     },
   };
 
-  if (product.description) schema.description = product.description;
+  // Same rules as the Merchant Center feed: never fall back to the store name
+  // as the brand (we don't make these products), and send plain text.
+  if (product.brand?.trim()) {
+    schema.brand = { "@type": "Brand", name: product.brand.trim() };
+  }
+  const description = stripHtml(product.description);
+  if (description) schema.description = description;
   if (images.length > 0) schema.image = images;
   if (product.sku) {
     schema.sku = product.sku;
